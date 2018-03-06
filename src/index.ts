@@ -1,5 +1,5 @@
 import * as socketIo from "socket.io-client";
-import { Popova } from "./Popova/Popova";
+import { Popova, mousePosition } from "./Popova/Popova";
 
 // Socket listener
 var socket = io();
@@ -11,7 +11,10 @@ var playerId: string;
 var playerWidth: number;
 var playerHeight: number;
 
-var mousePos: { x: number, y: number };
+var renderOffsetX: number;
+var renderOffsetY: number;
+
+var mousePos: mousePosition;
 
 var movement = {
     up: false,
@@ -52,14 +55,21 @@ document.addEventListener("keyup", (event) => {
     }
 });
 
-mousePos = { x: 0, y: 0};
+mousePos = { x: 0, y: 0, outOfBounds: true };
 
 function onMouseMove(event: any) {
     mousePos = foreground.getMousePos(event);
 }
-window.addEventListener('mousemove', onMouseMove, false);
+window.addEventListener("mousemove", onMouseMove, false);
 
-// Tell the server a new player has joined
+function onMouseClick(event: any) {
+    if (!mousePos.outOfBounds) {
+        socket.emit("mouseDown", { sourceId: playerId, targetX: (mousePos.x + renderOffsetX), targetY: (mousePos.y + renderOffsetY) });
+    }
+}
+window.addEventListener("click", onMouseClick, false);
+
+// Tell the server a new player has joined and handshake
 socket.emit("new-player");
 socket.on("handshake", (info: any) => {
     playerId = info.id;
@@ -83,68 +93,91 @@ foreground.init("foreground");
 
 background.drawGrid(50);
 
-// Interpret state and draw players
-socket.on("state", (players: any) => {
+// Interpret state and draw objects
+socket.on("state", (objects: any) => {
     foreground.wipeCanvas();
+    env.wipeCanvas();
     var canvasSize = foreground.size();
 
     // TODO: Add smoothing to camera movement
-    var renderOffsetX = (!!playerId)
-        ? players[playerId].x + playerWidth * foreground.cubeSize() / 2 + (mousePos.x - (canvasSize.width / 2)) / 3
+    renderOffsetX = (!!playerId)
+        ? objects[playerId].x + playerWidth * foreground.cubeSize() / 2 + (mousePos.x - (canvasSize.width / 2)) / 3 - canvasSize.width / 2
         : undefined;
-    var renderOffsetY = (!!playerId)
-        ? players[playerId].y + playerHeight * foreground.cubeSize() / 2 + (mousePos.y - (canvasSize.height / 2)) / 3
+    renderOffsetY = (!!playerId)
+        ? objects[playerId].y + playerHeight * foreground.cubeSize() / 2 + (mousePos.y - (canvasSize.height / 2)) / 3 - canvasSize.height / 2
         : undefined;
 
-    if (!!players) {
+    if (!!objects) {
         background.wipeCanvas();
         background.drawGrid(gridSize, -renderOffsetX, -renderOffsetY);
     }
 
-    for(var id in players){
-        var player = players[id];
-        foreground.draw({
-            palette: ["#abab9a", "#FF69B4", "#AAAAAA", "#775050"],
-            posX: player.x - renderOffsetX + canvasSize.width / 2,
-            posY: player.y - renderOffsetY + canvasSize.height / 2,
-            facing: 0,
-            strokes: [{
-                cellX: 0,
-                cellY: 2,
-                width: 4,
-                height: 2,
-                swatch: 1
-            }, {
-                cellX: 1,
-                cellY: 0,
-                width: 2,
-                height: 2,
-                swatch: 0
-            }, {
-                cellX: 0,
-                cellY: 3,
-                width: 1,
-                height: 1,
-                swatch: 2
-            }, {
-                cellX: 3,
-                cellY: 3,
-                width: 1,
-                height: 1,
-                swatch: 2
-            }, {
-                cellX: 1,
-                cellY: 4,
-                width: 1,
-                height: 2,
-                swatch: 3
-            }, {
-                cellX: 2,
-                cellY: 4,
-                width: 1,
-                height: 2,
-                swatch: 3
-            }]
-        });
+    for(var id in objects){
+        var object = objects[id];
+
+        // TODO: Specify dimensions of masterpiece and render around position,
+        // Instead of from top-left corner as it is now,
+        // Will help with object position later on.
+        switch (object.type) {
+            case "player":
+                foreground.draw({
+                    palette: ["#abab9a", "#FF69B4", "#AAAAAA", "#775050"],
+                    posX: object.x - renderOffsetX,
+                    posY: object.y - renderOffsetY,
+                    facing: 0,
+                    strokes: [{
+                        cellX: 0,
+                        cellY: 2,
+                        width: 4,
+                        height: 2,
+                        swatch: 1
+                    }, {
+                        cellX: 1,
+                        cellY: 0,
+                        width: 2,
+                        height: 2,
+                        swatch: 0
+                    }, {
+                        cellX: 0,
+                        cellY: 3,
+                        width: 1,
+                        height: 1,
+                        swatch: 2
+                    }, {
+                        cellX: 3,
+                        cellY: 3,
+                        width: 1,
+                        height: 1,
+                        swatch: 2
+                    }, {
+                        cellX: 1,
+                        cellY: 4,
+                        width: 1,
+                        height: 2,
+                        swatch: 3
+                    }, {
+                        cellX: 2,
+                        cellY: 4,
+                        width: 1,
+                        height: 2,
+                        swatch: 3
+                    }]
+                });
+                break;
+            case "projectile":
+                env.draw({
+                    palette: ["#444444"],
+                    posX: object.x - renderOffsetX,
+                    posY: object.y - renderOffsetY,
+                    facing: 0,
+                    strokes: [{
+                        cellX: 0,
+                        cellY: 0,
+                        width: 2,
+                        height: 2,
+                        swatch: 0
+                    }]
+                });
+        }
     }
 });

@@ -14,6 +14,12 @@ export interface stroke {
     swatch: number,
 }
 
+export interface mousePosition {
+    x: number,
+    y: number,
+    outOfBounds: boolean,
+}
+
 const CUBE_SIZE = 8;
 
 export class Popova {
@@ -46,7 +52,7 @@ export class Popova {
         this.ctx.beginPath();
         this.ctx.save();
         // Draw grid on background
-        this.ctx.strokeStyle = "#d8d8d8";
+        this.ctx.strokeStyle = "#d0d0d0";
         for (var x = (!!offsetX) ? offsetX % spacing : 0; x <= this.width; x += spacing) {
             this.ctx.moveTo(x, 0);
             this.ctx.lineTo(x, this.height);
@@ -120,20 +126,37 @@ export class Popova {
         return CUBE_SIZE;
     }
 
-
-    getMousePos(evt: any): { x: number, y: number } {
+    /**
+     * Returns mouse position and if mouse is inside canvas
+     * @param evt Mouse movement event, containing position information
+     */
+    getMousePos(evt: any): mousePosition {
         var rect = this.canvas.getBoundingClientRect();
         var posX = evt.clientX - rect.left;
         var posY = evt.clientY - rect.top;
+        var offCanvas = false;
 
-        if (posX < 0) posX = 0;
-        if (posY < 0) posY = 0;
-        if (posX > this.width) posX = this.width;
-        if (posY > this.height) posY = this.height;
+        if (posX < 0) {
+            posX = 0;
+            offCanvas = true;
+        }
+        if (posY < 0) {
+            posY = 0;
+            offCanvas = true;
+        }
+        if (posX > this.width) {
+            posX = this.width;
+            offCanvas = true;
+        }
+        if (posY > this.height) {
+            posY = this.height;
+            offCanvas = true;
+        }
 
         return {
           x: posX,
           y: posY,
+          outOfBounds: offCanvas,
         };
     }
 

@@ -20,13 +20,14 @@ server.listen(5000, () => {
 });
 
 // Listen for connection on IO
-var players = {};
+var objects = {};
 io.on("connection", (socket) => {
     // Handle connection
     socket.on("new-player", () => {
-        players[socket.id] = {
-            x: 100,
-            y: 100,
+        objects[socket.id] = {
+            type: "player",
+            x: 0,
+            y: 0,
         };
         socket.emit("handshake", {
             id: socket.id,
@@ -37,7 +38,7 @@ io.on("connection", (socket) => {
 
     // Handle player movement event
     socket.on("movement", (movement) => {
-        var player = players[socket.id] || {};
+        var player = objects[socket.id] || {};
         if (movement.left) {
             player.x -= 5;
         }
@@ -52,12 +53,22 @@ io.on("connection", (socket) => {
         }
     });
 
+    // Handle mouse down event from player
+    socket.on("mouseDown", (object) => {
+        objects[object.sourceId.concat(":", object.targetX, ":", object.targetY)] = {
+            type: "projectile",
+            source: object.sourceId,
+            x: object.targetX,
+            y: object.targetY,
+        }
+    });
+
     // Handle player disconnect - Clean up resources 
     socket.on("disconnect", () => {
-        delete players[socket.id];
+        delete objects[socket.id];
     });
 });
 
 setInterval(() => {
-    io.sockets.emit("state", players);
+    io.sockets.emit("state", objects);
 }, 1000 / 60);
