@@ -2,6 +2,8 @@ export interface masterPiece {
     palette: string[],
     posX: number,
     posY: number,
+    width: number,
+    height: number,
     facing: number,
     strokes: stroke[],
 }
@@ -74,7 +76,10 @@ export class Popova {
     draw(masterPiece: masterPiece) {
         this.ctx.save();
 
-        this.prepCanvas(masterPiece.posX, masterPiece.posY, masterPiece.facing);
+        this.prepCanvas(
+            masterPiece.posX - masterPiece.width * CUBE_SIZE / 2,
+            masterPiece.posY - masterPiece.height * CUBE_SIZE / 2,
+            masterPiece.facing);
         masterPiece.strokes.forEach((stroke: stroke) => {
             this.renderStroke(stroke, masterPiece.palette);
         });

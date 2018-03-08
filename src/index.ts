@@ -22,6 +22,10 @@ var movement = {
     left: false,
     right: false
 }
+mousePos = { x: 0, y: 0, outOfBounds: true };
+
+
+// Add listeners to document
 document.addEventListener("keydown", (event) => {
     switch (event.keyCode) {
         case 65: // A
@@ -54,8 +58,6 @@ document.addEventListener("keyup", (event) => {
             break;
     }
 });
-
-mousePos = { x: 0, y: 0, outOfBounds: true };
 
 function onMouseMove(event: any) {
     mousePos = foreground.getMousePos(event);
@@ -101,10 +103,10 @@ socket.on("state", (objects: any) => {
 
     // TODO: Add smoothing to camera movement
     renderOffsetX = (!!playerId)
-        ? objects[playerId].x + playerWidth * foreground.cubeSize() / 2 + (mousePos.x - (canvasSize.width / 2)) / 3 - canvasSize.width / 2
+        ? objects[playerId].x + (mousePos.x - (canvasSize.width / 2)) / 3 - canvasSize.width / 2
         : undefined;
     renderOffsetY = (!!playerId)
-        ? objects[playerId].y + playerHeight * foreground.cubeSize() / 2 + (mousePos.y - (canvasSize.height / 2)) / 3 - canvasSize.height / 2
+        ? objects[playerId].y + (mousePos.y - (canvasSize.height / 2)) / 3 - canvasSize.height / 2
         : undefined;
 
     if (!!objects) {
@@ -115,15 +117,14 @@ socket.on("state", (objects: any) => {
     for(var id in objects){
         var object = objects[id];
 
-        // TODO: Specify dimensions of masterpiece and render around position,
-        // Instead of from top-left corner as it is now,
-        // Will help with object position later on.
         switch (object.type) {
             case "player":
                 foreground.draw({
                     palette: ["#abab9a", "#FF69B4", "#AAAAAA", "#775050"],
                     posX: object.x - renderOffsetX,
                     posY: object.y - renderOffsetY,
+                    width: playerWidth,
+                    height: playerHeight,
                     facing: 0,
                     strokes: [{
                         cellX: 0,
@@ -166,18 +167,21 @@ socket.on("state", (objects: any) => {
                 break;
             case "projectile":
                 env.draw({
-                    palette: ["#444444"],
+                    palette: ["#FF6666", "#66FF66", "#6666FF", "#FFFF66", "#FF66FF", "#66FFFF"],
                     posX: object.x - renderOffsetX,
                     posY: object.y - renderOffsetY,
+                    width: 2,
+                    height: 2,
                     facing: 0,
                     strokes: [{
                         cellX: 0,
                         cellY: 0,
                         width: 2,
                         height: 2,
-                        swatch: 0
+                        swatch: Math.floor(Math.random() * 6)
                     }]
                 });
+                break;
         }
     }
 });

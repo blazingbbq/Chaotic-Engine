@@ -58,8 +58,10 @@ io.on("connection", (socket) => {
         objects[object.sourceId.concat(":", object.targetX, ":", object.targetY)] = {
             type: "projectile",
             source: object.sourceId,
-            x: object.targetX,
-            y: object.targetY,
+            x: objects[object.sourceId].x,
+            y: objects[object.sourceId].y,
+            targetX: object.targetX,
+            targetY: object.targetY,
         }
     });
 
@@ -69,6 +71,21 @@ io.on("connection", (socket) => {
     });
 });
 
+// Update state sent at 60fps
 setInterval(() => {
+    for (var id in objects) {
+        switch (objects[id].type) {
+            case "player":
+                break;
+            case "projectile":
+            // TODO: Move these calculations to object init
+                var angle = Math.atan2(objects[id].targetX - objects[id].x, objects[id].targetY - objects[id].y);
+                var speed = 10;
+                objects[id].x = objects[id].x + speed * Math.cos(angle);
+                objects[id].y = objects[id].y + speed * Math.sin(angle);
+                break;
+        }
+    }
+
     io.sockets.emit("state", objects);
 }, 1000 / 60);
