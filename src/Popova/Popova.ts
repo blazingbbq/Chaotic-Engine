@@ -77,8 +77,10 @@ export class Popova {
         this.ctx.save();
 
         this.prepCanvas(
-            masterPiece.posX - masterPiece.width * CUBE_SIZE / 2,
-            masterPiece.posY - masterPiece.height * CUBE_SIZE / 2,
+            masterPiece.posX,
+            masterPiece.posY,
+            masterPiece.width,
+            masterPiece.height,
             masterPiece.facing);
         masterPiece.strokes.forEach((stroke: stroke) => {
             this.renderStroke(stroke, masterPiece.palette);
@@ -91,12 +93,15 @@ export class Popova {
      * Centers the canvas on position, and rotates to a certain facing
      * @param positionX The x position of what is being drawn
      * @param positionY The y position of what is being drawn
+     * @param width The width of what is being drawn
+     * @param height The height of what is being drawn
      * @param degrees Degrees to rotate the canvas by
      */
-    prepCanvas(positionX: number, positionY: number, degrees: number){
+    prepCanvas(positionX: number, positionY: number, width: number, height: number, degrees: number){
         this.ctx.beginPath();
         this.ctx.translate(positionX, positionY);
         this.ctx.rotate(degrees * Math.PI / 180);
+        this.ctx.translate(- width * CUBE_SIZE / 2, - height * CUBE_SIZE / 2);
     }
 
     /**

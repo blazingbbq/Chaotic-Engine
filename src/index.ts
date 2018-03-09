@@ -66,7 +66,10 @@ window.addEventListener("mousemove", onMouseMove, false);
 
 function onMouseClick(event: any) {
     if (!mousePos.outOfBounds) {
-        socket.emit("mouseDown", { sourceId: playerId, targetX: (mousePos.x + renderOffsetX), targetY: (mousePos.y + renderOffsetY) });
+        socket.emit("mouseDown", {
+            sourceId: playerId,
+            targetX: (mousePos.x + renderOffsetX),
+            targetY: (mousePos.y + renderOffsetY) });
     }
 }
 window.addEventListener("click", onMouseClick, false);
@@ -167,17 +170,17 @@ socket.on("state", (objects: any) => {
                 break;
             case "projectile":
                 env.draw({
-                    palette: ["#FF6666", "#66FF66", "#6666FF", "#FFFF66", "#FF66FF", "#66FFFF"],
+                    palette: ["#FF6666", "#66FF66", "#6666FF", "#FFFF66", "#FF66FF", "#66FFFF", "#000000"],
                     posX: object.x - renderOffsetX,
                     posY: object.y - renderOffsetY,
                     width: 2,
-                    height: 2,
-                    facing: 0,
+                    height: 1,
+                    facing: object.facing,
                     strokes: [{
                         cellX: 0,
                         cellY: 0,
                         width: 2,
-                        height: 2,
+                        height: 1,
                         swatch: Math.floor(Math.random() * 6)
                     }]
                 });

@@ -19,6 +19,9 @@ server.listen(5000, () => {
   console.log("Starting server on port 5000");
 });
 
+var speed = 10; 
+var maxProjDist = 1600;
+
 // Listen for connection on IO
 var objects = {};
 io.on("connection", (socket) => {
@@ -55,13 +58,26 @@ io.on("connection", (socket) => {
 
     // Handle mouse down event from player
     socket.on("mouseDown", (object) => {
-        objects[object.sourceId.concat(":", object.targetX, ":", object.targetY)] = {
+        var angle = Math.atan2(
+            object.targetY - objects[object.sourceId].y,
+            object.targetX - objects[object.sourceId].x);
+    
+        // Generate unique Id for new projectile
+        var newId = object.sourceId.concat(":", object.targetX, ":", object.targetY);
+        var dup = 0;
+        while (objects[newId.concat(":" + dup)]){
+            dup++;
+        }
+        
+        objects[newId.concat(":" + dup)] = {
             type: "projectile",
             source: object.sourceId,
             x: objects[object.sourceId].x,
             y: objects[object.sourceId].y,
-            targetX: object.targetX,
-            targetY: object.targetY,
+            velocityX: Math.cos(angle) * speed,
+            velocityY: Math.sin(angle) * speed,
+            facing: angle * 57.2958,
+            dist: 0,
         }
     });
 
@@ -78,11 +94,14 @@ setInterval(() => {
             case "player":
                 break;
             case "projectile":
-            // TODO: Move these calculations to object init
-                var angle = Math.atan2(objects[id].targetX - objects[id].x, objects[id].targetY - objects[id].y);
-                var speed = 10;
-                objects[id].x = objects[id].x + speed * Math.cos(angle);
-                objects[id].y = objects[id].y + speed * Math.sin(angle);
+                objects[id].x += objects[id].velocityX;
+                objects[id].y += objects[id].velocityY;
+                objects[id].dist += Math.sqrt(
+                    Math.pow(objects[id].velocityX, 2) +
+                    Math.pow(objects[id].velocityY, 2));
+                if (objects[id].dist > maxProjDist) {
+                    delete objects[id];
+                }
                 break;
         }
     }
