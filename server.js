@@ -29,11 +29,14 @@ var projectileWidth = 2;
 var projectileHeight = 0.5;
 var projectileHitBoxRadius = 1;
 
+var teamColors = ["#FF0000", "#00FF00", "#0000FF"];
+
 // Listen for connection on IO
 var objects = {};
 io.on("connection", (socket) => {
     // Handle connection
     socket.on("new-player", () => {
+        var newPlayerTeam = Math.floor(Math.random() * (teamColors.length))
         objects[socket.id] = {
             type: "player",
             x: 0,
@@ -42,6 +45,8 @@ io.on("connection", (socket) => {
             height: playerHeight,
             health: 100,
             maxHealth: 100,
+            team: newPlayerTeam,
+            teamColor: teamColors[newPlayerTeam],
         };
         socket.emit("handshake", {
             id: socket.id,
@@ -130,7 +135,7 @@ setInterval(() => {
 
     io.sockets.emit("state", objects);
 }, 1000 / 60);
-var hitCount = 0;
+
 // Check collisions between all objects
 function checkCollisions(checkSrc, obs, callBack) {
     var src = obs[checkSrc];
@@ -139,11 +144,11 @@ function checkCollisions(checkSrc, obs, callBack) {
         if (id != src.source && id != checkSrc){
             var check = obs[id];
 
-            var xIn = valueInRange(src.x, check.x, check.x + check.width * renderSize) ||
-                valueInRange(src.x + projectileHitBoxRadius * renderSize, check.x, check.x + check.width * renderSize);
+            var xIn = valueInRange(src.x, check.x - check.width / 2 * renderSize, check.x + check.width / 2 * renderSize) ||
+                valueInRange(src.x + projectileHitBoxRadius * renderSize, check.x - check.width / 2 * renderSize, check.x + check.width / 2 * renderSize);
 
-            var yIn = valueInRange(src.y, check.y, check.y + check.height * renderSize) ||
-                valueInRange(src.y + projectileHitBoxRadius * renderSize, check.y, check.y + check.height * renderSize);
+            var yIn = valueInRange(src.y, check.y - check.height / 2 * renderSize, check.y + check.height / 2 * renderSize) ||
+                valueInRange(src.y + projectileHitBoxRadius * renderSize, check.y - check.height / 2 * renderSize, check.y + check.height / 2 * renderSize);
 
             if (xIn && yIn) callBack(checkSrc, id);
         }

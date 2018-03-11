@@ -121,7 +121,7 @@ socket.on("state", (objects: any) => {
         switch (object.type) {
             case "player":
                 foreground.draw({
-                    palette: ["#abab9a", "#FF69B4", "#AAAAAA", "#775050"],
+                    palette: ["#abab9a", "#775050", "#AAAAAA"].concat(object.teamColor),
                     posX: object.x - renderOffsetX,
                     posY: object.y - renderOffsetY,
                     width: object.width,
@@ -132,7 +132,7 @@ socket.on("state", (objects: any) => {
                         cellY: 2,
                         width: 4,
                         height: 2,
-                        swatch: 1
+                        swatch: 3
                     }, {
                         cellX: 1,
                         cellY: 0,
@@ -156,13 +156,13 @@ socket.on("state", (objects: any) => {
                         cellY: 4,
                         width: 1,
                         height: 2,
-                        swatch: 3
+                        swatch: 1
                     }, {
                         cellX: 2,
                         cellY: 4,
                         width: 1,
                         height: 2,
-                        swatch: 3
+                        swatch: 1
                     }],
                 });
                 foreground.draw({
