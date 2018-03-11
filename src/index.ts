@@ -8,8 +8,6 @@ var cubeSize: number;
 var gridSize: number = 64;
 
 var playerId: string;
-var playerWidth: number;
-var playerHeight: number;
 
 var renderOffsetX: number;
 var renderOffsetY: number;
@@ -74,29 +72,29 @@ function onMouseClick(event: any) {
 }
 window.addEventListener("click", onMouseClick, false);
 
-// Tell the server a new player has joined and handshake
-socket.emit("new-player");
-socket.on("handshake", (info: any) => {
-    playerId = info.id;
-    playerWidth = info.playerWidth;
-    playerHeight = info.playerHeight;
-});
+// Init canvas
+var background  = new Popova();
+var env         = new Popova();
+var foreground  = new Popova();
+
+background.init("background", cubeSize);
+env.init("env", cubeSize);
+foreground.init("foreground", cubeSize);
 
 // Broadcast player movement
 setInterval(() => {
     socket.emit("movement", movement);
 }, 1000/60);
 
-// Init canvas
-var background  = new Popova();
-var env         = new Popova();
-var foreground  = new Popova();
-
-background.init("background");
-env.init("env");
-foreground.init("foreground");
-
-background.drawGrid(50);
+// Tell the server a new player has joined and handshake
+socket.emit("new-player");
+socket.on("handshake", (info: any) => {
+    playerId = info.id;
+    cubeSize = info.cubeSize;
+    background.setCubeSize(cubeSize);
+    env.setCubeSize(cubeSize);
+    foreground.setCubeSize(cubeSize);
+});
 
 // Interpret state and draw objects
 socket.on("state", (objects: any) => {
@@ -126,8 +124,8 @@ socket.on("state", (objects: any) => {
                     palette: ["#abab9a", "#FF69B4", "#AAAAAA", "#775050"],
                     posX: object.x - renderOffsetX,
                     posY: object.y - renderOffsetY,
-                    width: playerWidth,
-                    height: playerHeight,
+                    width: object.width,
+                    height: object.height,
                     facing: 0,
                     strokes: [{
                         cellX: 0,
@@ -165,22 +163,37 @@ socket.on("state", (objects: any) => {
                         width: 1,
                         height: 2,
                         swatch: 3
-                    }]
+                    }],
                 });
+                foreground.draw({
+                    palette: ["#00a400"],
+                    posX: object.x - renderOffsetX,
+                    posY: object.y - renderOffsetY - 32,
+                    width: object.width * cubeSize,
+                    height: 8,
+                    facing: 0,
+                    strokes: [{
+                        cellX: 0,
+                        cellY: 0,
+                        width: object.health / object.maxHealth * object.width * cubeSize,
+                        height: object.height,
+                        swatch: 0
+                    },],
+                    freeHand: true});
                 break;
             case "projectile":
                 env.draw({
                     palette: ["#FF6666", "#66FF66", "#6666FF", "#FFFF66", "#FF66FF", "#66FFFF", "#000000"],
                     posX: object.x - renderOffsetX,
                     posY: object.y - renderOffsetY,
-                    width: 2,
-                    height: 1,
+                    width: object.width,
+                    height: object.height,
                     facing: object.facing,
                     strokes: [{
                         cellX: 0,
                         cellY: 0,
-                        width: 2,
-                        height: 1,
+                        width: object.width,
+                        height: object.height,
                         swatch: Math.floor(Math.random() * 6)
                     }]
                 });

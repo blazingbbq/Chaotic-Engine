@@ -6,6 +6,7 @@ export interface masterPiece {
     height: number,
     facing: number,
     strokes: stroke[],
+    freeHand?: boolean,
 }
 
 export interface stroke {
@@ -22,23 +23,24 @@ export interface mousePosition {
     outOfBounds: boolean,
 }
 
-const CUBE_SIZE = 8;
-
 export class Popova {
 
     private canvas: any;
     private ctx: any;
     private width: number;
     private height: number;
+    private cubeSize: number;
 
     constructor() { }
 
     /**
      * Initializes Popova's canvas
      * @param canvasId Id of html canvas element
+     * @param cubeSize Render size for each cube when drawing with cubes
      */
-    init(canvasId: string) {
+    init(canvasId: string, cubeSize: number) {
         this.canvas = <any> document.getElementById(canvasId);
+        this.cubeSize = cubeSize;
         this.width = this.canvas.offsetWidth;
         this.height = this.canvas.offsetHeight;
         this.canvas.width = this.width;
@@ -81,9 +83,10 @@ export class Popova {
             masterPiece.posY,
             masterPiece.width,
             masterPiece.height,
-            masterPiece.facing);
+            masterPiece.facing,
+            masterPiece.freeHand);
         masterPiece.strokes.forEach((stroke: stroke) => {
-            this.renderStroke(stroke, masterPiece.palette);
+            this.renderStroke(stroke, masterPiece.palette, masterPiece.freeHand);
         });
 
         this.ctx.restore();
@@ -96,23 +99,34 @@ export class Popova {
      * @param width The width of what is being drawn
      * @param height The height of what is being drawn
      * @param degrees Degrees to rotate the canvas by
+     * @param freeHand If the stroke is rendered with blocks or free hand
      */
-    prepCanvas(positionX: number, positionY: number, width: number, height: number, degrees: number){
+    prepCanvas(positionX: number, positionY: number, width: number, height: number, degrees: number, freeHand?: boolean){
         this.ctx.beginPath();
         this.ctx.translate(positionX, positionY);
         this.ctx.rotate(degrees * Math.PI / 180);
-        this.ctx.translate(- width * CUBE_SIZE / 2, - height * CUBE_SIZE / 2);
+        if (freeHand) {
+            this.ctx.translate(- width / 2, - height / 2);
+        } else {
+            this.ctx.translate(- width * this.cubeSize / 2, - height * this.cubeSize / 2);
+        }
     }
 
     /**
      * Renders 
      * @param stroke Stroke to render
      * @param palette Contains the master piece's color swatches
+     * @param freeHand If the stroke is rendered with blocks or free hand
      */
-    renderStroke(stroke: stroke, palette: string[]){
+    renderStroke(stroke: stroke, palette: string[], freeHand?: boolean){
         this.ctx.fillStyle = palette[stroke.swatch];
-        this.ctx.fillRect(stroke.cellX * CUBE_SIZE, stroke.cellY * CUBE_SIZE,
-            stroke.width * CUBE_SIZE, stroke.height * CUBE_SIZE);
+        if (freeHand){
+            this.ctx.fillRect(stroke.cellX, stroke.cellY,
+                stroke.width, stroke.height);
+        } else {
+            this.ctx.fillRect(stroke.cellX * this.cubeSize, stroke.cellY * this.cubeSize,
+                stroke.width * this.cubeSize, stroke.height * this.cubeSize);
+            }
     }
 
     /**
@@ -132,8 +146,16 @@ export class Popova {
     /**
      * Returns Popova's cube render size
      */
-    cubeSize(): number {
-        return CUBE_SIZE;
+    getCubeSize(): number {
+        return this.cubeSize;
+    }
+
+    /**
+     * Sets Popova's cube render size
+     * @param size Value for cube render size
+     */
+    setCubeSize(size: number) {
+        this.cubeSize = size;
     }
 
     /**
