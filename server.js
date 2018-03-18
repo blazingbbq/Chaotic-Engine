@@ -26,10 +26,18 @@ var renderSize = 8;
 var projectileWidth = 2;
 var projectileHeight = 0.5;
 var projectileHitBoxRadius = 1;
+var baseProjectileDamage = 10;
 
+var playerSpeed = 5;
+var playerHealth = 100;
 var playerWidth = 4;
 var playerHeight = 6;
 var teamColors = ["#FF0000", "#00FF00", "#0000FF"];
+
+var gravestoneWidth = 3;
+var gravestoneHeight = 4;
+var gravestoneHitboxWidth = gravestoneWidth;
+var gravestoneHitboxHeight = gravestoneHeight;
 var gravestoneHealth = 40;
 
 // Listen for connection on IO
@@ -44,13 +52,13 @@ io.on("connection", (socket) => {
             y: 0,
             velocityX: 0,
             velocityY: 0,
-            speed: 5,
+            speed: playerSpeed,
             width: playerWidth,
             height: playerHeight,
             hitboxWidth: playerWidth - 2,
             hitboxHeight: playerHeight,
-            health: 100,
-            maxHealth: 100,
+            health: playerHealth,
+            maxHealth: playerHealth,
             team: newPlayerTeam,
             teamColor: teamColors[newPlayerTeam],
         };
@@ -115,7 +123,7 @@ io.on("connection", (socket) => {
                 hitboxHeight: projectileHitBoxRadius,
                 facing: angle * 180 / Math.PI,
                 dist: 0,
-                damage: 10,
+                damage: baseProjectileDamage,
             }
         }
     });
@@ -142,46 +150,48 @@ setInterval(() => {
                 objects[id].dist += Math.sqrt(
                     Math.pow(objects[id].velocityX, 2) +
                     Math.pow(objects[id].velocityY, 2));
-                // TODO: Move this method to projectile class once it exists (if server ever migrates to ts)
-                checkCollisionsProjectile(id, objects, (srcId, collisionId) => {
-                    switch (objects[collisionId].type) {
-                        case "player":
-                            objects[collisionId].health -= objects[srcId].damage;
-                            delete objects[srcId];
 
-                            // TODO: Move player death calculations out of here
-                            // Add deathrattle function to object definitions
-                            if (objects[collisionId].health <= 0){
-                                // Don't bother changing the values like this... Just reset the object
-                                objects[collisionId].type = "gravestone";
-                                objects[collisionId].y = objects[collisionId].y + 1 * renderSize;
-                                objects[collisionId].width = 3;
-                                objects[collisionId].height = 4;
-                                objects[collisionId].hitboxWidth = 3;
-                                objects[collisionId].hitboxHeight = 4;
-                                objects[collisionId].maxHealth = gravestoneHealth;
-                                objects[collisionId].health = objects[collisionId].maxHealth;
-                            }
-                            break;
-                        case "gravestone":
-                            objects[collisionId].health -= objects[srcId].damage;
-                            delete objects[srcId];
+                checkCollisions(id, objects, (srcId, collisionId) => {
+                    if (objects[srcId] && collisionId != srcId && collisionId != objects[srcId].source){
+                        switch (objects[collisionId].type) {
+                            case "player":
+                                objects[collisionId].health -= objects[srcId].damage;
+                                delete objects[srcId];
 
-                            // TODO: Move gravestone death calculations out of here
-                            if (objects[collisionId].health <= 0){
-                                // Player respawns on gravestone death
-                                objects[collisionId].type = "player";
-                                objects[collisionId].x = 0;
-                                objects[collisionId].y = 0;
-                                objects[collisionId].velocityX = 0;
-                                objects[collisionId].velocityY = 0;
-                                objects[collisionId].width = playerWidth;
-                                objects[collisionId].height = playerHeight;
-                                objects[collisionId].hitboxWidth = playerWidth - 2;
-                                objects[collisionId].hitboxHeight = playerHeight;
-                                objects[collisionId].maxHealth = 100;
-                                objects[collisionId].health = 100;
-                            }
+                                // TODO: Move player death calculations out of here
+                                // Add deathrattle function to object definitions
+                                if (objects[collisionId].health <= 0){
+                                    // Don't bother changing the values like this... Just reset the object
+                                    objects[collisionId].type = "gravestone";
+                                    objects[collisionId].y = objects[collisionId].y + 1 * renderSize;
+                                    objects[collisionId].width = gravestoneWidth;
+                                    objects[collisionId].height = gravestoneHeight;
+                                    objects[collisionId].hitboxWidth = gravestoneHitboxWidth;
+                                    objects[collisionId].hitboxHeight = gravestoneHitboxHeight;
+                                    objects[collisionId].maxHealth = gravestoneHealth;
+                                    objects[collisionId].health = objects[collisionId].maxHealth;
+                                }
+                                break;
+                            case "gravestone":
+                                objects[collisionId].health -= objects[srcId].damage;
+                                delete objects[srcId];
+
+                                // TODO: Move gravestone death calculations out of here
+                                if (objects[collisionId].health <= 0){
+                                    // Player respawns on gravestone death
+                                    objects[collisionId].type = "player";
+                                    objects[collisionId].x = 0;
+                                    objects[collisionId].y = 0;
+                                    objects[collisionId].velocityX = 0;
+                                    objects[collisionId].velocityY = 0;
+                                    objects[collisionId].width = playerWidth;
+                                    objects[collisionId].height = playerHeight;
+                                    objects[collisionId].hitboxWidth = playerWidth - 2;
+                                    objects[collisionId].hitboxHeight = playerHeight;
+                                    objects[collisionId].maxHealth = 100;
+                                    objects[collisionId].health = 100;
+                                }
+                        }
                     }
                 });
                 if (objects[id]) {
@@ -197,21 +207,19 @@ setInterval(() => {
 }, 1000 / 60);
 
 // Check collisions between all objects
-function checkCollisionsProjectile(checkSrc, obs, callBack) {
+function checkCollisions(checkSrc, obs, callBack) {
     var src = obs[checkSrc];
 
     for (id in obs) {
-        if (id != src.source && id != checkSrc){
-            var check = obs[id];
+        var check = obs[id];
 
-            var xIn = valueInRange(src.x - src.hitboxWidth / 2 * renderSize, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize) ||
-                valueInRange(src.x + src.hitboxWidth / 2 * renderSize, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize);
+        var xIn = valueInRange(src.x - src.hitboxWidth / 2 * renderSize, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize) ||
+            valueInRange(src.x + src.hitboxWidth / 2 * renderSize, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize);
 
-            var yIn = valueInRange(src.y - src.hitboxHeight / 2 * renderSize, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize) ||
-                valueInRange(src.y + src.hitboxHeight / 2 * renderSize, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize);
+        var yIn = valueInRange(src.y - src.hitboxHeight / 2 * renderSize, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize) ||
+            valueInRange(src.y + src.hitboxHeight / 2 * renderSize, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize);
 
-            if (xIn && yIn) callBack(checkSrc, id);
-        }
+        if (xIn && yIn) callBack(checkSrc, id);
     }
 }
 

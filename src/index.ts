@@ -7,6 +7,7 @@ var socket = io();
 var cubeSize: number;
 var gridSize: number = 48;
 var healthBarHeight = 6;
+var viewRange = 1 / 2;
 
 var playerId: string;
 
@@ -105,12 +106,13 @@ socket.on("state", (objects: any) => {
 
     // TODO: Add smoothing to camera movement
     renderOffsetX = (!!playerId)
-        ? objects[playerId].x + (mousePos.x - (canvasSize.width / 2)) / 3 - canvasSize.width / 2
+        ? objects[playerId].x + (mousePos.x - (canvasSize.width / 2)) * viewRange - canvasSize.width / 2
         : undefined;
     renderOffsetY = (!!playerId)
-        ? objects[playerId].y + (mousePos.y - (canvasSize.height / 2)) / 3 - canvasSize.height / 2
+        ? objects[playerId].y + (mousePos.y - (canvasSize.height / 2)) * viewRange - canvasSize.height / 2
         : undefined;
 
+    // TODO: Don't wipe background canvas, translate it to match player position
     if (!!objects) {
         background.wipeCanvas();
         background.drawGrid(gridSize, -renderOffsetX, -renderOffsetY);
