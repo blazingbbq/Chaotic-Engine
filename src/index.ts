@@ -1,11 +1,12 @@
 import * as socketIo from "socket.io-client";
-import { Popova, mousePosition } from "./Popova/Popova";
+import { Popova, mousePosition, masterPiece } from "./Popova/Popova";
 
 // Socket listener
 var socket = io();
 
 var cubeSize: number;
-var gridSize: number = 64;
+var gridSize: number = 48;
+var healthBarHeight = 6;
 
 var playerId: string;
 
@@ -165,25 +166,11 @@ socket.on("state", (objects: any) => {
                         swatch: 1
                     }],
                 });
-                foreground.draw({
-                    palette: ["#00a400"],
-                    posX: object.x - renderOffsetX,
-                    posY: object.y - renderOffsetY - 32,
-                    width: object.width * cubeSize,
-                    height: 8,
-                    facing: 0,
-                    strokes: [{
-                        cellX: 0,
-                        cellY: 0,
-                        width: object.health / object.maxHealth * object.width * cubeSize,
-                        height: object.height,
-                        swatch: 0
-                    },],
-                    freeHand: true});
+                foreground.draw(healthBarMasterPiece(object));
                 break;
             case "projectile":
                 env.draw({
-                    palette: ["#FF6666", "#66FF66", "#6666FF", "#FFFF66", "#FF66FF", "#66FFFF", "#000000"],
+                    palette: ["#FF6666", "#66FF66", "#6666FF", "#FFFF66", "#FF66FF", "#66FFFF"],
                     posX: object.x - renderOffsetX,
                     posY: object.y - renderOffsetY,
                     width: object.width,
@@ -198,6 +185,54 @@ socket.on("state", (objects: any) => {
                     }]
                 });
                 break;
+            case "gravestone":
+                env.draw({
+                    palette: ["#888888"],
+                    posX: object.x - renderOffsetX,
+                    posY: object.y - renderOffsetY,
+                    width: object.width,
+                    height: object.height,
+                    facing: object.facing,
+                    strokes: [{
+                        cellX: 0,
+                        cellY: 1,
+                        width: object.width,
+                        height: 1,
+                        swatch: 0,
+                    }, {
+                        cellX: 1,
+                        cellY: 0,
+                        width: 1,
+                        height: object.height,
+                        swatch: 0,
+                    }]
+                });
+                env.draw(healthBarMasterPiece(object));
+                break;
         }
     }
 });
+
+/**
+ * Get master piece for object's health bar
+ * @param object The object that needs a health bar
+ * @param renderOffsetX The horizontal render offset
+ * @param renderOffsetY The vertical render offset
+ */
+function healthBarMasterPiece(object: any): masterPiece {
+    return {
+        palette: ["#00a400", "#FF0000"],
+        posX: object.x - renderOffsetX,
+        posY: object.y - renderOffsetY - (object.height + 2) * cubeSize / 2,
+        width: object.width * cubeSize,
+        height: 1 * cubeSize,
+        facing: 0,
+        strokes: [{
+            cellX: 0,
+            cellY: 0,
+            width: object.health / object.maxHealth * object.width * cubeSize,
+            height: healthBarHeight,
+            swatch: (object.health > object.maxHealth / 3) ? 0 : 1,
+        },],
+        freeHand: true};
+}
