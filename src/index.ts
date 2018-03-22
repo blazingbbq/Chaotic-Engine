@@ -6,7 +6,6 @@ var socket = io();
 
 var cubeSize: number;
 var gridSize: number = 48;
-var healthBarHeight = 6;
 var viewRange = 1 / 2;
 
 var playerId: string;
@@ -16,11 +15,12 @@ var renderOffsetY: number;
 
 var mousePos: mousePosition;
 
-var movement = {
+var playerInput = {
     up: false,
     down: false,
     left: false,
-    right: false
+    right: false,
+    build: false,
 }
 mousePos = { x: 0, y: 0, outOfBounds: true };
 
@@ -29,32 +29,32 @@ mousePos = { x: 0, y: 0, outOfBounds: true };
 document.addEventListener("keydown", (event) => {
     switch (event.keyCode) {
         case 65: // A
-            movement.left = true;
+            playerInput.left = true;
             break;
         case 87: // W
-            movement.up = true;
+            playerInput.up = true;
             break;
         case 68: // D
-            movement.right = true;
+            playerInput.right = true;
             break;
         case 83: // S
-            movement.down = true;
+            playerInput.down = true;
             break;
     }
 });
 document.addEventListener("keyup", (event) => {
     switch (event.keyCode) {
         case 65: // A
-            movement.left = false;
+            playerInput.left = false;
             break;
         case 87: // W
-            movement.up = false;
+            playerInput.up = false;
             break;
         case 68: // D
-            movement.right = false;
+            playerInput.right = false;
             break;
         case 83: // S
-            movement.down = false;
+            playerInput.down = false;
             break;
     }
 });
@@ -78,14 +78,16 @@ window.addEventListener("click", onMouseClick, false);
 var background  = new Popova();
 var env         = new Popova();
 var foreground  = new Popova();
+var cover       = new Popova();
 
 background.init("background", cubeSize);
 env.init("env", cubeSize);
 foreground.init("foreground", cubeSize);
+cover.init("cover", cubeSize);
 
-// Broadcast player movement
+// Broadcast player input
 setInterval(() => {
-    socket.emit("movement", movement);
+    socket.emit("playerInput", playerInput);
 }, 1000/60);
 
 // Tell the server a new player has joined and handshake
@@ -96,12 +98,14 @@ socket.on("handshake", (info: any) => {
     background.setCubeSize(cubeSize);
     env.setCubeSize(cubeSize);
     foreground.setCubeSize(cubeSize);
+    cover.setCubeSize(cubeSize);
 });
 
 // Interpret state and draw objects
 socket.on("state", (objects: any) => {
     foreground.wipeCanvas();
     env.wipeCanvas();
+    cover.wipeCanvas();
     var canvasSize = foreground.size();
 
     // TODO: Add smoothing to camera movement
@@ -123,51 +127,7 @@ socket.on("state", (objects: any) => {
 
         switch (object.type) {
             case "player":
-                foreground.draw({
-                    palette: ["#abab9a", "#775050", "#AAAAAA"].concat(object.teamColor),
-                    posX: object.x - renderOffsetX,
-                    posY: object.y - renderOffsetY,
-                    width: object.width,
-                    height: object.height,
-                    facing: 0,
-                    strokes: [{
-                        cellX: 0,
-                        cellY: 2,
-                        width: 4,
-                        height: 2,
-                        swatch: 3
-                    }, {
-                        cellX: 1,
-                        cellY: 0,
-                        width: 2,
-                        height: 2,
-                        swatch: 0
-                    }, {
-                        cellX: 0,
-                        cellY: 3,
-                        width: 1,
-                        height: 1,
-                        swatch: 2
-                    }, {
-                        cellX: 3,
-                        cellY: 3,
-                        width: 1,
-                        height: 1,
-                        swatch: 2
-                    }, {
-                        cellX: 1,
-                        cellY: 4,
-                        width: 1,
-                        height: 2,
-                        swatch: 1
-                    }, {
-                        cellX: 2,
-                        cellY: 4,
-                        width: 1,
-                        height: 2,
-                        swatch: 1
-                    }],
-                });
+                foreground.draw(playerMasterPiece(object));
                 foreground.draw(healthBarMasterPiece(object));
                 break;
             case "projectile":
@@ -211,15 +171,74 @@ socket.on("state", (objects: any) => {
                 });
                 env.draw(healthBarMasterPiece(object));
                 break;
+            case "terrain":
+                switch (object.subtype) {
+                    case "tree":
+                        env.draw(treeTrunkMasterPiece(object));
+                        cover.draw(treeLeafMasterPiece(object));
+                }
+                break;
         }
     }
 });
 
+// TODO: Move these to an art collection class, which handles generating art for each of these objects
+
+/**
+ * Get master peice for player object
+ * @param object The player object
+ */
+function playerMasterPiece(object: any): masterPiece {
+    return {
+        palette: ["#abab9a", "#775050", "#AAAAAA"].concat(object.teamColor),
+        posX: object.x - renderOffsetX,
+        posY: object.y - renderOffsetY,
+        width: object.width,
+        height: object.height,
+        facing: 0,
+        strokes: [{
+            cellX: 0,
+            cellY: 2,
+            width: 4,
+            height: 2,
+            swatch: 3
+        }, {
+            cellX: 1,
+            cellY: 0,
+            width: 2,
+            height: 2,
+            swatch: 0
+        }, {
+            cellX: 0,
+            cellY: 3,
+            width: 1,
+            height: 1,
+            swatch: 2
+        }, {
+            cellX: 3,
+            cellY: 3,
+            width: 1,
+            height: 1,
+            swatch: 2
+        }, {
+            cellX: 1,
+            cellY: 4,
+            width: 1,
+            height: 2,
+            swatch: 1
+        }, {
+            cellX: 2,
+            cellY: 4,
+            width: 1,
+            height: 2,
+            swatch: 1
+        }],
+    }
+}
+
 /**
  * Get master piece for object's health bar
  * @param object The object that needs a health bar
- * @param renderOffsetX The horizontal render offset
- * @param renderOffsetY The vertical render offset
  */
 function healthBarMasterPiece(object: any): masterPiece {
     return {
@@ -233,8 +252,59 @@ function healthBarMasterPiece(object: any): masterPiece {
             cellX: 0,
             cellY: 0,
             width: object.health / object.maxHealth * object.width * cubeSize,
-            height: healthBarHeight,
+            height: cubeSize * 3 / 4,
             swatch: (object.health > object.maxHealth / 3) ? 0 : 1,
         },],
-        freeHand: true};
+    freeHand: true};
+}
+
+/**
+ * Get master piece for tree object
+ * @param object The tree object
+ */
+function treeTrunkMasterPiece(object: any): masterPiece {
+    return {
+        palette: ["#993300"],
+        posX: object.x - renderOffsetX,
+        posY: object.y - renderOffsetY,
+        width: object.width,
+        height: object.height,
+        facing: object.facing,
+        strokes: [{
+            cellX: 0,
+            cellY: 0,
+            width: object.width,
+            height: object.height,
+            swatch: 0
+        },],
+    };
+}
+
+// TODO: Change leaf rendering depending on tree health
+/**
+ * Get master piece for tree object's leaves
+ * @param object The tree object
+ */
+function treeLeafMasterPiece(object: any): masterPiece {
+    return {
+        palette: ["#228822"],
+        posX: object.x - renderOffsetX,
+        posY: object.y - renderOffsetY,
+        width: object.width,
+        height: object.height,
+        facing: object.facing,
+        strokes: [{
+            cellX: -2,
+            cellY: -4,
+            width: object.width * 2,
+            height: object.height,
+            swatch: 0
+        }, {
+            cellX: 0,
+            cellY: -10,
+            width: 4,
+            height: 7,
+            swatch: 0
+        },],
+    };
 }

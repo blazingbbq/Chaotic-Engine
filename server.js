@@ -19,16 +19,20 @@ server.listen(5000, () => {
   console.log("Starting server on port 5000");
 }); 
 
-var projectileSpeed = 10; 
+var Terrain = {
+    TREE: "tree",
+}
+
+var projectileSpeed = 12; 
 var maxProjDist = 1600;
-var renderSize = 8;
+var renderSize = 4;
 
 var projectileWidth = 2;
 var projectileHeight = 0.5;
 var projectileHitBoxRadius = 1;
 var baseProjectileDamage = 10;
 
-var playerSpeed = 5;
+var playerSpeed = 3;
 var playerHealth = 100;
 var playerWidth = 4;
 var playerHeight = 6;
@@ -40,8 +44,18 @@ var gravestoneHitboxWidth = gravestoneWidth;
 var gravestoneHitboxHeight = gravestoneHeight;
 var gravestoneHealth = 40;
 
+var treeWidth = 4;
+var treeHeight = 8;
+var treeHitboxWidth = 4;
+var treeHitboxHeight = 8;
+var treeHealth = 200;
+
 // Listen for connection on IO
 var objects = {};
+
+// Adds starting resources to the map
+initializeMap(objects);
+
 io.on("connection", (socket) => {
     // Handle connection
     socket.on("new-player", () => {
@@ -69,27 +83,27 @@ io.on("connection", (socket) => {
     });
 
     // Handle player movement event
-    socket.on("movement", (movement) => {
+    socket.on("playerInput", (playerInput) => {
         var player = objects[socket.id] || {};
-        if (movement.left) {
-            if (movement.right) {
+        if (playerInput.left) {
+            if (playerInput.right) {
                 player.velocityX = 0;
             } else {
                 player.velocityX = -player.speed;
             }
-        } else if (movement.right) {
+        } else if (playerInput.right) {
             player.velocityX = player.speed;
         } else {
             player.velocityX = 0;
         }
 
-        if (movement.up) {
-            if (movement.down){
+        if (playerInput.up) {
+            if (playerInput.down){
                 player.velocityY = 0;
             } else {
                 player.velocityY = -player.speed;
             }
-        } else if (movement.down) {
+        } else if (playerInput.down) {
             player.velocityY = player.speed;
         } else {
             player.velocityY = 0;
@@ -142,6 +156,32 @@ setInterval(() => {
                 // Calculate player movement
                 objects[id].x += objects[id].velocityX;
                 objects[id].y += objects[id].velocityY;
+
+                // Check collisions with terrain and reposition accordingly
+                checkCollisions(id, objects, (srcId, collisionId) => {
+                    if (objects[srcId] && collisionId != srcId){
+                        switch (objects[collisionId].type) {
+                            case "terrain":
+                                // Push object back out of collision terrain towards which ever side is the closest to the terrain object
+                                var distRight = Math.abs((objects[collisionId].x - objects[collisionId].width * renderSize / 2) - (objects[srcId].x + objects[srcId].hitboxWidth * renderSize / 2));
+                                var distLeft =  Math.abs((objects[collisionId].x + objects[collisionId].width * renderSize / 2) - (objects[srcId].x - objects[srcId].hitboxWidth * renderSize / 2));
+                                var distUp =    Math.abs((objects[collisionId].y + objects[collisionId].height * renderSize / 2) - (objects[srcId].y - objects[srcId].hitboxHeight * renderSize / 2));
+                                var distDown =  Math.abs((objects[collisionId].y - objects[collisionId].height * renderSize / 2) - (objects[srcId].y + objects[srcId].hitboxHeight * renderSize / 2));
+                                
+                                if (distRight < distLeft && distRight < distUp && distRight < distDown) {
+                                    objects[srcId].x = objects[srcId].x - distRight;
+                                } else if (distLeft < distRight && distLeft < distUp && distLeft < distDown) {
+                                    objects[srcId].x = objects[srcId].x + distLeft;
+                                } else if (distUp < distRight && distUp < distLeft && distUp < distDown) {
+                                    objects[srcId].y = objects[srcId].y + distUp;
+                                } else if (distDown < distRight && distDown < distLeft && distDown < distUp) {
+                                    objects[srcId].y = objects[srcId].y - distDown;
+                                }
+                                break;
+                        }
+                    }
+                });
+
                 break;
             case "projectile":
                 // Calculate projectile movement
@@ -191,6 +231,14 @@ setInterval(() => {
                                     objects[collisionId].maxHealth = 100;
                                     objects[collisionId].health = 100;
                                 }
+                            case "terrain":
+                                objects[collisionId].health -= objects[srcId].damage;
+                                delete objects[srcId];
+
+                                if (objects[collisionId].health <= 0){
+                                    delete objects[collisionId];
+                                }
+                                break;
                         }
                     }
                 });
@@ -226,4 +274,31 @@ function checkCollisions(checkSrc, obs, callBack) {
 // Collision detection helper, checks if value is between min and max
 function valueInRange(value, min, max) { 
     return (value >= min) && (value <= max); 
+}
+
+// Initializes starting map resources
+function initializeMap(obs) {
+    obs["init:tree:200:200"] = generateNewTerrain(200, 200, Terrain.TREE);
+    obs["init:tree:-200:200"] = generateNewTerrain(-200, 200, Terrain.TREE);
+    obs["init:tree:200:-200"] = generateNewTerrain(200, -200, Terrain.TREE);
+    obs["init:tree:-200:-200"] = generateNewTerrain(-200, -200, Terrain.TREE);
+}
+
+function generateNewTerrain(posX, posY, subtype) {
+    switch (subtype) {
+        case Terrain.TREE:
+            return {
+                type: "terrain",
+                subtype: subtype,
+                x: posX,
+                y: posY,
+                width: treeWidth,
+                height: treeHeight,
+                hitboxWidth: treeHitboxWidth,
+                hitboxHeight: treeHitboxHeight,
+                health: treeHealth,
+                maxHealth: treeHealth,
+            }
+            break;
+    }
 }
