@@ -213,30 +213,35 @@ setInterval(() => {
                                 }
                                 break;
                             case "gravestone":
-                                objects[collisionId].health -= objects[srcId].damage;
-                                delete objects[srcId];
+                                if (objects[srcId]) {
+                                    objects[collisionId].health -= objects[srcId].damage;
+                                    delete objects[srcId];
 
-                                // TODO: Move gravestone death calculations out of here
-                                if (objects[collisionId].health <= 0){
-                                    // Player respawns on gravestone death
-                                    objects[collisionId].type = "player";
-                                    objects[collisionId].x = 0;
-                                    objects[collisionId].y = 0;
-                                    objects[collisionId].velocityX = 0;
-                                    objects[collisionId].velocityY = 0;
-                                    objects[collisionId].width = playerWidth;
-                                    objects[collisionId].height = playerHeight;
-                                    objects[collisionId].hitboxWidth = playerWidth - 2;
-                                    objects[collisionId].hitboxHeight = playerHeight;
-                                    objects[collisionId].maxHealth = 100;
-                                    objects[collisionId].health = 100;
+                                    // TODO: Move gravestone death calculations out of here
+                                    if (objects[collisionId].health <= 0){
+                                        // Player respawns on gravestone death
+                                        objects[collisionId].type = "player";
+                                        objects[collisionId].x = 0;
+                                        objects[collisionId].y = 0;
+                                        objects[collisionId].velocityX = 0;
+                                        objects[collisionId].velocityY = 0;
+                                        objects[collisionId].width = playerWidth;
+                                        objects[collisionId].height = playerHeight;
+                                        objects[collisionId].hitboxWidth = playerWidth - 2;
+                                        objects[collisionId].hitboxHeight = playerHeight;
+                                        objects[collisionId].maxHealth = 100;
+                                        objects[collisionId].health = 100;
+                                    }
                                 }
+                                break;
                             case "terrain":
-                                objects[collisionId].health -= objects[srcId].damage;
-                                delete objects[srcId];
+                                if (objects[srcId]) {
+                                    objects[collisionId].health -= objects[srcId].damage;
+                                    delete objects[srcId];
 
-                                if (objects[collisionId].health <= 0){
-                                    delete objects[collisionId];
+                                    if (objects[collisionId].health <= 0){
+                                        delete objects[collisionId];
+                                    }
                                 }
                                 break;
                         }
@@ -278,16 +283,18 @@ function valueInRange(value, min, max) {
 
 // Initializes starting map resources
 function initializeMap(obs) {
-    obs["init:tree:200:200"] = generateNewTerrain(200, 200, Terrain.TREE);
-    obs["init:tree:-200:200"] = generateNewTerrain(-200, 200, Terrain.TREE);
-    obs["init:tree:200:-200"] = generateNewTerrain(200, -200, Terrain.TREE);
-    obs["init:tree:-200:-200"] = generateNewTerrain(-200, -200, Terrain.TREE);
+    generateNew(obs, "init", 200, 200, Terrain.TREE);
+    generateNew(obs, "init", -200, 200, Terrain.TREE);
+    generateNew(obs, "init", 200, -200, Terrain.TREE);
+    generateNew(obs, "init", -200, -200, Terrain.TREE);
 }
 
-function generateNewTerrain(posX, posY, subtype) {
+function generateNew(obs, src, posX, posY, subtype) {
+    var newTerrain;
+    
     switch (subtype) {
         case Terrain.TREE:
-            return {
+            newTerrain =  {
                 type: "terrain",
                 subtype: subtype,
                 x: posX,
@@ -301,4 +308,6 @@ function generateNewTerrain(posX, posY, subtype) {
             }
             break;
     }
+
+    obs[src + ":" + subtype + ":" + posX + ":" + posY] = newTerrain;
 }

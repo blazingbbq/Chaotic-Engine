@@ -1,5 +1,6 @@
 import * as socketIo from "socket.io-client";
 import { Popova, mousePosition, masterPiece } from "./Popova/Popova";
+import * as louvre from "./Louvre/Louvre";
 
 // Socket listener
 var socket = io();
@@ -127,184 +128,27 @@ socket.on("state", (objects: any) => {
 
         switch (object.type) {
             case "player":
-                foreground.draw(playerMasterPiece(object));
-                foreground.draw(healthBarMasterPiece(object));
+                foreground.draw(louvre.playerMasterPiece(object, renderOffsetX, renderOffsetY));
+                foreground.draw(louvre.healthBarMasterPiece(object, renderOffsetX, renderOffsetY, cubeSize));
                 break;
             case "projectile":
-                env.draw({
-                    palette: ["#FF6666", "#66FF66", "#6666FF", "#FFFF66", "#FF66FF", "#66FFFF"],
-                    posX: object.x - renderOffsetX,
-                    posY: object.y - renderOffsetY,
-                    width: object.width,
-                    height: object.height,
-                    facing: object.facing,
-                    strokes: [{
-                        cellX: 0,
-                        cellY: 0,
-                        width: object.width,
-                        height: object.height,
-                        swatch: Math.floor(Math.random() * 6)
-                    }]
-                });
+                env.draw(louvre.projectileMasterPiece(object, renderOffsetX, renderOffsetY));
                 break;
             case "gravestone":
-                env.draw({
-                    palette: ["#888888"],
-                    posX: object.x - renderOffsetX,
-                    posY: object.y - renderOffsetY,
-                    width: object.width,
-                    height: object.height,
-                    facing: object.facing,
-                    strokes: [{
-                        cellX: 0,
-                        cellY: 1,
-                        width: object.width,
-                        height: 1,
-                        swatch: 0,
-                    }, {
-                        cellX: 1,
-                        cellY: 0,
-                        width: 1,
-                        height: object.height,
-                        swatch: 0,
-                    }]
-                });
-                env.draw(healthBarMasterPiece(object));
+                env.draw(louvre.graveStoneMasterPiece(object, renderOffsetX, renderOffsetY));
+                env.draw(louvre.healthBarMasterPiece(object, renderOffsetX, renderOffsetY, cubeSize));
                 break;
             case "terrain":
                 switch (object.subtype) {
                     case "tree":
-                        env.draw(treeTrunkMasterPiece(object));
-                        cover.draw(treeLeafMasterPiece(object));
+                        env.draw(louvre.treeTrunkMasterPiece(object, renderOffsetX, renderOffsetY));
+                        cover.draw(louvre.treeLeafMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                    default:
+                        env.draw(louvre.defaultTerrainMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
                 }
                 break;
         }
     }
 });
-
-// TODO: Move these to an art collection class, which handles generating art for each of these objects
-
-/**
- * Get master peice for player object
- * @param object The player object
- */
-function playerMasterPiece(object: any): masterPiece {
-    return {
-        palette: ["#abab9a", "#775050", "#AAAAAA"].concat(object.teamColor),
-        posX: object.x - renderOffsetX,
-        posY: object.y - renderOffsetY,
-        width: object.width,
-        height: object.height,
-        facing: 0,
-        strokes: [{
-            cellX: 0,
-            cellY: 2,
-            width: 4,
-            height: 2,
-            swatch: 3
-        }, {
-            cellX: 1,
-            cellY: 0,
-            width: 2,
-            height: 2,
-            swatch: 0
-        }, {
-            cellX: 0,
-            cellY: 3,
-            width: 1,
-            height: 1,
-            swatch: 2
-        }, {
-            cellX: 3,
-            cellY: 3,
-            width: 1,
-            height: 1,
-            swatch: 2
-        }, {
-            cellX: 1,
-            cellY: 4,
-            width: 1,
-            height: 2,
-            swatch: 1
-        }, {
-            cellX: 2,
-            cellY: 4,
-            width: 1,
-            height: 2,
-            swatch: 1
-        }],
-    }
-}
-
-/**
- * Get master piece for object's health bar
- * @param object The object that needs a health bar
- */
-function healthBarMasterPiece(object: any): masterPiece {
-    return {
-        palette: ["#00a400", "#FF0000"],
-        posX: object.x - renderOffsetX,
-        posY: object.y - renderOffsetY - (object.height + 2) * cubeSize / 2,
-        width: object.width * cubeSize,
-        height: 1 * cubeSize,
-        facing: 0,
-        strokes: [{
-            cellX: 0,
-            cellY: 0,
-            width: object.health / object.maxHealth * object.width * cubeSize,
-            height: cubeSize * 3 / 4,
-            swatch: (object.health > object.maxHealth / 3) ? 0 : 1,
-        },],
-    freeHand: true};
-}
-
-/**
- * Get master piece for tree object
- * @param object The tree object
- */
-function treeTrunkMasterPiece(object: any): masterPiece {
-    return {
-        palette: ["#993300"],
-        posX: object.x - renderOffsetX,
-        posY: object.y - renderOffsetY,
-        width: object.width,
-        height: object.height,
-        facing: object.facing,
-        strokes: [{
-            cellX: 0,
-            cellY: 0,
-            width: object.width,
-            height: object.height,
-            swatch: 0
-        },],
-    };
-}
-
-// TODO: Change leaf rendering depending on tree health
-/**
- * Get master piece for tree object's leaves
- * @param object The tree object
- */
-function treeLeafMasterPiece(object: any): masterPiece {
-    return {
-        palette: ["#228822"],
-        posX: object.x - renderOffsetX,
-        posY: object.y - renderOffsetY,
-        width: object.width,
-        height: object.height,
-        facing: object.facing,
-        strokes: [{
-            cellX: -2,
-            cellY: -4,
-            width: object.width * 2,
-            height: object.height,
-            swatch: 0
-        }, {
-            cellX: 0,
-            cellY: -10,
-            width: 4,
-            height: 7,
-            swatch: 0
-        },],
-    };
-}
