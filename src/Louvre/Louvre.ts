@@ -201,7 +201,7 @@ export function defaultTerrainMasterPiece(object: any, renderOffsetX: number, re
             cellY: 0,
             width: object.width,
             height: object.height,
-            swatch: Math.floor(Math.random() * 6)
+            swatch: 0
         }]
     }
 }

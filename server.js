@@ -75,6 +75,9 @@ io.on("connection", (socket) => {
             maxHealth: playerHealth,
             team: newPlayerTeam,
             teamColor: teamColors[newPlayerTeam],
+            deathrattle: (collisionId) => {
+                objects[collisionId] = playerToGravestone(objects[collisionId]);
+            },
         };
         socket.emit("handshake", {
             id: socket.id,
@@ -116,28 +119,32 @@ io.on("connection", (socket) => {
             var angle = Math.atan2(
                 object.targetY - objects[object.sourceId].y,
                 object.targetX - objects[object.sourceId].x);
-        
-            // Generate unique Id for new projectile
-            var newId = object.sourceId.concat(":", object.targetX, ":", object.targetY);
-            var dup = 0;
-            while (objects[newId.concat(":" + dup)]){
-                dup++;
-            }
             
-            objects[newId.concat(":" + dup)] = {
-                type: "projectile",
-                source: object.sourceId,
-                x: objects[object.sourceId].x,
-                y: objects[object.sourceId].y,
-                velocityX: Math.cos(angle) * projectileSpeed,
-                velocityY: Math.sin(angle) * projectileSpeed,
-                width: projectileWidth,
-                height: projectileHeight,
-                hitboxWidth: projectileHitBoxRadius,
-                hitboxHeight: projectileHitBoxRadius,
-                facing: angle * 180 / Math.PI,
-                dist: 0,
-                damage: baseProjectileDamage,
+            if (object.playerInput.build) {
+                generateNew(objects, object.sourceId, object.targetX, object.targetY - treeHeight * renderSize / 2, Terrain.TREE);
+            } else {
+                // Generate unique Id for new projectile
+                var newId = object.sourceId.concat(":", object.targetX, ":", object.targetY);
+                var dup = 0;
+                while (objects[newId.concat(":" + dup)]){
+                    dup++;
+                }
+                
+                objects[newId.concat(":" + dup)] = {
+                    type: "projectile",
+                    source: object.sourceId,
+                    x: objects[object.sourceId].x,
+                    y: objects[object.sourceId].y,
+                    velocityX: Math.cos(angle) * projectileSpeed,
+                    velocityY: Math.sin(angle) * projectileSpeed,
+                    width: projectileWidth,
+                    height: projectileHeight,
+                    hitboxWidth: projectileHitBoxRadius,
+                    hitboxHeight: projectileHitBoxRadius,
+                    facing: angle * 180 / Math.PI,
+                    dist: 0,
+                    damage: baseProjectileDamage,
+                }
             }
         }
     });
@@ -163,6 +170,7 @@ setInterval(() => {
                         switch (objects[collisionId].type) {
                             case "terrain":
                                 // Push object back out of collision terrain towards which ever side is the closest to the terrain object
+                                // Warning: A little buggy for objects 4x4
                                 var distRight = Math.abs((objects[collisionId].x - objects[collisionId].width * renderSize / 2) - (objects[srcId].x + objects[srcId].hitboxWidth * renderSize / 2));
                                 var distLeft =  Math.abs((objects[collisionId].x + objects[collisionId].width * renderSize / 2) - (objects[srcId].x - objects[srcId].hitboxWidth * renderSize / 2));
                                 var distUp =    Math.abs((objects[collisionId].y + objects[collisionId].height * renderSize / 2) - (objects[srcId].y - objects[srcId].hitboxHeight * renderSize / 2));
@@ -201,15 +209,7 @@ setInterval(() => {
                                 // TODO: Move player death calculations out of here
                                 // Add deathrattle function to object definitions
                                 if (objects[collisionId].health <= 0){
-                                    // Don't bother changing the values like this... Just reset the object
-                                    objects[collisionId].type = "gravestone";
-                                    objects[collisionId].y = objects[collisionId].y + 1 * renderSize;
-                                    objects[collisionId].width = gravestoneWidth;
-                                    objects[collisionId].height = gravestoneHeight;
-                                    objects[collisionId].hitboxWidth = gravestoneHitboxWidth;
-                                    objects[collisionId].hitboxHeight = gravestoneHitboxHeight;
-                                    objects[collisionId].maxHealth = gravestoneHealth;
-                                    objects[collisionId].health = objects[collisionId].maxHealth;
+                                    objects[collisionId].deathrattle(collisionId);
                                 }
                                 break;
                             case "gravestone":
@@ -219,18 +219,7 @@ setInterval(() => {
 
                                     // TODO: Move gravestone death calculations out of here
                                     if (objects[collisionId].health <= 0){
-                                        // Player respawns on gravestone death
-                                        objects[collisionId].type = "player";
-                                        objects[collisionId].x = 0;
-                                        objects[collisionId].y = 0;
-                                        objects[collisionId].velocityX = 0;
-                                        objects[collisionId].velocityY = 0;
-                                        objects[collisionId].width = playerWidth;
-                                        objects[collisionId].height = playerHeight;
-                                        objects[collisionId].hitboxWidth = playerWidth - 2;
-                                        objects[collisionId].hitboxHeight = playerHeight;
-                                        objects[collisionId].maxHealth = 100;
-                                        objects[collisionId].health = 100;
+                                        objects[collisionId].deathrattle(collisionId);
                                     }
                                 }
                                 break;
@@ -283,10 +272,11 @@ function valueInRange(value, min, max) {
 
 // Initializes starting map resources
 function initializeMap(obs) {
-    generateNew(obs, "init", 200, 200, Terrain.TREE);
-    generateNew(obs, "init", -200, 200, Terrain.TREE);
-    generateNew(obs, "init", 200, -200, Terrain.TREE);
-    generateNew(obs, "init", -200, -200, Terrain.TREE);
+    generateNew(obs, "init", 50, -25, Terrain.TREE);
+    generateNew(obs, "init", 180, 210, Terrain.TREE);
+    generateNew(obs, "init", -150, 185, Terrain.TREE);
+    generateNew(obs, "init", 220, -205, Terrain.TREE);
+    generateNew(obs, "init", -195, -175, Terrain.TREE);
 }
 
 function generateNew(obs, src, posX, posY, subtype) {
@@ -307,7 +297,64 @@ function generateNew(obs, src, posX, posY, subtype) {
                 maxHealth: treeHealth,
             }
             break;
+        default: 
+            newTerrain = {
+                type: "terrain",
+                subtype: subtype,
+                x: posX,
+                y: posY,
+                width: 6,
+                height: 6,
+                hitboxWidth: 6,
+                hitboxHeight: 6,
+                health: 100,
+                maxHealth: 100,
+            }
     }
 
     obs[src + ":" + subtype + ":" + posX + ":" + posY] = newTerrain;
+}
+
+function playerToGravestone(player) {
+    return {
+        type: "gravestone",
+        x: player.x,
+        y: player.y + 1 * renderSize,
+        velocityX: 0,
+        velocityY: 0,
+        speed: 0,
+        width: gravestoneWidth,
+        height: gravestoneHeight,
+        hitboxWidth: gravestoneHitboxWidth,
+        hitboxHeight: gravestoneHitboxHeight,
+        health: gravestoneHealth,
+        maxHealth: gravestoneHealth,
+        team: player.team,
+        teamColor: player.teamColor,
+        deathrattle: (collisionId) => {
+            objects[collisionId] = gravestoneToPlayer(objects[collisionId]);
+        },
+    }
+}
+
+function gravestoneToPlayer(gravestone) {
+    return {
+        type: "player",
+        x: 0,
+        y: 0,
+        velocityX: 0,
+        velocityY: 0,
+        speed: playerSpeed,
+        width: playerWidth,
+        height: playerHeight,
+        hitboxWidth: playerWidth - 2,
+        hitboxHeight: playerHeight,
+        health: playerHealth,
+        maxHealth: playerHealth,
+        team: gravestone.team,
+        teamColor: gravestone.teamColor,
+        deathrattle: (collisionId) => {
+            objects[collisionId] = playerToGravestone(objects[collisionId]);
+        },
+    }
 }
