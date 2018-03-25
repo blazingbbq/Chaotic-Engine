@@ -1,6 +1,7 @@
 import * as socketIo from "socket.io-client";
 import { Popova, mousePosition, masterPiece } from "./Popova/Popova";
 import * as louvre from "./Louvre/Louvre";
+import * as types from "../ObjectTypes";
 
 // Socket listener
 var socket = io();
@@ -22,6 +23,7 @@ var playerInput = {
     left: false,
     right: false,
     build: false,
+    pickup: false,
 }
 mousePos = { x: 0, y: 0, outOfBounds: true };
 
@@ -29,7 +31,8 @@ var KEY_UP = 87;        // Default to W
 var KEY_DOWN = 83;      // Default to S
 var KEY_RIGHT = 68;     // Default to D
 var KEY_LEFT = 65;      // Default to A
-var KEY_CLICK_MODE = 69 // Default to E
+var KEY_CLICK_MODE = 70 // Default to F
+var KEY_PICKUP = 69     // Default to E
 
 
 // Add listeners to document
@@ -49,10 +52,15 @@ document.addEventListener("keydown", (event) => {
             break;
         case KEY_CLICK_MODE:
             playerInput.build = !playerInput.build;
+            break;
+        case KEY_PICKUP:
+            playerInput.pickup = true;
+            break;
         default:
             return;
     }
     socket.emit("playerInput", playerInput);
+    playerInput.pickup = false;
 });
 document.addEventListener("keyup", (event) => {
     switch (event.keyCode) {
@@ -97,10 +105,10 @@ var env         = new Popova();
 var foreground  = new Popova();
 var cover       = new Popova();
 
-background.init("background", cubeSize);
-env.init("env", cubeSize);
-foreground.init("foreground", cubeSize);
-cover.init("cover", cubeSize);
+background.init("background");
+env.init("env");
+foreground.init("foreground");
+cover.init("cover");
 
 // Tell the server a new player has joined and handshake
 socket.emit("new-player");
@@ -128,7 +136,7 @@ socket.on("state", (objects: any) => {
         ? objects[playerId].y + (mousePos.y - (canvasSize.height / 2)) * viewRange - canvasSize.height / 2
         : undefined;
 
-    // TODO: Don't wipe background canvas, translate it to match player position
+    // TODO: Draw background map (instead of/with grid)
     if (!!objects) {
         background.wipeCanvas();
         background.drawGrid(gridSize, -renderOffsetX, -renderOffsetY);
@@ -138,27 +146,38 @@ socket.on("state", (objects: any) => {
         var object = objects[id];
 
         switch (object.type) {
-            case "player":
+            case types.ObjectTypes.PLAYER:
                 foreground.draw(louvre.playerMasterPiece(object, renderOffsetX, renderOffsetY));
                 foreground.draw(louvre.healthBarMasterPiece(object, renderOffsetX, renderOffsetY, cubeSize));
                 break;
-            case "projectile":
+            case types.ObjectTypes.PROJECTILE:
                 env.draw(louvre.projectileMasterPiece(object, renderOffsetX, renderOffsetY));
                 break;
-            case "gravestone":
+            case types.ObjectTypes.GRAVESTONE:
                 env.draw(louvre.graveStoneMasterPiece(object, renderOffsetX, renderOffsetY));
                 env.draw(louvre.healthBarMasterPiece(object, renderOffsetX, renderOffsetY, cubeSize));
                 break;
-            case "terrain":
+            case types.ObjectTypes.TERRAIN:
                 switch (object.subtype) {
-                    case "tree":
+                    case types.Terrain.TREE:
                         env.draw(louvre.treeTrunkMasterPiece(object, renderOffsetX, renderOffsetY));
                         cover.draw(louvre.treeLeafMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
-                    default:
-                        env.draw(louvre.defaultTerrainMasterPiece(object, renderOffsetX, renderOffsetY));
+                    case types.Terrain.WALL_HORIZ:
+                        env.draw(louvre.wallHorizBaseMasterPiece(object, renderOffsetX, renderOffsetY));
+                        cover.draw(louvre.wallHorizCoverMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
                 }
+                break;
+            case types.ObjectTypes.INTERACTABLE:
+                switch (object.subtype) {
+                    case types.Interactable.HEALTH_PICKUP:
+                        env.draw(louvre.healthPickupMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                }
+                break;
+            default:
+                env.draw(louvre.defaultTerrainMasterPiece(object, renderOffsetX, renderOffsetY));
                 break;
         }
     }

@@ -29,7 +29,7 @@ export class Popova {
     private ctx: any;
     private width: number;
     private height: number;
-    private cubeSize: number;
+    private cubeSize: number = 12;
 
     constructor() { }
 
@@ -38,9 +38,8 @@ export class Popova {
      * @param canvasId Id of html canvas element
      * @param cubeSize Render size for each cube when drawing with cubes
      */
-    init(canvasId: string, cubeSize: number) {
+    init(canvasId: string) {
         this.canvas = <any> document.getElementById(canvasId);
-        this.cubeSize = cubeSize;
         this.width = this.canvas.offsetWidth;
         this.height = this.canvas.offsetHeight;
         this.canvas.width = this.width;

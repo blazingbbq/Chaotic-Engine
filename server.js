@@ -3,6 +3,7 @@ var http = require("http");
 var path = require("path");
 var express = require("express");
 var socketIO = require("socket.io");
+var types = require("./ObjectTypes");
 var app = express();
 var server = http.Server(app);
 var io = socketIO(server);
@@ -19,36 +20,49 @@ server.listen(5000, () => {
   console.log("Starting server on port 5000");
 }); 
 
-var Terrain = {
-    TREE: "tree",
-}
-
-var projectileSpeed = 12; 
-var maxProjDist = 1600;
 var renderSize = 4;
 
+// Projectile
 var projectileWidth = 2;
 var projectileHeight = 0.5;
 var projectileHitBoxRadius = 1;
 var baseProjectileDamage = 10;
+var projectileSpeed = 12; 
+var maxProjDist = 1600;
 
+// Player
 var playerSpeed = 3;
 var playerHealth = 100;
 var playerWidth = 4;
 var playerHeight = 6;
 var teamColors = ["#FF0000", "#00FF00", "#0000FF"];
 
+// Gravestone
 var gravestoneWidth = 3;
 var gravestoneHeight = 4;
 var gravestoneHitboxWidth = gravestoneWidth;
 var gravestoneHitboxHeight = gravestoneHeight;
 var gravestoneHealth = 40;
 
+// Terrain
 var treeWidth = 4;
 var treeHeight = 8;
 var treeHitboxWidth = 4;
 var treeHitboxHeight = 8;
 var treeHealth = 200;
+
+var wallHorizWidth = 20;
+var wallHorizHeight = 12;
+var wallHorizHitboxWidth = 20;
+var wallHorizHitboxHeight = 2;
+var wallHorizHealth = 250;
+
+// Interactables
+var healthPickupWidth = 3;
+var healthPickupHeight = 3;
+var healthPickupHitboxWidth = 3;
+var healthPickupHitboxHeight = 3;
+var healthPickupHealing = 40;
 
 // Listen for connection on IO
 var objects = {};
@@ -59,33 +73,17 @@ initializeMap(objects);
 io.on("connection", (socket) => {
     // Handle connection
     socket.on("new-player", () => {
+        // TODO: Teams shouldn't be random...
         var newPlayerTeam = Math.floor(Math.random() * (teamColors.length))
-        objects[socket.id] = {
-            type: "player",
-            x: 0,
-            y: 0,
-            velocityX: 0,
-            velocityY: 0,
-            speed: playerSpeed,
-            width: playerWidth,
-            height: playerHeight,
-            hitboxWidth: playerWidth - 2,
-            hitboxHeight: playerHeight,
-            health: playerHealth,
-            maxHealth: playerHealth,
-            team: newPlayerTeam,
-            teamColor: teamColors[newPlayerTeam],
-            deathrattle: (collisionId) => {
-                objects[collisionId] = playerToGravestone(objects[collisionId]);
-            },
-        };
+        generateNew(objects, socket.id, 0, 0, types.ObjectTypes.PLAYER, newPlayerTeam);
+
         socket.emit("handshake", {
             id: socket.id,
             cubeSize: renderSize,
         });
     });
 
-    // Handle player movement event
+    // Handle player input event
     socket.on("playerInput", (playerInput) => {
         var player = objects[socket.id] || {};
         if (playerInput.left) {
@@ -111,6 +109,14 @@ io.on("connection", (socket) => {
         } else {
             player.velocityY = 0;
         }
+
+        if (playerInput.pickup) {
+            checkCollisions(socket.id, objects, (srcId, collisionId) => {
+                if (objects[srcId] && collisionId != srcId && objects[collisionId].type == types.ObjectTypes.INTERACTABLE){
+                    objects[collisionId].onInteract(collisionId, srcId);
+                }
+            });
+        }
     });
 
     // Handle mouse down event from player
@@ -121,7 +127,7 @@ io.on("connection", (socket) => {
                 object.targetX - objects[object.sourceId].x);
             
             if (object.playerInput.build) {
-                generateNew(objects, object.sourceId, object.targetX, object.targetY - treeHeight * renderSize / 2, Terrain.TREE);
+                generateNew(objects, object.sourceId, object.targetX, object.targetY, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
             } else {
                 // Generate unique Id for new projectile
                 var newId = object.sourceId.concat(":", object.targetX, ":", object.targetY);
@@ -131,7 +137,7 @@ io.on("connection", (socket) => {
                 }
                 
                 objects[newId.concat(":" + dup)] = {
-                    type: "projectile",
+                    type: types.ObjectTypes.PROJECTILE,
                     source: object.sourceId,
                     x: objects[object.sourceId].x,
                     y: objects[object.sourceId].y,
@@ -159,7 +165,7 @@ io.on("connection", (socket) => {
 setInterval(() => {
     for (var id in objects) {
         switch (objects[id].type) {
-            case "player":
+            case types.ObjectTypes.PLAYER:
                 // Calculate player movement
                 objects[id].x += objects[id].velocityX;
                 objects[id].y += objects[id].velocityY;
@@ -168,21 +174,23 @@ setInterval(() => {
                 checkCollisions(id, objects, (srcId, collisionId) => {
                     if (objects[srcId] && collisionId != srcId){
                         switch (objects[collisionId].type) {
-                            case "terrain":
+                            case types.ObjectTypes.TERRAIN:
                                 // Push object back out of collision terrain towards which ever side is the closest to the terrain object
-                                // Warning: A little buggy for objects 4x4
-                                var distRight = Math.abs((objects[collisionId].x - objects[collisionId].width * renderSize / 2) - (objects[srcId].x + objects[srcId].hitboxWidth * renderSize / 2));
-                                var distLeft =  Math.abs((objects[collisionId].x + objects[collisionId].width * renderSize / 2) - (objects[srcId].x - objects[srcId].hitboxWidth * renderSize / 2));
-                                var distUp =    Math.abs((objects[collisionId].y + objects[collisionId].height * renderSize / 2) - (objects[srcId].y - objects[srcId].hitboxHeight * renderSize / 2));
-                                var distDown =  Math.abs((objects[collisionId].y - objects[collisionId].height * renderSize / 2) - (objects[srcId].y + objects[srcId].hitboxHeight * renderSize / 2));
+                                var distRight = Math.abs((objects[collisionId].x - objects[collisionId].hitboxWidth * renderSize / 2) - (objects[srcId].x + objects[srcId].hitboxWidth * renderSize / 2));
+                                var distLeft =  Math.abs((objects[collisionId].x + objects[collisionId].hitboxWidth * renderSize / 2) - (objects[srcId].x - objects[srcId].hitboxWidth * renderSize / 2));
+                                var distUp =    Math.abs((objects[collisionId].y + objects[collisionId].hitboxHeight * renderSize / 2) - (objects[srcId].y - objects[srcId].hitboxHeight * renderSize / 2));
+                                var distDown =  Math.abs((objects[collisionId].y - objects[collisionId].hitboxHeight * renderSize / 2) - (objects[srcId].y + objects[srcId].hitboxHeight * renderSize / 2));
                                 
                                 if (distRight < distLeft && distRight < distUp && distRight < distDown) {
                                     objects[srcId].x = objects[srcId].x - distRight;
-                                } else if (distLeft < distRight && distLeft < distUp && distLeft < distDown) {
+                                }
+                                if (distLeft < distRight && distLeft < distUp && distLeft < distDown) {
                                     objects[srcId].x = objects[srcId].x + distLeft;
-                                } else if (distUp < distRight && distUp < distLeft && distUp < distDown) {
+                                }
+                                if (distUp < distRight && distUp < distLeft && distUp < distDown) {
                                     objects[srcId].y = objects[srcId].y + distUp;
-                                } else if (distDown < distRight && distDown < distLeft && distDown < distUp) {
+                                }
+                                if (distDown < distRight && distDown < distLeft && distDown < distUp) {
                                     objects[srcId].y = objects[srcId].y - distDown;
                                 }
                                 break;
@@ -191,7 +199,7 @@ setInterval(() => {
                 });
 
                 break;
-            case "projectile":
+            case types.ObjectTypes.PROJECTILE:
                 // Calculate projectile movement
                 objects[id].x += objects[id].velocityX;
                 objects[id].y += objects[id].velocityY;
@@ -202,28 +210,25 @@ setInterval(() => {
                 checkCollisions(id, objects, (srcId, collisionId) => {
                     if (objects[srcId] && collisionId != srcId && collisionId != objects[srcId].source){
                         switch (objects[collisionId].type) {
-                            case "player":
+                            case types.ObjectTypes.PLAYER:
                                 objects[collisionId].health -= objects[srcId].damage;
                                 delete objects[srcId];
 
-                                // TODO: Move player death calculations out of here
-                                // Add deathrattle function to object definitions
                                 if (objects[collisionId].health <= 0){
                                     objects[collisionId].deathrattle(collisionId);
                                 }
                                 break;
-                            case "gravestone":
+                            case types.ObjectTypes.GRAVESTONE:
                                 if (objects[srcId]) {
                                     objects[collisionId].health -= objects[srcId].damage;
                                     delete objects[srcId];
 
-                                    // TODO: Move gravestone death calculations out of here
                                     if (objects[collisionId].health <= 0){
                                         objects[collisionId].deathrattle(collisionId);
                                     }
                                 }
                                 break;
-                            case "terrain":
+                            case types.ObjectTypes.TERRAIN:
                                 if (objects[srcId]) {
                                     objects[collisionId].health -= objects[srcId].damage;
                                     delete objects[srcId];
@@ -255,11 +260,17 @@ function checkCollisions(checkSrc, obs, callBack) {
     for (id in obs) {
         var check = obs[id];
 
-        var xIn = valueInRange(src.x - src.hitboxWidth / 2 * renderSize, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize) ||
-            valueInRange(src.x + src.hitboxWidth / 2 * renderSize, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize);
+        var xIn = 
+            valueInRange(src.x - src.hitboxWidth / 2 * renderSize, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize) ||
+            valueInRange(src.x + src.hitboxWidth / 2 * renderSize, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize) ||
+            valueInRange(check.x - check.hitboxWidth / 2 * renderSize, src.x - src.hitboxWidth / 2 * renderSize, src.x + src.hitboxWidth / 2 * renderSize) ||
+            valueInRange(check.x + check.hitboxWidth / 2 * renderSize, src.x - src.hitboxWidth / 2 * renderSize, src.x + src.hitboxWidth / 2 * renderSize);
 
-        var yIn = valueInRange(src.y - src.hitboxHeight / 2 * renderSize, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize) ||
-            valueInRange(src.y + src.hitboxHeight / 2 * renderSize, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize);
+        var yIn =
+            valueInRange(src.y - src.hitboxHeight / 2 * renderSize, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize) ||
+            valueInRange(src.y + src.hitboxHeight / 2 * renderSize, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize) ||
+            valueInRange(check.y - check.hitboxHeight / 2 * renderSize, src.y - src.hitboxHeight / 2 * renderSize, src.y + src.hitboxHeight / 2 * renderSize) ||
+            valueInRange(check.y + check.hitboxHeight / 2 * renderSize, src.y - src.hitboxHeight / 2 * renderSize, src.y + src.hitboxHeight / 2 * renderSize);
 
         if (xIn && yIn) callBack(checkSrc, id);
     }
@@ -272,52 +283,127 @@ function valueInRange(value, min, max) {
 
 // Initializes starting map resources
 function initializeMap(obs) {
-    generateNew(obs, "init", 50, -25, Terrain.TREE);
-    generateNew(obs, "init", 180, 210, Terrain.TREE);
-    generateNew(obs, "init", -150, 185, Terrain.TREE);
-    generateNew(obs, "init", 220, -205, Terrain.TREE);
-    generateNew(obs, "init", -195, -175, Terrain.TREE);
+    generateNew(obs, "init", 50, -25, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    generateNew(obs, "init", 180, 210, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    generateNew(obs, "init", -150, 185, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    generateNew(obs, "init", 220, -205, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    generateNew(obs, "init", -195, -175, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+
+    generateNew(obs, "init", -120, 125, types.ObjectTypes.TERRAIN, types.Terrain.WALL_HORIZ);
+    generateNew(obs, "init", 0, 150, types.ObjectTypes.TERRAIN, types.Terrain.WALL_HORIZ);
+    generateNew(obs, "init", 120, 125, types.ObjectTypes.TERRAIN, types.Terrain.WALL_HORIZ);
+
+    generateNew(obs, "init", -100, 0, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
 }
 
-function generateNew(obs, src, posX, posY, subtype) {
-    var newTerrain;
+// Generate a new terrain object
+function generateNew(obs, src, posX, posY, type, subtype) {
+    var newObj;
     
-    switch (subtype) {
-        case Terrain.TREE:
-            newTerrain =  {
-                type: "terrain",
-                subtype: subtype,
-                x: posX,
-                y: posY,
-                width: treeWidth,
-                height: treeHeight,
-                hitboxWidth: treeHitboxWidth,
-                hitboxHeight: treeHitboxHeight,
-                health: treeHealth,
-                maxHealth: treeHealth,
+    switch (type) {
+        case types.ObjectTypes.PLAYER:
+            newObj = {
+                type: types.ObjectTypes.PLAYER,
+                x: 0,
+                y: 0,
+                velocityX: 0,
+                velocityY: 0,
+                speed: playerSpeed,
+                width: playerWidth,
+                height: playerHeight,
+                hitboxWidth: playerWidth - 2,
+                hitboxHeight: playerHeight,
+                health: playerHealth,
+                maxHealth: playerHealth,
+                team: subtype,
+                teamColor: teamColors[subtype],
+                deathrattle: (collisionId) => {
+                    objects[collisionId] = playerToGravestone(objects[collisionId]);
+                },
+            };
+            obs[src] = newObj;
+            return;
+        case types.ObjectTypes.TERRAIN: 
+            switch (subtype) {
+                case types.Terrain.TREE:
+                    newObj =  {
+                        type: type,
+                        subtype: subtype,
+                        x: posX,
+                        y: posY,
+                        width: treeWidth,
+                        height: treeHeight,
+                        hitboxWidth: treeHitboxWidth,
+                        hitboxHeight: treeHitboxHeight,
+                        health: treeHealth,
+                        maxHealth: treeHealth,
+                    };
+                    break;
+                case types.Terrain.WALL_HORIZ:
+                    newObj = {
+                        type: type,
+                        subtype: subtype,
+                        x: posX,
+                        y: posY,
+                        width: wallHorizWidth,
+                        height: wallHorizHeight,
+                        hitboxWidth: wallHorizHitboxWidth,
+                        hitboxHeight: wallHorizHitboxHeight,
+                        health: wallHorizHealth,
+                        maxHealth: wallHorizHealth,
+                    };
+                    break;
             }
             break;
-        default: 
-            newTerrain = {
-                type: "terrain",
-                subtype: subtype,
-                x: posX,
-                y: posY,
-                width: 6,
-                height: 6,
-                hitboxWidth: 6,
-                hitboxHeight: 6,
-                health: 100,
-                maxHealth: 100,
+        case types.ObjectTypes.INTERACTABLE:
+            switch (subtype) {
+                case types.Interactable.HEALTH_PICKUP:
+                    newObj = {
+                        type: type,
+                        subtype: subtype,
+                        x: posX,
+                        y: posY,
+                        width: healthPickupWidth,
+                        height: healthPickupHeight,
+                        hitboxWidth: healthPickupHitboxWidth,
+                        hitboxHeight: healthPickupHitboxHeight,
+                        onInteract: (selfRef, interactId) => {
+                            if (objects[interactId].health < objects[interactId].maxHealth) {
+                                objects[interactId].health + healthPickupHealing >= objects[interactId].maxHealth
+                                    ? objects[interactId].health = objects[interactId].maxHealth
+                                    : objects[interactId].health += healthPickupHealing;
+                                delete objects[selfRef];
+                            }
+                        },
+                    };
+                    break;
             }
+            break;
+        case types.ObjectTypes.TRIGGER:
+            break;
     }
 
-    obs[src + ":" + subtype + ":" + posX + ":" + posY] = newTerrain;
+    if (!newObj) {
+        newObj = {
+            type: types.ObjectTypes.TERRAIN,
+            subtype: subtype,
+            x: posX,
+            y: posY,
+            width: 6,
+            height: 6,
+            hitboxWidth: 6,
+            hitboxHeight: 6,
+            health: 100,
+            maxHealth: 100,
+        }
+    }
+    obs[src + ":" + type + ":" + subtype + ":" + posX + ":" + posY] = newObj;
 }
 
+// Transform a player into a gravestone
 function playerToGravestone(player) {
     return {
-        type: "gravestone",
+        type: types.ObjectTypes.GRAVESTONE,
         x: player.x,
         y: player.y + 1 * renderSize,
         velocityX: 0,
@@ -337,9 +423,10 @@ function playerToGravestone(player) {
     }
 }
 
+// Transform a gravestone into a player
 function gravestoneToPlayer(gravestone) {
     return {
-        type: "player",
+        type: types.ObjectTypes.PLAYER,
         x: 0,
         y: 0,
         velocityX: 0,
