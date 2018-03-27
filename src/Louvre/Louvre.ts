@@ -248,7 +248,7 @@ export function wallHorizBaseMasterPiece(object: any, renderOffsetX: number, ren
  */
 export function wallHorizCoverMasterPiece(object: any, renderOffsetX: number, renderOffsetY: number): masterPiece {
     return {
-        palette: ["#00FFFFBB"],
+        palette: ["#A3A3C2BB"],
         posX: object.x - renderOffsetX,
         posY: object.y - renderOffsetY,
         width: object.width,

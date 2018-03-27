@@ -64,6 +64,13 @@ var healthPickupHitboxWidth = 3;
 var healthPickupHitboxHeight = 3;
 var healthPickupHealing = 40;
 
+// Trigger
+var spikeTrapWidth = 5;
+var spikeTrapHeight = 5;
+var spikeTrapHitboxWidth = 5;
+var spikeTrapHitboxHeight = 5;
+var spikeTrapDamage = 50;
+
 // Listen for connection on IO
 var objects = {};
 
@@ -247,6 +254,13 @@ setInterval(() => {
                     }
                 }
                 break;
+            case types.ObjectTypes.TRIGGER:
+                checkCollisions(id, objects, (srcId, collisionId) => {
+                    if (objects[srcId] && collisionId != srcId){
+                        objects[srcId].onTrigger(srcId, collisionId);
+                    }
+                });
+                break;
         }
     }
 
@@ -294,6 +308,8 @@ function initializeMap(obs) {
     generateNew(obs, "init", 120, 125, types.ObjectTypes.TERRAIN, types.Terrain.WALL_HORIZ);
 
     generateNew(obs, "init", -100, 0, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
+
+    generateNew(obs, "init", 150, 0, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
 }
 
 // Generate a new terrain object
@@ -317,8 +333,8 @@ function generateNew(obs, src, posX, posY, type, subtype) {
                 maxHealth: playerHealth,
                 team: subtype,
                 teamColor: teamColors[subtype],
-                deathrattle: (collisionId) => {
-                    objects[collisionId] = playerToGravestone(objects[collisionId]);
+                deathrattle: (selfRef) => {
+                    objects[selfRef] = playerToGravestone(objects[selfRef]);
                 },
             };
             obs[src] = newObj;
@@ -380,6 +396,28 @@ function generateNew(obs, src, posX, posY, type, subtype) {
             }
             break;
         case types.ObjectTypes.TRIGGER:
+            switch (subtype) {
+                case types.Trigger.SPIKE_TRAP:
+                    newObj = {
+                        type: type,
+                        subtype: subtype,
+                        x: posX,
+                        y: posY,
+                        width: spikeTrapWidth,
+                        height: spikeTrapHeight,
+                        hitboxWidth: spikeTrapHitboxWidth,
+                        hitboxHeight: spikeTrapHitboxHeight,
+                        onTrigger: (selfRef, triggerId) => {
+                            if (objects[triggerId] && objects[triggerId].type == types.ObjectTypes.PLAYER) {
+                                objects[triggerId].health - spikeTrapDamage <= 0
+                                ? objects[triggerId].deathrattle(triggerId)
+                                : objects[triggerId].health -= spikeTrapDamage;
+                                delete objects[selfRef];
+                            }
+                        },
+                    };
+                    break;
+            }
             break;
     }
 
