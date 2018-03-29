@@ -7,18 +7,18 @@ var types = require("./ObjectTypes");
 var app = express();
 var server = http.Server(app);
 var io = socketIO(server);
-app.set("port", 5000);
 app.use("/dist", express.static(__dirname + "/dist"));
 
-// Routing
-app.get("/", (request, response) => {
-  response.sendFile(path.join(__dirname, "dist/index.html"));
-});
+const PORT = process.env.PORT || 3000;
+const INDEX = path.join(__dirname, "dist/index.html");
+
+app
+    .use((req, res) => res.sendFile(INDEX) );
 
 // Start the server
-server.listen(5000, () => {
-  console.log("Starting server on port 5000");
-}); 
+server.listen(PORT, () => {
+    console.log(`Starting server on port ${ PORT }`);
+});
 
 var renderSize = 4;
 
