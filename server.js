@@ -69,7 +69,7 @@ var spikeTrapWidth = 5;
 var spikeTrapHeight = 5;
 var spikeTrapHitboxWidth = 5;
 var spikeTrapHitboxHeight = 5;
-var spikeTrapDamage = 50;
+var spikeTrapDamage = 20;
 
 // Listen for connection on IO
 var objects = {};
@@ -310,6 +310,13 @@ function initializeMap(obs) {
     generateNew(obs, "init", -100, 0, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
 
     generateNew(obs, "init", 150, 0, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
+    generateNew(obs, "init", 150, 24, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
+    generateNew(obs, "init", 150, 48, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
+    generateNew(obs, "init", 170, 12, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
+    generateNew(obs, "init", 170, 36, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
+    generateNew(obs, "init", 190, 0, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
+    generateNew(obs, "init", 190, 24, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
+    generateNew(obs, "init", 190, 48, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
 }
 
 // Generate a new terrain object
@@ -384,12 +391,10 @@ function generateNew(obs, src, posX, posY, type, subtype) {
                         hitboxWidth: healthPickupHitboxWidth,
                         hitboxHeight: healthPickupHitboxHeight,
                         onInteract: (selfRef, interactId) => {
-                            if (objects[interactId].health < objects[interactId].maxHealth) {
-                                objects[interactId].health + healthPickupHealing >= objects[interactId].maxHealth
-                                    ? objects[interactId].health = objects[interactId].maxHealth
-                                    : objects[interactId].health += healthPickupHealing;
-                                delete objects[selfRef];
-                            }
+                            objects[interactId].health + healthPickupHealing >= objects[interactId].maxHealth
+                                ? objects[interactId].health = objects[interactId].maxHealth
+                                : objects[interactId].health += healthPickupHealing;
+                            delete objects[selfRef];
                         },
                     };
                     break;

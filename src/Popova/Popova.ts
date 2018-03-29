@@ -138,8 +138,8 @@ export class Popova {
     /**
      * Returns the canvas' width and height
      */
-    size(): {width: number, height: number} {
-        return { width: this.width, height: this. height };
+    size(): { width: number, height: number } {
+        return { width: this.width, height: this.height };
     }
 
     /**
@@ -189,6 +189,11 @@ export class Popova {
           y: posY,
           outOfBounds: offCanvas,
         };
+    }
+
+    drawText(text: string, posX: number, posY: number) {
+        this.ctx.font = "16px Arial"
+        this.ctx.fillText(text, posX, posY);
     }
 
 }
