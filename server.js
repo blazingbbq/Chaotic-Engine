@@ -9,7 +9,7 @@ var server = http.Server(app);
 var io = socketIO(server);
 app.use("/dist", express.static(__dirname + "/dist"));
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 const INDEX = path.join(__dirname, "dist/index.html");
 
 app
@@ -117,6 +117,13 @@ io.on("connection", (socket) => {
             player.velocityY = 0;
         }
 
+        if (playerInput.cycleEquipmentForward && !playerInput.cycleEquipmentBackward) {
+            player.currentEquipment = player.currentEquipment + 1 >= player.equipment.length ? 0 : player.currentEquipment + 1;
+        }
+        if (playerInput.cycleEquipmentBackward && !playerInput.cycleEquipmentForward) {
+            player.currentEquipment = player.currentEquipment - 1 < 0 ? player.equipment.length - 1 : player.currentEquipment - 1;
+        }
+
         if (playerInput.pickup) {
             checkCollisions(socket.id, objects, (srcId, collisionId) => {
                 if (objects[srcId] && collisionId != srcId && objects[collisionId].type == types.ObjectTypes.INTERACTABLE){
@@ -133,9 +140,11 @@ io.on("connection", (socket) => {
                 object.targetY - objects[object.sourceId].y,
                 object.targetX - objects[object.sourceId].x);
             
-            if (object.playerInput.build) {
+            if (objects[object.sourceId].currentEquipment == 1) {
                 generateNew(objects, object.sourceId, object.targetX, object.targetY, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
-            } else {
+            }
+            
+            if (objects[object.sourceId].currentEquipment == 0) {
                 // Generate unique Id for new projectile
                 var newId = object.sourceId.concat(":", object.targetX, ":", object.targetY);
                 var dup = 0;
@@ -308,6 +317,8 @@ function initializeMap(obs) {
     generateNew(obs, "init", 120, 125, types.ObjectTypes.TERRAIN, types.Terrain.WALL_HORIZ);
 
     generateNew(obs, "init", -100, 0, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
+    generateNew(obs, "init", -120, 0, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
+    generateNew(obs, "init", -140, 0, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
 
     generateNew(obs, "init", 150, 0, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
     generateNew(obs, "init", 150, 24, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
@@ -319,6 +330,7 @@ function initializeMap(obs) {
     generateNew(obs, "init", 190, 48, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
 }
 
+// TODO: Make prefabs class to handle generation of all these objects and future equipement
 // Generate a new terrain object
 function generateNew(obs, src, posX, posY, type, subtype) {
     var newObj;
@@ -340,6 +352,8 @@ function generateNew(obs, src, posX, posY, type, subtype) {
                 maxHealth: playerHealth,
                 team: subtype,
                 teamColor: teamColors[subtype],
+                currentEquipment: 0,
+                equipment: ["shoot", "build"],      // Temp... TODO: Make these into actual equipments
                 deathrattle: (selfRef) => {
                     objects[selfRef] = playerToGravestone(objects[selfRef]);
                 },
