@@ -135,39 +135,9 @@ io.on("connection", (socket) => {
 
     // Handle mouse down event from player
     socket.on("mouseDown", (object) => {
-        if (objects[object.sourceId].type == "player") {
-            var angle = Math.atan2(
-                object.targetY - objects[object.sourceId].y,
-                object.targetX - objects[object.sourceId].x);
-            
-            if (objects[object.sourceId].currentEquipment == 1) {
-                generateNew(objects, object.sourceId, object.targetX, object.targetY, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
-            }
-            
-            if (objects[object.sourceId].currentEquipment == 0) {
-                // Generate unique Id for new projectile
-                var newId = object.sourceId.concat(":", object.targetX, ":", object.targetY);
-                var dup = 0;
-                while (objects[newId.concat(":" + dup)]){
-                    dup++;
-                }
-                
-                objects[newId.concat(":" + dup)] = {
-                    type: types.ObjectTypes.PROJECTILE,
-                    source: object.sourceId,
-                    x: objects[object.sourceId].x,
-                    y: objects[object.sourceId].y,
-                    velocityX: Math.cos(angle) * projectileSpeed,
-                    velocityY: Math.sin(angle) * projectileSpeed,
-                    width: projectileWidth,
-                    height: projectileHeight,
-                    hitboxWidth: projectileHitBoxRadius,
-                    hitboxHeight: projectileHitBoxRadius,
-                    facing: angle * 180 / Math.PI,
-                    dist: 0,
-                    damage: baseProjectileDamage,
-                }
-            }
+        if (objects[object.sourceId] && objects[object.sourceId].type == "player") {
+            objects[object.sourceId].equipment[objects[object.sourceId].currentEquipment]
+                .use(object.sourceId, object.targetX, object.targetY);
         }
     });
 
@@ -299,6 +269,23 @@ function checkCollisions(checkSrc, obs, callBack) {
     }
 }
 
+// Check collisions between click location and all objects
+function checkClickCollisions(clickX, clickY, obs, callBack) {
+    for (id in obs) {
+        var check = obs[id];
+
+        var xIn = 
+            valueInRange(clickX, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize) ||
+            valueInRange(clickX, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize);
+
+        var yIn =
+            valueInRange(clickY, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize) ||
+            valueInRange(clickY, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize);
+
+        if (xIn && yIn) callBack(id);
+    }
+}
+
 // Collision detection helper, checks if value is between min and max
 function valueInRange(value, min, max) { 
     return (value >= min) && (value <= max); 
@@ -353,7 +340,11 @@ function generateNew(obs, src, posX, posY, type, subtype) {
                 team: subtype,
                 teamColor: teamColors[subtype],
                 currentEquipment: 0,
-                equipment: ["shoot", "build"],      // Temp... TODO: Make these into actual equipments
+                equipment: [
+                    newEquipment(types.EquipmentTypes.BLASTER),
+                    newEquipment(types.EquipmentTypes.SCANNER),
+                    newEquipment(types.EquipmentTypes.BUILDER, { type: types.ObjectTypes.INTERACTABLE, subtype: types.Interactable.HEALTH_PICKUP }),
+                ],
                 deathrattle: (selfRef) => {
                     objects[selfRef] = playerToGravestone(objects[selfRef]);
                 },
@@ -455,6 +446,72 @@ function generateNew(obs, src, posX, posY, type, subtype) {
         }
     }
     obs[src + ":" + type + ":" + subtype + ":" + posX + ":" + posY] = newObj;
+}
+
+function newEquipment(type, params = {}) {
+    switch (type) {
+        case types.EquipmentTypes.BLASTER:
+            return {
+                type: type,
+                use: (sourceId, targetX, targetY) => {
+                    var angle = Math.atan2(
+                        targetY - objects[sourceId].y,
+                        targetX - objects[sourceId].x);
+                    // Generate unique Id for new projectile
+                    var newId = sourceId.concat(":", targetX, ":", targetY);
+                    var dup = 0;
+                    while (objects[newId.concat(":" + dup)]){
+                        dup++;
+                    }
+                    
+                    objects[newId.concat(":" + dup)] = {
+                        type: types.ObjectTypes.PROJECTILE,
+                        source: sourceId,
+                        x: objects[sourceId].x,
+                        y: objects[sourceId].y,
+                        velocityX: Math.cos(angle) * projectileSpeed,
+                        velocityY: Math.sin(angle) * projectileSpeed,
+                        width: projectileWidth,
+                        height: projectileHeight,
+                        hitboxWidth: projectileHitBoxRadius,
+                        hitboxHeight: projectileHitBoxRadius,
+                        facing: angle * 180 / Math.PI,
+                        dist: 0,
+                        damage: baseProjectileDamage,
+                    }
+                }
+            }
+            break;
+        case types.EquipmentTypes.SCANNER:
+            return {
+                type: type,
+                use: (sourceId, targetX, targetY) => {
+                    // Replaces all builders with this build type...
+                    checkClickCollisions(targetX, targetY, objects, (collisionId) => {
+                        objects[sourceId].equipment = objects[sourceId].equipment.map((item) => {
+                            if (item.type == types.EquipmentTypes.BUILDER) {
+                                item = newEquipment(types.EquipmentTypes.BUILDER, { type: objects[collisionId].type, subtype: objects[collisionId].subtype });
+                            }
+                            return item;
+                        });
+                    });
+                }
+            }
+            break;
+        case types.EquipmentTypes.BUILDER:
+            return params ? {
+                type: type,
+                use: (sourceId, targetX, targetY) => {
+                    generateNew(objects, sourceId, targetX, targetY, params.type, params.subtype);
+                }
+            } : {
+                type: type,
+                use: (sourceId, targetX, targetY) => {
+                    console.log("Cannot initialize builder equipment without params");
+                }
+            };
+            break;
+    }
 }
 
 // Transform a player into a gravestone

@@ -16,5 +16,10 @@ module.exports = {
     },
     Trigger: {
         SPIKE_TRAP: "spike-trap",
+    },
+    EquipmentTypes: {
+        BLASTER: "blaster",
+        SCANNER: "scanner",
+        BUILDER: "builder",
     }
 }
