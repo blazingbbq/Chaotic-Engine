@@ -22,13 +22,14 @@ server.listen(PORT, () => {
 });
 
 var renderSize = prefabs.renderSize;
-
-// Listen for connection on IO
+var prevTime = Date.now();
+var delta = 0;
 var objects = {};
 
 // Adds starting resources to the map
 initializeMap(objects);
 
+// Listen for connection on IO
 io.on("connection", (socket) => {
     // Handle connection
     socket.on("new-player", () => {
@@ -68,15 +69,19 @@ io.on("connection", (socket) => {
         }
 
         if (playerInput.cycleEquipmentForward && !playerInput.cycleEquipmentBackward) {
+            player.equipment[player.currentEquipment].onDequip(objects, socket.id);
             player.currentEquipment = player.currentEquipment + 1 >= player.equipment.length ? 0 : player.currentEquipment + 1;
+            player.equipment[player.currentEquipment].onEquip(objects, socket.id);
         }
         if (playerInput.cycleEquipmentBackward && !playerInput.cycleEquipmentForward) {
+            player.equipment[player.currentEquipment].onDequip(objects, socket.id);
             player.currentEquipment = player.currentEquipment - 1 < 0 ? player.equipment.length - 1 : player.currentEquipment - 1;
+            player.equipment[player.currentEquipment].onEquip(objects, socket.id);
         }
 
         if (playerInput.pickup) {
             collisions.checkCollisions(socket.id, objects, renderSize, (srcId, collisionId) => {
-                if (objects[srcId] && collisionId != srcId && objects[collisionId].type == types.ObjectTypes.INTERACTABLE){
+                if (objects[srcId] && collisionId != srcId && objects[collisionId].type == types.ObjectTypes.INTERACTABLE) {
                     objects[collisionId].onInteract(objects, collisionId, srcId);
                 }
             });
@@ -99,12 +104,16 @@ io.on("connection", (socket) => {
 
 // Main update loop at 60fps
 setInterval(() => {
+    const time = Date.now();
+    delta = time - prevTime;
+    prevTime = time;
+
     for (var id in objects) {
         switch (objects[id].type) {
             case types.ObjectTypes.PLAYER:
                 // Calculate player movement
-                objects[id].x += objects[id].velocityX;
-                objects[id].y += objects[id].velocityY;
+                objects[id].x += objects[id].velocityX * delta;
+                objects[id].y += objects[id].velocityY * delta;
 
                 // Check collisions with terrain and reposition accordingly
                 collisions.checkCollisions(id, objects, renderSize, (srcId, collisionId) => {
@@ -137,12 +146,13 @@ setInterval(() => {
                 break;
             case types.ObjectTypes.PROJECTILE:
                 // Calculate projectile movement
-                objects[id].x += objects[id].velocityX;
-                objects[id].y += objects[id].velocityY;
+                objects[id].x += objects[id].velocityX * delta;
+                objects[id].y += objects[id].velocityY * delta;
                 objects[id].dist += Math.sqrt(
-                    Math.pow(objects[id].velocityX, 2) +
-                    Math.pow(objects[id].velocityY, 2));
+                    Math.pow(objects[id].velocityX * delta, 2) +
+                    Math.pow(objects[id].velocityY * delta, 2));
 
+                // TODO: Change projectile collisions to ray cast
                 collisions.checkCollisions(id, objects, renderSize, (srcId, collisionId) => {
                     if (objects[srcId] && collisionId != srcId && collisionId != objects[srcId].source){
                         switch (objects[collisionId].type) {

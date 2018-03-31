@@ -6,16 +6,17 @@ var renderSize = 4;
 // Projectile
 var projectileWidth = 2;
 var projectileHeight = 0.5;
-var projectileHitBoxRadius = 1;
+var projectileHitBoxRadius = 1.5;
 var baseProjectileDamage = 10;
-var projectileSpeed = 12; 
+var projectileSpeed = 0.8; 
 var maxProjDist = 1600;
 
 // Player
-var playerSpeed = 3;
+var playerSpeed = 0.2;
 var playerHealth = 100;
 var playerWidth = 4;
 var playerHeight = 6;
+var playerViewRange = 1 / 2;
 var teamColors = ["#FF0000", "#00FF00", "#0000FF"];
 
 // Gravestone
@@ -24,6 +25,7 @@ var gravestoneHeight = 4;
 var gravestoneHitboxWidth = gravestoneWidth;
 var gravestoneHitboxHeight = gravestoneHeight;
 var gravestoneHealth = 40;
+var gravestoneViewRange = 1 / 4;
 
 // Terrain
 var treeWidth = 4;
@@ -51,6 +53,9 @@ var spikeTrapHeight = 5;
 var spikeTrapHitboxWidth = 5;
 var spikeTrapHitboxHeight = 5;
 var spikeTrapDamage = 20;
+
+// Equipment
+var binocularsViewRange = 2;
 
 
 module.exports = {
@@ -85,8 +90,10 @@ module.exports = {
                     equipment: [
                         module.exports.newEquipment(obs, types.EquipmentTypes.BLASTER),
                         module.exports.newEquipment(obs, types.EquipmentTypes.SCANNER),
-                        module.exports.newEquipment(obs, types.EquipmentTypes.BUILDER, { type: types.ObjectTypes.INTERACTABLE, subtype: types.Interactable.HEALTH_PICKUP }),
+                        module.exports.newEquipment(obs, types.EquipmentTypes.BUILDER, { type: types.ObjectTypes.TERRAIN, subtype: types.Terrain.TREE }),
+                        module.exports.newEquipment(obs, types.EquipmentTypes.BINOCULARS),
                     ],
+                    viewRange: playerViewRange,
                     deathrattle: (obs, selfRef) => {
                         module.exports.generateNew(obs, selfRef, obs[selfRef].x, obs[selfRef].y, types.ObjectTypes.GRAVESTONE);
                     },
@@ -109,8 +116,9 @@ module.exports = {
                     maxHealth: gravestoneHealth,
                     team: obs[src].team,
                     teamColor: obs[src].teamColor,
-                    currentEquipment: 0,
+                    currentEquipment: undefined,
                     equipment: [],
+                    viewRange: gravestoneViewRange,
                     deathrattle: (obs, selfRef) => {
                         module.exports.generateNew(obs, selfRef, 0, 0, types.ObjectTypes.PLAYER);
                     },
@@ -244,9 +252,10 @@ module.exports = {
                             dist: 0,
                             damage: baseProjectileDamage,
                         }
-                    }
+                    },
+                    onEquip: (obs, sourceId) => { },
+                    onDequip: (obs, sourceId) => { },
                 }
-                break;
             case types.EquipmentTypes.SCANNER:
                 return {
                     type: type,
@@ -260,22 +269,30 @@ module.exports = {
                                 return item;
                             });
                         });
-                    }
+                    },
+                    onEquip: (obs, sourceId) => { },
+                    onDequip: (obs, sourceId) => { },
                 }
-                break;
             case types.EquipmentTypes.BUILDER:
-                return params ? {
+                return {
                     type: type,
                     use: (obs, sourceId, targetX, targetY) => {
                         module.exports.generateNew(obs, sourceId, targetX, targetY, params.type, params.subtype);
-                    }
-                } : {
+                    },
+                    onEquip: (obs, sourceId) => { },
+                    onDequip: (obs, sourceId) => { },
+                }
+            case types.EquipmentTypes.BINOCULARS:
+                return {
                     type: type,
-                    use: (obs, sourceId, targetX, targetY) => {
-                        console.log("Cannot initialize builder equipment without params");
-                    }
-                };
-                break;
+                    use: (obs, sourceId, targetX, targetY) => { },
+                    onEquip: (obs, sourceId) => {
+                        obs[sourceId].viewRange = binocularsViewRange;
+                    },
+                    onDequip: (obs, sourceId) => {
+                        obs[sourceId].viewRange = playerViewRange;
+                    },
+                }
         }
     },
 }

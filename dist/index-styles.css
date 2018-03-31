@@ -22,8 +22,8 @@ body {
 canvas {
     display: flex;
     position: absolute;
-    width: 800px;
-    height: 600px;
+    width: 1000px;
+    height: 750px;
     /* margin-bottom: 16px;
     margin-top: auto; */
     margin: auto;

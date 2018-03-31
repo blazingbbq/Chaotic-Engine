@@ -1,4 +1,4 @@
-import { masterPiece } from "../Popova/Popova";
+import { masterPiece,  } from "../Popova/Popova";
 
 /**
  * Get master peice for player object
@@ -308,7 +308,7 @@ export function healthPickupMasterPiece(object: any, renderOffsetX: number, rend
  */
 export function spikeTrapMasterPiece(object: any, renderOffsetX: number, renderOffsetY: number): masterPiece {
     return {
-        palette: ["#808080", "#ffffff"],
+        palette: ["#808080"],
         posX: object.x - renderOffsetX,
         posY: object.y - renderOffsetY,
         width: object.width,
@@ -344,6 +344,134 @@ export function spikeTrapMasterPiece(object: any, renderOffsetX: number, renderO
             width: 1,
             height: 2,
             swatch: 0
-        }, ]
+        },]
+    };
+}
+
+/**
+ * Get master piece for blaster ui icon
+ * @param posX Horizontal icon position
+ * @param posY Vertical icon position
+ */
+export function blasterUIMasterPiece(posX: number, posY: number): masterPiece {
+    return {
+        palette: ["#000000"],
+        posX: posX,
+        posY: posY,
+        width: 3,
+        height: 2,
+        facing: -45,
+        strokes: [{
+            cellX: 0,
+            cellY: 0,
+            width: 1,
+            height: 2,
+            swatch: 0
+        }, {
+            cellX: 0,
+            cellY: 0,
+            width: 3,
+            height: 1,
+            swatch: 0
+        },]
+    };
+}
+
+/**
+ * Get master piece for scanner ui icon
+ * @param posX Horizontal icon position
+ * @param posY Vertical icon position
+ */
+export function scannerUIMasterPiece(posX: number, posY: number): masterPiece {
+    return {
+        palette: ["#FFFFFF", "#3399FF"],
+        posX: posX,
+        posY: posY,
+        width: 3,
+        height: 3,
+        facing: 0,
+        strokes: [{
+            cellX: 0,
+            cellY: 0,
+            width: 3,
+            height: 3,
+            swatch: 0
+        }, {
+            cellX: -1,
+            cellY: 1,
+            width: 5,
+            height: 1,
+            swatch: 0
+        }, {
+            cellX: 1,
+            cellY: 1,
+            width: 1,
+            height: 1,
+            swatch: 1
+        },]
+    };
+}
+
+/**
+ * Get master piece for builder ui icon
+ * @param posX Horizontal icon position
+ * @param posY Vertical icon position
+ */
+export function builderUIMasterPiece(posX: number, posY: number): masterPiece {
+    return {
+        palette: ["#000000", "#935200"],
+        posX: posX,
+        posY: posY,
+        width: 3,
+        height: 3,
+        facing: -45,
+        strokes: [{
+            cellX: 1,
+            cellY: 0,
+            width: 1,
+            height: 3,
+            swatch: 1
+        }, {
+            cellX: 0,
+            cellY: 0,
+            width: 3,
+            height: 1,
+            swatch: 0
+        },]
+    };
+}
+
+/**
+ * Get master piece for binoculars ui icon
+ * @param posX Horizontal icon position
+ * @param posY Vertical icon position
+ */
+export function binocularsUIMasterPiece(posX: number, posY: number): masterPiece {
+    return {
+        palette: ["#000000", "#333333"],
+        posX: posX,
+        posY: posY,
+        width: 3,
+        height: 3,
+        facing: -45,
+        strokes: [ {
+            cellX: 0,
+            cellY: 1,
+            width: 3,
+            height: 1,
+            swatch: 1
+        }, {
+            cellX: 0,
+            cellY: 0,
+            width: 1,
+            height: 3,
+            swatch: 0
+        }, {
+            cellX: 2,
+            cellY: 0,
+            width: 1,
+            height: 3,
+            swatch: 0
+        },]
     };
 }

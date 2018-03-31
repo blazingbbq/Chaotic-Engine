@@ -9,13 +9,17 @@ var debug = true;
 
 var cubeSize: number;
 var gridSize: number = 48;
-var viewRange = 1 / 2;
 var canvasSize: { width: number, height: number };
+var equipmentIconPosX: number = 976;
+var equipmentIconPosY: number = 726;
 
 var playerId: string;
 
 var renderOffsetX: number;
 var renderOffsetY: number;
+var cameraMovingToX: number;
+var cameraMovingToY: number;
+var cameraPanSpeed = 0.015;
 
 var mousePos: mousePosition;
 
@@ -136,25 +140,44 @@ socket.on("handshake", (info: any) => {
     canvasSize = foreground.size();
 
     prevTime = Date.now();
+    renderOffsetX = 0;
+    renderOffsetY = 0;
 });
 
 // Interpret state and draw objects
 socket.on("state", (objects: any) => {
+    var player = undefined;
+    if (playerId && objects[playerId]) {
+        player = objects[playerId];
+    }
+
+    if (!canvasSize) {
+        return;
+    }
+
     foreground.wipeCanvas();
     env.wipeCanvas();
     cover.wipeCanvas();
+    ui.wipeCanvas();
 
     const time = Date.now();
     delta = time - prevTime;
     prevTime = time;
 
-    // TODO: Add smoothing to camera movement
-    renderOffsetX = (!!playerId)
-        ? objects[playerId].x + (mousePos.x - (canvasSize.width / 2)) * viewRange - canvasSize.width / 2
+    // Camera smoothing and render offset calculations
+    cameraMovingToX = (!!player)
+        ? player.x + (mousePos.x - (canvasSize.width / 2)) * player.viewRange - canvasSize.width / 2
         : undefined;
-    renderOffsetY = (!!playerId)
-        ? objects[playerId].y + (mousePos.y - (canvasSize.height / 2)) * viewRange - canvasSize.height / 2
+    cameraMovingToY = (!!player)
+        ? player.y + (mousePos.y - (canvasSize.height / 2)) * player.viewRange - canvasSize.height / 2
         : undefined;
+
+    renderOffsetX += (!!cameraMovingToX)
+        ? (cameraMovingToX - renderOffsetX) * cameraPanSpeed * delta
+        : 0;
+    renderOffsetY += (!!cameraMovingToY)
+        ? (cameraMovingToY - renderOffsetY) * cameraPanSpeed * delta
+        : 0;
 
     // TODO: Draw background map (instead of/with grid)
     if (!!objects) {
@@ -162,12 +185,31 @@ socket.on("state", (objects: any) => {
         background.drawGrid(gridSize, -renderOffsetX, -renderOffsetY);
     }
 
-    if (canvasSize && debug) {
-        ui.wipeCanvas();
+    if (debug) {
         ui.drawText(delta.toString() + "ms", canvasSize.width - 48, 16);
     }
 
-    for(var id in objects){
+    // Draw current equipment ui icon
+    if (player && player.currentEquipment != undefined) {
+        switch (player.equipment[player.currentEquipment].type) {
+            case types.EquipmentTypes.BLASTER:
+                ui.draw(louvre.blasterUIMasterPiece(equipmentIconPosX, equipmentIconPosY));
+                break;
+            case types.EquipmentTypes.SCANNER:
+                ui.draw(louvre.scannerUIMasterPiece(equipmentIconPosX, equipmentIconPosY));
+                break;
+            case types.EquipmentTypes.BUILDER:
+                ui.draw(louvre.builderUIMasterPiece(equipmentIconPosX, equipmentIconPosY));
+                break;
+            case types.EquipmentTypes.BINOCULARS:
+                ui.draw(louvre.binocularsUIMasterPiece(equipmentIconPosX, equipmentIconPosY));
+                break;
+            default:
+                break;
+        }
+    }
+
+    for (var id in objects) {
         var object = objects[id];
 
         switch (object.type) {

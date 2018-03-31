@@ -21,5 +21,6 @@ module.exports = {
         BLASTER: "blaster",
         SCANNER: "scanner",
         BUILDER: "builder",
+        BINOCULARS: "binoculars",
     }
 }
