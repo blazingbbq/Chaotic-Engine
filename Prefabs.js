@@ -97,6 +97,43 @@ module.exports = {
                     deathrattle: (obs, selfRef) => {
                         module.exports.generateNew(obs, selfRef, obs[selfRef].x, obs[selfRef].y, types.ObjectTypes.GRAVESTONE);
                     },
+                    update: (obs, selfId, delta) => {
+                        // Calculate player movement
+                        obs[selfId].x += obs[selfId].velocityX * delta;
+                        obs[selfId].y += obs[selfId].velocityY * delta;
+
+                        // Check collisions with terrain and reposition accordingly
+                        collisions.checkCollisions(selfId, obs, renderSize, (srcId, collisionId) => {
+                            if (obs[srcId] && collisionId != srcId){
+                                switch (obs[collisionId].type) {
+                                    case types.ObjectTypes.TERRAIN:
+                                        // Push object back out of collision terrain towards which ever side is the closest to the terrain object
+                                        var distRight = Math.abs((obs[collisionId].x - obs[collisionId].hitboxWidth * renderSize / 2) - (obs[srcId].x + obs[srcId].hitboxWidth * renderSize / 2));
+                                        var distLeft =  Math.abs((obs[collisionId].x + obs[collisionId].hitboxWidth * renderSize / 2) - (obs[srcId].x - obs[srcId].hitboxWidth * renderSize / 2));
+                                        var distUp =    Math.abs((obs[collisionId].y + obs[collisionId].hitboxHeight * renderSize / 2) - (obs[srcId].y - obs[srcId].hitboxHeight * renderSize / 2));
+                                        var distDown =  Math.abs((obs[collisionId].y - obs[collisionId].hitboxHeight * renderSize / 2) - (obs[srcId].y + obs[srcId].hitboxHeight * renderSize / 2));
+                                        
+                                        if (distRight < distLeft && distRight < distUp && distRight < distDown) {
+                                            obs[srcId].x = obs[srcId].x - distRight;
+                                        }
+                                        if (distLeft < distRight && distLeft < distUp && distLeft < distDown) {
+                                            obs[srcId].x = obs[srcId].x + distLeft;
+                                        }
+                                        if (distUp < distRight && distUp < distLeft && distUp < distDown) {
+                                            obs[srcId].y = obs[srcId].y + distUp;
+                                        }
+                                        if (distDown < distRight && distDown < distLeft && distDown < distUp) {
+                                            obs[srcId].y = obs[srcId].y - distDown;
+                                        }
+                                        break;
+                                }
+                            }
+                        });
+                    },
+                    mouseDown: (obs, mouseEvent) => {
+                        obs[mouseEvent.sourceId].equipment[obs[mouseEvent.sourceId].currentEquipment]
+                            .use(obs, mouseEvent.sourceId, mouseEvent.targetX, mouseEvent.targetY);
+                    }
                 };
                 obs[src] = newObj;
                 return;
@@ -122,6 +159,7 @@ module.exports = {
                     deathrattle: (obs, selfRef) => {
                         module.exports.generateNew(obs, selfRef, 0, 0, types.ObjectTypes.PLAYER);
                     },
+                    update: (obs, selfId, delta) => { },
                 }
                 obs[src] = newObj;
                 return;
@@ -139,6 +177,7 @@ module.exports = {
                             hitboxHeight: treeHitboxHeight,
                             health: treeHealth,
                             maxHealth: treeHealth,
+                            update: (obs, selfId, delta) => { },
                         };
                         break;
                     case types.Terrain.WALL_HORIZ:
@@ -153,6 +192,7 @@ module.exports = {
                             hitboxHeight: wallHorizHitboxHeight,
                             health: wallHorizHealth,
                             maxHealth: wallHorizHealth,
+                            update: (obs, selfId, delta) => { },
                         };
                         break;
                 }
@@ -175,6 +215,7 @@ module.exports = {
                                     : obs[interactId].health += healthPickupHealing;
                                 delete obs[selfRef];
                             },
+                            update: (obs, selfId, delta) => { },
                         };
                         break;
                 }
@@ -199,6 +240,13 @@ module.exports = {
                                     delete obs[selfRef];
                                 }
                             },
+                            update: (obs, selfId, delta) => {
+                                collisions.checkCollisions(selfId, obs, renderSize, (srcId, collisionId) => {
+                                    if (obs[srcId] && collisionId != srcId){
+                                        obs[srcId].onTrigger(obs, srcId, collisionId);
+                                    }
+                                });
+                            },
                         };
                         break;
                 }
@@ -217,6 +265,7 @@ module.exports = {
                 hitboxHeight: 6,
                 health: 100,
                 maxHealth: 100,
+                update: (obs, selfId, delta) => { },
             }
         }
         obs[src + ":" + type + ":" + subtype + ":" + posX + ":" + posY] = newObj;
@@ -251,6 +300,55 @@ module.exports = {
                             facing: angle * 180 / Math.PI,
                             dist: 0,
                             damage: baseProjectileDamage,
+                            update: (obs, selfId, delta) => {
+                                // Calculate projectile movement
+                                obs[selfId].x += obs[selfId].velocityX * delta;
+                                obs[selfId].y += obs[selfId].velocityY * delta;
+                                obs[selfId].dist += Math.sqrt(
+                                    Math.pow(obs[selfId].velocityX * delta, 2) +
+                                    Math.pow(obs[selfId].velocityY * delta, 2));
+
+                                // TODO: Change projectile collisions to ray cast
+                                collisions.checkCollisions(selfId, obs, renderSize, (srcId, collisionId) => {
+                                    if (obs[srcId] && collisionId != srcId && collisionId != obs[srcId].source){
+                                        switch (obs[collisionId].type) {
+                                            case types.ObjectTypes.PLAYER:
+                                                obs[collisionId].health -= obs[srcId].damage;
+                                                delete obs[srcId];
+
+                                                if (obs[collisionId].health <= 0){
+                                                    obs[collisionId].deathrattle(obs, collisionId);
+                                                }
+                                                break;
+                                            case types.ObjectTypes.GRAVESTONE:
+                                                if (obs[srcId]) {
+                                                    obs[collisionId].health -= obs[srcId].damage;
+                                                    delete obs[srcId];
+
+                                                    if (obs[collisionId].health <= 0){
+                                                        obs[collisionId].deathrattle(obs, collisionId);
+                                                    }
+                                                }
+                                                break;
+                                            case types.ObjectTypes.TERRAIN:
+                                                if (obs[srcId]) {
+                                                    obs[collisionId].health -= obs[srcId].damage;
+                                                    delete obs[srcId];
+
+                                                    if (obs[collisionId].health <= 0){
+                                                        delete obs[collisionId];
+                                                    }
+                                                }
+                                                break;
+                                        }
+                                    }
+                                });
+                                if (obs[id]) {
+                                    if (obs[id].dist > maxProjDist) {
+                                        delete obs[id];
+                                    }
+                                }
+                            }
                         }
                     },
                     onEquip: (obs, sourceId) => { },

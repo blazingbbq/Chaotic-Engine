@@ -43,6 +43,7 @@ io.on("connection", (socket) => {
 
     // Handle player input event
     socket.on("playerInput", (playerInput) => {
+        // TODO: Move this to player prefab
         var player = objects[socket.id] || {};
         if (playerInput.left) {
             if (playerInput.right) {
@@ -90,9 +91,8 @@ io.on("connection", (socket) => {
 
     // Handle mouse down event from player
     socket.on("mouseDown", (object) => {
-        if (objects[object.sourceId] && objects[object.sourceId].type == "player") {
-            objects[object.sourceId].equipment[objects[object.sourceId].currentEquipment]
-                .use(objects, object.sourceId, object.targetX, object.targetY);
+        if (objects[object.sourceId]) {
+            objects[object.sourceId].mouseDown(objects, object);
         }
     });
 
@@ -109,98 +109,7 @@ setInterval(() => {
     prevTime = time;
 
     for (var id in objects) {
-        switch (objects[id].type) {
-            case types.ObjectTypes.PLAYER:
-                // Calculate player movement
-                objects[id].x += objects[id].velocityX * delta;
-                objects[id].y += objects[id].velocityY * delta;
-
-                // Check collisions with terrain and reposition accordingly
-                collisions.checkCollisions(id, objects, renderSize, (srcId, collisionId) => {
-                    if (objects[srcId] && collisionId != srcId){
-                        switch (objects[collisionId].type) {
-                            case types.ObjectTypes.TERRAIN:
-                                // Push object back out of collision terrain towards which ever side is the closest to the terrain object
-                                var distRight = Math.abs((objects[collisionId].x - objects[collisionId].hitboxWidth * renderSize / 2) - (objects[srcId].x + objects[srcId].hitboxWidth * renderSize / 2));
-                                var distLeft =  Math.abs((objects[collisionId].x + objects[collisionId].hitboxWidth * renderSize / 2) - (objects[srcId].x - objects[srcId].hitboxWidth * renderSize / 2));
-                                var distUp =    Math.abs((objects[collisionId].y + objects[collisionId].hitboxHeight * renderSize / 2) - (objects[srcId].y - objects[srcId].hitboxHeight * renderSize / 2));
-                                var distDown =  Math.abs((objects[collisionId].y - objects[collisionId].hitboxHeight * renderSize / 2) - (objects[srcId].y + objects[srcId].hitboxHeight * renderSize / 2));
-                                
-                                if (distRight < distLeft && distRight < distUp && distRight < distDown) {
-                                    objects[srcId].x = objects[srcId].x - distRight;
-                                }
-                                if (distLeft < distRight && distLeft < distUp && distLeft < distDown) {
-                                    objects[srcId].x = objects[srcId].x + distLeft;
-                                }
-                                if (distUp < distRight && distUp < distLeft && distUp < distDown) {
-                                    objects[srcId].y = objects[srcId].y + distUp;
-                                }
-                                if (distDown < distRight && distDown < distLeft && distDown < distUp) {
-                                    objects[srcId].y = objects[srcId].y - distDown;
-                                }
-                                break;
-                        }
-                    }
-                });
-
-                break;
-            case types.ObjectTypes.PROJECTILE:
-                // Calculate projectile movement
-                objects[id].x += objects[id].velocityX * delta;
-                objects[id].y += objects[id].velocityY * delta;
-                objects[id].dist += Math.sqrt(
-                    Math.pow(objects[id].velocityX * delta, 2) +
-                    Math.pow(objects[id].velocityY * delta, 2));
-
-                // TODO: Change projectile collisions to ray cast
-                collisions.checkCollisions(id, objects, renderSize, (srcId, collisionId) => {
-                    if (objects[srcId] && collisionId != srcId && collisionId != objects[srcId].source){
-                        switch (objects[collisionId].type) {
-                            case types.ObjectTypes.PLAYER:
-                                objects[collisionId].health -= objects[srcId].damage;
-                                delete objects[srcId];
-
-                                if (objects[collisionId].health <= 0){
-                                    objects[collisionId].deathrattle(objects, collisionId);
-                                }
-                                break;
-                            case types.ObjectTypes.GRAVESTONE:
-                                if (objects[srcId]) {
-                                    objects[collisionId].health -= objects[srcId].damage;
-                                    delete objects[srcId];
-
-                                    if (objects[collisionId].health <= 0){
-                                        objects[collisionId].deathrattle(objects, collisionId);
-                                    }
-                                }
-                                break;
-                            case types.ObjectTypes.TERRAIN:
-                                if (objects[srcId]) {
-                                    objects[collisionId].health -= objects[srcId].damage;
-                                    delete objects[srcId];
-
-                                    if (objects[collisionId].health <= 0){
-                                        delete objects[collisionId];
-                                    }
-                                }
-                                break;
-                        }
-                    }
-                });
-                if (objects[id]) {
-                    if (objects[id].dist > prefabs.maxProjDist) {
-                        delete objects[id];
-                    }
-                }
-                break;
-            case types.ObjectTypes.TRIGGER:
-                collisions.checkCollisions(id, objects, renderSize, (srcId, collisionId) => {
-                    if (objects[srcId] && collisionId != srcId){
-                        objects[srcId].onTrigger(objects, srcId, collisionId);
-                    }
-                });
-                break;
-        }
+        objects[id].update(objects, id, delta);
     }
 
     io.sockets.emit("state", objects);
