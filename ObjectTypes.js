@@ -6,6 +6,7 @@ module.exports = {
         TERRAIN: "terrain",
         INTERACTABLE: "interactable",
         TRIGGER: "trigger",
+        VEHICLE: "vehicle",
     },
     Terrain: {
         TREE: "tree",
@@ -13,6 +14,7 @@ module.exports = {
     },
     Interactable: {
         HEALTH_PICKUP: "health-pickup",
+        CAR_ENTER: "car-enter",
     },
     Trigger: {
         SPIKE_TRAP: "spike-trap",
@@ -22,5 +24,8 @@ module.exports = {
         SCANNER: "scanner",
         BUILDER: "builder",
         BINOCULARS: "binoculars",
-    }
+    },
+    Vehicle: {
+        CAR: "car",
+    },
 }

@@ -250,6 +250,13 @@ socket.on("state", (objects: any) => {
                         break;
                 }
                 break;
+            case types.ObjectTypes.VEHICLE:
+                switch (object.subtype) {
+                    case types.Vehicle.CAR:
+                        foreground.draw(louvre.carMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                }
+                break;
             default:
                 env.draw(louvre.defaultTerrainMasterPiece(object, renderOffsetX, renderOffsetY));
                 break;

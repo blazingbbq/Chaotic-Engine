@@ -43,49 +43,8 @@ io.on("connection", (socket) => {
 
     // Handle player input event
     socket.on("playerInput", (playerInput) => {
-        // TODO: Move this to player prefab
-        var player = objects[socket.id] || {};
-        if (playerInput.left) {
-            if (playerInput.right) {
-                player.velocityX = 0;
-            } else {
-                player.velocityX = -player.speed;
-            }
-        } else if (playerInput.right) {
-            player.velocityX = player.speed;
-        } else {
-            player.velocityX = 0;
-        }
-
-        if (playerInput.up) {
-            if (playerInput.down){
-                player.velocityY = 0;
-            } else {
-                player.velocityY = -player.speed;
-            }
-        } else if (playerInput.down) {
-            player.velocityY = player.speed;
-        } else {
-            player.velocityY = 0;
-        }
-
-        if (playerInput.cycleEquipmentForward && !playerInput.cycleEquipmentBackward) {
-            player.equipment[player.currentEquipment].onDequip(objects, socket.id);
-            player.currentEquipment = player.currentEquipment + 1 >= player.equipment.length ? 0 : player.currentEquipment + 1;
-            player.equipment[player.currentEquipment].onEquip(objects, socket.id);
-        }
-        if (playerInput.cycleEquipmentBackward && !playerInput.cycleEquipmentForward) {
-            player.equipment[player.currentEquipment].onDequip(objects, socket.id);
-            player.currentEquipment = player.currentEquipment - 1 < 0 ? player.equipment.length - 1 : player.currentEquipment - 1;
-            player.equipment[player.currentEquipment].onEquip(objects, socket.id);
-        }
-
-        if (playerInput.pickup) {
-            collisions.checkCollisions(socket.id, objects, renderSize, (srcId, collisionId) => {
-                if (objects[srcId] && collisionId != srcId && objects[collisionId].type == types.ObjectTypes.INTERACTABLE) {
-                    objects[collisionId].onInteract(objects, collisionId, srcId);
-                }
-            });
+        if (objects[socket.id]) {
+            objects[socket.id].onPlayerInput(objects, socket.id, playerInput);
         }
     });
 
@@ -109,7 +68,9 @@ setInterval(() => {
     prevTime = time;
 
     for (var id in objects) {
-        objects[id].update(objects, id, delta);
+        if (objects[id]) {
+            objects[id].update(objects, id, delta);
+        }
     }
 
     io.sockets.emit("state", objects);
@@ -139,4 +100,6 @@ function initializeMap(obs) {
     prefabs.generateNew(obs, "init", 190, 0, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
     prefabs.generateNew(obs, "init", 190, 24, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
     prefabs.generateNew(obs, "init", 190, 48, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
+
+    prefabs.generateNew(obs, "init", -300, 0, types.ObjectTypes.VEHICLE, types.Vehicle.CAR);
 }

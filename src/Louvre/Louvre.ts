@@ -348,6 +348,26 @@ export function spikeTrapMasterPiece(object: any, renderOffsetX: number, renderO
     };
 }
 
+export function carMasterPiece(object: any, renderOffsetX: number, renderOffsetY: number): masterPiece {
+    return {
+        palette: ["#AA3333"],
+        posX: object.x - renderOffsetX,
+        posY: object.y - renderOffsetY,
+        width: object.width,
+        height: object.height,
+        facing: object.facing,
+        strokes: [{
+            cellX: 0,
+            cellY: 0,
+            width: object.width,
+            height: object.height,
+            swatch: 0
+        },]
+    };
+}
+
+
+// UI Icons
 /**
  * Get master piece for blaster ui icon
  * @param posX Horizontal icon position
