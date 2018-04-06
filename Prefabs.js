@@ -66,7 +66,7 @@ var carHeight = 16;
 var carHitboxWidth = 10;
 var carHitboxHeight = 16;
 var carHealth = 200;
-var carViewRange = 1;
+var carViewRange = 1 / 3;
 
 // Equipment
 var binocularsViewRange = 2;
@@ -292,6 +292,8 @@ module.exports = {
                             onInteract: (obs, selfRef, interactId) => {
                                 obs[obs[selfRef].vehicleId].rider = obs[interactId];
                                 obs[interactId] = obs[obs[selfRef].vehicleId];
+                                delete obs[obs[selfRef].vehicleId];
+                                obs[selfRef].vehicleId = interactId;
                             },
                             update: (obs, selfId, delta) => { },
                         };
@@ -357,7 +359,16 @@ module.exports = {
                             deathrattle: (obs, selfId) => {
                                 if (obs[selfId]) {
                                     delete obs[obs[selfId].interactableId];
-                                    obs[selfId] = obs[selfId].rider;
+                                    var rider = obs[selfId].rider;
+
+                                    // Reset velocities and position
+                                    rider.velocityX = 0;
+                                    rider.velocityY = 0;
+                                    rider.x = obs[selfId].x;
+                                    rider.y = obs[selfId].y;
+
+                                    delete obs[selfId];
+                                    obs[selfId] = rider;
                                 } else {
                                     delete obs[obs[selfId].interactableId];
                                     delete obs[selfId];
@@ -368,8 +379,10 @@ module.exports = {
                                 obs[selfId].x += obs[selfId].velocityX * delta;
                                 obs[selfId].y += obs[selfId].velocityY * delta;
 
-                                obs[obs[selfId].interactableId].x = obs[selfId].x;
-                                obs[obs[selfId].interactableId].y = obs[selfId].y;
+                                if (obs[obs[selfId].interactableId]) {
+                                    obs[obs[selfId].interactableId].x = obs[selfId].x;
+                                    obs[obs[selfId].interactableId].y = obs[selfId].y;
+                                }
 
                                 // Check collisions with terrain and reposition accordingly
                                 collisions.checkCollisions(selfId, obs, renderSize, (srcId, collisionId) => {
@@ -424,6 +437,23 @@ module.exports = {
                                     player.velocityY = player.speed;
                                 } else {
                                     player.velocityY = 0;
+                                }
+
+                                if (playerInput.pickup) {
+                                    var newVechicleId = selfId + ":" + obs[selfId].type + ":" + obs[selfId].subtype + ":" + obs[selfId].x + ":" + obs[selfId].y;
+                                    obs[obs[selfId].interactableId].vehicleId = newVechicleId;
+                                    obs[newVechicleId] = obs[selfId];
+                                    delete obs[selfId];
+                                    obs[selfId] = obs[newVechicleId].rider;
+                                    obs[newVechicleId].rider = undefined;
+
+                                    // Reset velocities and position
+                                    obs[selfId].velocityX = 0;
+                                    obs[selfId].velocityY = 0;
+                                    obs[newVechicleId].velocityX = 0;
+                                    obs[newVechicleId].velocityY = 0;
+                                    obs[selfId].x = obs[newVechicleId].x + obs[newVechicleId].width / 2 + obs[selfId].width / 2;
+                                    obs[selfId].y = obs[newVechicleId].y;
                                 }
                             }
                         };
