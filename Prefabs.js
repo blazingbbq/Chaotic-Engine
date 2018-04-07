@@ -60,13 +60,24 @@ var spikeTrapHitboxHeight = 5;
 var spikeTrapDamage = 20;
 
 // Vehicle
-var carSpeed = 0.2;
+var carSpeed = 0.35;
 var carWidth = 10;
 var carHeight = 16;
 var carHitboxWidth = 10;
 var carHitboxHeight = 16;
 var carHealth = 200;
 var carViewRange = 1 / 3;
+var carColors = [
+    "#DC143C",      // Crimson
+    "#006400",      // Dark Green
+    "#FF69B4",      // Hot Pink
+    "#FFD700",      // Gold
+    "#708090",      // Slate Gray
+    "#00BFFF",      // Deep Sky Blue
+    "#0000CD",      // Medium Blue
+    "#FF4500",      // Orange Red
+    "#8B008B",      // Dark Magenta
+];
 
 // Equipment
 var binocularsViewRange = 2;
@@ -151,29 +162,25 @@ module.exports = {
                     },
                     onPlayerInput: (obs, selfId, playerInput) => {
                         player = obs[selfId];
+                        var xDir = 0;
+                        var yDir = 0;
+
                         if (playerInput.left) {
-                            if (playerInput.right) {
-                                player.velocityX = 0;
-                            } else {
-                                player.velocityX = -player.speed;
-                            }
-                        } else if (playerInput.right) {
-                            player.velocityX = player.speed;
-                        } else {
-                            player.velocityX = 0;
+                            xDir -= 1;
+                        }
+                        if (playerInput.right) {
+                            xDir += 1;
                         }
                 
                         if (playerInput.up) {
-                            if (playerInput.down){
-                                player.velocityY = 0;
-                            } else {
-                                player.velocityY = -player.speed;
-                            }
-                        } else if (playerInput.down) {
-                            player.velocityY = player.speed;
-                        } else {
-                            player.velocityY = 0;
+                            yDir -= 1;
                         }
+                        if (playerInput.down) {
+                            yDir += 1;
+                        }
+
+                        player.velocityX = xDir * player.speed;
+                        player.velocityY = yDir * player.speed;
                 
                         if (playerInput.cycleEquipmentForward && !playerInput.cycleEquipmentBackward) {
                             player.equipment[player.currentEquipment].onDequip(obs, selfId);
@@ -219,7 +226,37 @@ module.exports = {
                     deathrattle: (obs, selfRef) => {
                         module.exports.generateNew(obs, selfRef, 0, 0, types.ObjectTypes.PLAYER);
                     },
-                    update: (obs, selfId, delta) => { },
+                    update: (obs, selfId, delta) => {
+                        // Check collisions with vehicles and reposition accordingly
+                        collisions.checkCollisions(selfId, obs, renderSize, (srcId, collisionId) => {
+                            if (obs[srcId] && collisionId != srcId){
+                                switch (obs[collisionId].type) {
+                                    case types.ObjectTypes.VEHICLE:
+                                        // Push object back out of collision vehicle towards which ever side is the closest to the vehicle object
+                                        var distRight = Math.abs((obs[collisionId].x - obs[collisionId].hitboxWidth * renderSize / 2) - (obs[srcId].x + obs[srcId].hitboxWidth * renderSize / 2));
+                                        var distLeft =  Math.abs((obs[collisionId].x + obs[collisionId].hitboxWidth * renderSize / 2) - (obs[srcId].x - obs[srcId].hitboxWidth * renderSize / 2));
+                                        var distUp =    Math.abs((obs[collisionId].y + obs[collisionId].hitboxHeight * renderSize / 2) - (obs[srcId].y - obs[srcId].hitboxHeight * renderSize / 2));
+                                        var distDown =  Math.abs((obs[collisionId].y - obs[collisionId].hitboxHeight * renderSize / 2) - (obs[srcId].y + obs[srcId].hitboxHeight * renderSize / 2));
+                                        
+                                        if (distRight < distLeft && distRight < distUp && distRight < distDown) {
+                                            obs[srcId].x = obs[srcId].x - distRight;
+                                        }
+                                        if (distLeft < distRight && distLeft < distUp && distLeft < distDown) {
+                                            obs[srcId].x = obs[srcId].x + distLeft;
+                                        }
+                                        if (distUp < distRight && distUp < distLeft && distUp < distDown) {
+                                            obs[srcId].y = obs[srcId].y + distUp;
+                                        }
+                                        if (distDown < distRight && distDown < distLeft && distDown < distUp) {
+                                            obs[srcId].y = obs[srcId].y - distDown;
+                                        }
+                                        break;
+                                }
+                            }
+                        });
+                    },
+                    mouseDown: (obs, mouseEvent) => { },
+                    onPlayerInput: (obs, selfId, playerInput) => { },
                 }
                 obs[src] = newObj;
                 return;
@@ -290,10 +327,15 @@ module.exports = {
                             hitboxHeight: carEnterHitboxHeight,
                             vehicleId: src,
                             onInteract: (obs, selfRef, interactId) => {
-                                obs[obs[selfRef].vehicleId].rider = obs[interactId];
-                                obs[interactId] = obs[obs[selfRef].vehicleId];
-                                delete obs[obs[selfRef].vehicleId];
-                                obs[selfRef].vehicleId = interactId;
+                                if (obs[interactId] &&
+                                    obs[interactId].type === types.ObjectTypes.PLAYER &&
+                                    obs[obs[selfRef].vehicleId].rider == undefined
+                                ) {
+                                    obs[obs[selfRef].vehicleId].rider = obs[interactId];
+                                    obs[interactId] = obs[obs[selfRef].vehicleId];
+                                    delete obs[obs[selfRef].vehicleId];
+                                    obs[selfRef].vehicleId = interactId;
+                                }
                             },
                             update: (obs, selfId, delta) => { },
                         };
@@ -315,7 +357,10 @@ module.exports = {
                             hitboxWidth: spikeTrapHitboxWidth,
                             hitboxHeight: spikeTrapHitboxHeight,
                             onTrigger: (obs, selfRef, triggerId) => {
-                                if (obs[triggerId] && obs[triggerId].type == types.ObjectTypes.PLAYER) {
+                                if (obs[triggerId] && (
+                                    obs[triggerId].type == types.ObjectTypes.PLAYER ||
+                                    obs[triggerId].type == types.ObjectTypes.VEHICLE
+                                )) {
                                     obs[triggerId].health - spikeTrapDamage <= 0
                                     ? obs[triggerId].deathrattle(obs, triggerId)
                                     : obs[triggerId].health -= spikeTrapDamage;
@@ -337,11 +382,12 @@ module.exports = {
                 var vehicleId = src + ":" + type + ":" + subtype + ":" + posX + ":" + posY;
                 switch (subtype) {
                     case types.Vehicle.CAR:
+                        var carColor = Math.floor(Math.random() * (carColors.length));
                         newObj = {
                             type: type,
                             subtype: subtype,
-                            x: 0,
-                            y: 0,
+                            x: posX,
+                            y: posY,
                             velocityX: 0,
                             velocityY: 0,
                             speed: carSpeed,
@@ -351,6 +397,8 @@ module.exports = {
                             hitboxHeight: carHitboxHeight,
                             health: carHealth,
                             maxHealth: carHealth,
+                            carColor: carColors[carColor],
+                            facing: 0,
                             currentEquipment: undefined,
                             equipment: [ ],
                             viewRange: carViewRange,
@@ -389,6 +437,7 @@ module.exports = {
                                     if (obs[srcId] && collisionId != srcId){
                                         switch (obs[collisionId].type) {
                                             case types.ObjectTypes.TERRAIN:
+                                            case types.ObjectTypes.VEHICLE:
                                                 // Push object back out of collision terrain towards which ever side is the closest to the terrain object
                                                 var distRight = Math.abs((obs[collisionId].x - obs[collisionId].hitboxWidth * renderSize / 2) - (obs[srcId].x + obs[srcId].hitboxWidth * renderSize / 2));
                                                 var distLeft =  Math.abs((obs[collisionId].x + obs[collisionId].hitboxWidth * renderSize / 2) - (obs[srcId].x - obs[srcId].hitboxWidth * renderSize / 2));
@@ -415,30 +464,37 @@ module.exports = {
                             mouseDown: (obs, mouseEvent) => { },
                             onPlayerInput: (obs, selfId, playerInput) => {
                                 player = obs[selfId];
+                                var xDir = 0;
+                                var yDir = 0;
+
                                 if (playerInput.left) {
-                                    if (playerInput.right) {
-                                        player.velocityX = 0;
-                                    } else {
-                                        player.velocityX = -player.speed;
-                                    }
-                                } else if (playerInput.right) {
-                                    player.velocityX = player.speed;
-                                } else {
-                                    player.velocityX = 0;
+                                    xDir -= 1;
+                                }
+                                if (playerInput.right) {
+                                    xDir += 1;
                                 }
                         
                                 if (playerInput.up) {
-                                    if (playerInput.down){
-                                        player.velocityY = 0;
-                                    } else {
-                                        player.velocityY = -player.speed;
-                                    }
-                                } else if (playerInput.down) {
-                                    player.velocityY = player.speed;
-                                } else {
-                                    player.velocityY = 0;
+                                    yDir -= 1;
+                                }
+                                if (playerInput.down) {
+                                    yDir += 1;
                                 }
 
+                                player.velocityX = xDir * player.speed;
+                                player.velocityY = yDir * player.speed;
+                                
+                                if (xDir != 0 || yDir != 0) {
+                                    player.facing = (Math.atan(player.velocityY / player.velocityX) * 57.2958 + 90) +(xDir < 0 ? 180 : 0);
+                                }
+
+                                if (yDir != 0) {
+                                    player.hitboxWidth = carHitboxWidth;
+                                }
+                                if (xDir != 0) {
+                                    player.hitboxWidth = carHitboxHeight;
+                                }
+                                
                                 if (playerInput.pickup) {
                                     var newVechicleId = selfId + ":" + obs[selfId].type + ":" + obs[selfId].subtype + ":" + obs[selfId].x + ":" + obs[selfId].y;
                                     obs[obs[selfId].interactableId].vehicleId = newVechicleId;
@@ -568,12 +624,14 @@ module.exports = {
                     use: (obs, sourceId, targetX, targetY) => {
                         // Replaces all builders with this build type...
                         collisions.checkClickCollisions(targetX, targetY, obs, renderSize, (collisionId) => {
-                            obs[sourceId].equipment = obs[sourceId].equipment.map((item) => {
-                                if (item.type == types.EquipmentTypes.BUILDER) {
-                                    item = module.exports.newEquipment(obs, types.EquipmentTypes.BUILDER, { type: obs[collisionId].type, subtype: obs[collisionId].subtype });
-                                }
-                                return item;
-                            });
+                            if (obs[collisionId].subtype != types.Interactable.CAR_ENTER) {
+                                obs[sourceId].equipment = obs[sourceId].equipment.map((item) => {
+                                    if (item.type == types.EquipmentTypes.BUILDER) {
+                                        item = module.exports.newEquipment(obs, types.EquipmentTypes.BUILDER, { type: obs[collisionId].type, subtype: obs[collisionId].subtype });
+                                    }
+                                    return item;
+                                });
+                            }
                         });
                     },
                     onEquip: (obs, sourceId) => { },

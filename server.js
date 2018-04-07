@@ -84,9 +84,9 @@ function initializeMap(obs) {
     prefabs.generateNew(obs, "init", 220, -205, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
     prefabs.generateNew(obs, "init", -195, -175, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
 
-    prefabs.generateNew(obs, "init", -120, 125, types.ObjectTypes.TERRAIN, types.Terrain.WALL_HORIZ);
+    prefabs.generateNew(obs, "init", -104, 125, types.ObjectTypes.TERRAIN, types.Terrain.WALL_HORIZ);
     prefabs.generateNew(obs, "init", 0, 150, types.ObjectTypes.TERRAIN, types.Terrain.WALL_HORIZ);
-    prefabs.generateNew(obs, "init", 120, 125, types.ObjectTypes.TERRAIN, types.Terrain.WALL_HORIZ);
+    prefabs.generateNew(obs, "init", 104, 125, types.ObjectTypes.TERRAIN, types.Terrain.WALL_HORIZ);
 
     prefabs.generateNew(obs, "init", -100, 0, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
     prefabs.generateNew(obs, "init", -120, 0, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
@@ -102,4 +102,7 @@ function initializeMap(obs) {
     prefabs.generateNew(obs, "init", 190, 48, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
 
     prefabs.generateNew(obs, "init", -300, 0, types.ObjectTypes.VEHICLE, types.Vehicle.CAR);
+    prefabs.generateNew(obs, "init", -300, 74, types.ObjectTypes.VEHICLE, types.Vehicle.CAR);
+    prefabs.generateNew(obs, "init", -350, 0, types.ObjectTypes.VEHICLE, types.Vehicle.CAR);
+    prefabs.generateNew(obs, "init", -350, 74, types.ObjectTypes.VEHICLE, types.Vehicle.CAR);
 }
