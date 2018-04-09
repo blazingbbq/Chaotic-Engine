@@ -21,7 +21,7 @@ var cameraMovingToX: number;
 var cameraMovingToY: number;
 var cameraPanSpeed = 0.015;
 
-var mousePos: mousePosition;
+var mousePos: mousePosition = { x: 0, y: 0, outOfBounds: true };
 
 var playerInput = {
     up: false,
@@ -31,8 +31,9 @@ var playerInput = {
     cycleEquipmentForward: false,
     cycleEquipmentBackward: false,
     pickup: false,
+    targetX: mousePos.x,
+    targetY: mousePos.y,
 }
-mousePos = { x: 0, y: 0, outOfBounds: true };
 
 var KEY_UP = 87;                        // Default to W
 var KEY_DOWN = 83;                      // Default to S
@@ -72,6 +73,8 @@ document.addEventListener("keydown", (event) => {
         default:
             return;
     }
+    playerInput.targetX = mousePos.x + renderOffsetX;
+    playerInput.targetY = mousePos.y + renderOffsetY;
     socket.emit("playerInput", playerInput);
     playerInput.pickup = false;
     playerInput.cycleEquipmentForward = false;
@@ -214,7 +217,14 @@ socket.on("state", (objects: any) => {
 
         switch (object.type) {
             case types.ObjectTypes.PLAYER:
-                foreground.draw(louvre.playerMasterPiece(object, renderOffsetX, renderOffsetY));
+                switch (object.subtype) {
+                    case types.Player.HUMAN:
+                        foreground.draw(louvre.playerMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                    case types.Player.GOD:
+                        foreground.draw(louvre.godPlayerMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                }
                 foreground.draw(louvre.healthBarMasterPiece(object, renderOffsetX, renderOffsetY, cubeSize));
                 break;
             case types.ObjectTypes.PROJECTILE:

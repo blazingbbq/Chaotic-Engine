@@ -8,6 +8,10 @@ module.exports = {
         TRIGGER: "trigger",
         VEHICLE: "vehicle",
     },
+    Player: {
+        HUMAN: "human",
+        GOD: "god",
+    },
     Terrain: {
         TREE: "tree",
         WALL_HORIZ: "wall-horiz",

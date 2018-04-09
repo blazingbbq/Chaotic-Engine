@@ -17,7 +17,9 @@ var playerHealth = 100;
 var playerWidth = 4;
 var playerHeight = 6;
 var playerViewRange = 1 / 2;
-var teamColors = ["#FF0000", "#00FF00", "#0000FF"];
+
+var godSpeed = 0.28;
+var godHealth = 9999;
 
 // Gravestone
 var gravestoneWidth = 3;
@@ -92,12 +94,9 @@ module.exports = {
         
         switch (type) {
             case types.ObjectTypes.PLAYER:
-                // TODO: Teams shouldn't be random...
-                var playerTeam = subtype
-                    ? subtype
-                    : Math.floor(Math.random() * (teamColors.length));
                 newObj = {
-                    type: types.ObjectTypes.PLAYER,
+                    type: type,
+                    subtype: types.Player.HUMAN,
                     x: 0,
                     y: 0,
                     velocityX: 0,
@@ -109,15 +108,8 @@ module.exports = {
                     hitboxHeight: playerHeight,
                     health: playerHealth,
                     maxHealth: playerHealth,
-                    team: playerTeam,
-                    teamColor: teamColors[playerTeam],
-                    currentEquipment: 0,
-                    equipment: [
-                        module.exports.newEquipment(obs, types.EquipmentTypes.BLASTER),
-                        module.exports.newEquipment(obs, types.EquipmentTypes.SCANNER),
-                        module.exports.newEquipment(obs, types.EquipmentTypes.BUILDER, { type: types.ObjectTypes.TERRAIN, subtype: types.Terrain.TREE }),
-                        module.exports.newEquipment(obs, types.EquipmentTypes.BINOCULARS),
-                    ],
+                    currentEquipment: undefined,
+                    equipment: [ ],
                     viewRange: playerViewRange,
                     deathrattle: (obs, selfRef) => {
                         module.exports.generateNew(obs, selfRef, obs[selfRef].x, obs[selfRef].y, types.ObjectTypes.GRAVESTONE);
@@ -157,10 +149,13 @@ module.exports = {
                         });
                     },
                     mouseDown: (obs, mouseEvent) => {
-                        obs[mouseEvent.sourceId].equipment[obs[mouseEvent.sourceId].currentEquipment]
-                            .use(obs, mouseEvent.sourceId, mouseEvent.targetX, mouseEvent.targetY);
+                        if (obs[mouseEvent.sourceId].currentEquipment != undefined) {
+                            obs[mouseEvent.sourceId].equipment[obs[mouseEvent.sourceId].currentEquipment]
+                                .use(obs, mouseEvent.sourceId, mouseEvent.targetX, mouseEvent.targetY);
+                        }
                     },
                     onPlayerInput: (obs, selfId, playerInput) => {
+                        console.log(playerInput.targetX + ":" + playerInput.targetY);
                         player = obs[selfId];
                         var xDir = 0;
                         var yDir = 0;
@@ -182,12 +177,12 @@ module.exports = {
                         player.velocityX = xDir * player.speed;
                         player.velocityY = yDir * player.speed;
                 
-                        if (playerInput.cycleEquipmentForward && !playerInput.cycleEquipmentBackward) {
+                        if (obs[selfId].currentEquipment != undefined && playerInput.cycleEquipmentForward && !playerInput.cycleEquipmentBackward) {
                             player.equipment[player.currentEquipment].onDequip(obs, selfId);
                             player.currentEquipment = player.currentEquipment + 1 >= player.equipment.length ? 0 : player.currentEquipment + 1;
                             player.equipment[player.currentEquipment].onEquip(obs, selfId);
                         }
-                        if (playerInput.cycleEquipmentBackward && !playerInput.cycleEquipmentForward) {
+                        if (obs[selfId].currentEquipment != undefined && playerInput.cycleEquipmentBackward && !playerInput.cycleEquipmentForward) {
                             player.equipment[player.currentEquipment].onDequip(obs, selfId);
                             player.currentEquipment = player.currentEquipment - 1 < 0 ? player.equipment.length - 1 : player.currentEquipment - 1;
                             player.equipment[player.currentEquipment].onEquip(obs, selfId);
@@ -202,11 +197,29 @@ module.exports = {
                         }
                     }
                 };
+                switch (subtype) {
+                    case types.Player.GOD:
+                        newObj = { 
+                            ...newObj,
+                            subtype: subtype,
+                            maxHealth: godHealth,
+                            health: godHealth,
+                            currentEquipment: 0,
+                            equipment: [
+                                module.exports.newEquipment(obs, types.EquipmentTypes.BLASTER),
+                                module.exports.newEquipment(obs, types.EquipmentTypes.SCANNER),
+                                module.exports.newEquipment(obs, types.EquipmentTypes.BUILDER, { type: types.ObjectTypes.TERRAIN, subtype: types.Terrain.TREE }),
+                                module.exports.newEquipment(obs, types.EquipmentTypes.BINOCULARS),
+                            ],
+                        }
+                        break;
+                }
                 obs[src] = newObj;
                 return;
             case types.ObjectTypes.GRAVESTONE:
                 newObj = {
                     type: types.ObjectTypes.GRAVESTONE,
+                    subtype: obs[src].subtype,
                     x: posX,
                     y: posY + 1 * renderSize,
                     velocityX: 0,
@@ -218,8 +231,6 @@ module.exports = {
                     hitboxHeight: gravestoneHitboxHeight,
                     health: gravestoneHealth,
                     maxHealth: gravestoneHealth,
-                    team: obs[src].team,
-                    teamColor: obs[src].teamColor,
                     currentEquipment: undefined,
                     equipment: [],
                     viewRange: gravestoneViewRange,
