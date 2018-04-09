@@ -31,6 +31,10 @@ var playerInput = {
     cycleEquipmentForward: false,
     cycleEquipmentBackward: false,
     pickup: false,
+    ability1: false,
+    ability2: false,
+    ability3: false,
+    ability4: false,
     targetX: mousePos.x,
     targetY: mousePos.y,
 }
@@ -41,7 +45,11 @@ var KEY_RIGHT = 68;                     // Default to D
 var KEY_LEFT = 65;                      // Default to A
 var KEY_CYCLE_EQUIPMENT_FORWARD = 69;   // Default to E
 var KEY_CYCLE_EQUIPMENT_BACKWARD = 81;  // Default to Q
-var KEY_PICKUP = 70                     // Default to F
+var KEY_PICKUP = 70;                    // Default to F
+var KEY_ABILITY_1 = 49;                 // Default to 1
+var KEY_ABILITY_2 = 50;                 // Default to 2
+var KEY_ABILITY_3 = 51;                 // Default to 3
+var KEY_ABILITY_4 = 52;                 // Default to 4
 
 var prevTime = 0;
 var delta = 0;
@@ -49,16 +57,16 @@ var delta = 0;
 // Add listeners to document
 document.addEventListener("keydown", (event) => {
     switch (event.keyCode) {
-        case KEY_UP: // W
+        case KEY_UP:
             playerInput.up = true;
             break;
-        case KEY_DOWN: // S
+        case KEY_DOWN:
             playerInput.down = true;
             break;
-        case KEY_RIGHT: // D
+        case KEY_RIGHT:
             playerInput.right = true;
             break;
-        case KEY_LEFT: // A
+        case KEY_LEFT:
             playerInput.left = true;
             break;
         case KEY_CYCLE_EQUIPMENT_FORWARD:
@@ -70,28 +78,42 @@ document.addEventListener("keydown", (event) => {
         case KEY_PICKUP:
             playerInput.pickup = true;
             break;
+        case KEY_ABILITY_1:
+            playerInput.ability1 = true;
+            break;
+        case KEY_ABILITY_2:
+            playerInput.ability2 = true;
+            break;
+        case KEY_ABILITY_3:
+            playerInput.ability3 = true;
+            break;
+        case KEY_ABILITY_4:
+            playerInput.ability4 = true;
+            break;
         default:
             return;
     }
     playerInput.targetX = mousePos.x + renderOffsetX;
     playerInput.targetY = mousePos.y + renderOffsetY;
     socket.emit("playerInput", playerInput);
+    
+    // Trigger keys are unset after emission
     playerInput.pickup = false;
     playerInput.cycleEquipmentForward = false;
     playerInput.cycleEquipmentBackward = false;
 });
 document.addEventListener("keyup", (event) => {
     switch (event.keyCode) {
-        case KEY_UP: // W
+        case KEY_UP:
             playerInput.up = false;
             break;
-        case KEY_DOWN: // S
+        case KEY_DOWN:
             playerInput.down = false;
             break;
-        case KEY_RIGHT: // D
+        case KEY_RIGHT:
             playerInput.right = false;
             break;
-        case KEY_LEFT: // A
+        case KEY_LEFT:
             playerInput.left = false;
             break;
         default:

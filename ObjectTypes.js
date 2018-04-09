@@ -11,6 +11,10 @@ module.exports = {
     Player: {
         HUMAN: "human",
         GOD: "god",
+        KNIGHT: "knight",
+    },
+    Projectile: {
+        BASIC_PROJECTILE: "basic-projectile",
     },
     Terrain: {
         TREE: "tree",
@@ -23,13 +27,16 @@ module.exports = {
     Trigger: {
         SPIKE_TRAP: "spike-trap",
     },
+    Vehicle: {
+        CAR: "car",
+    },
     EquipmentTypes: {
         BLASTER: "blaster",
         SCANNER: "scanner",
         BUILDER: "builder",
         BINOCULARS: "binoculars",
     },
-    Vehicle: {
-        CAR: "car",
+    Abilities: {
+
     },
 }
