@@ -11,10 +11,12 @@ module.exports = {
     Player: {
         HUMAN: "human",
         GOD: "god",
+        FIRE_MAGE: "fire-mage",
         KNIGHT: "knight",
     },
     Projectile: {
         BASIC_PROJECTILE: "basic-projectile",
+        FIREBOLT_PROJECTILE: "firebold-projectile",
     },
     Terrain: {
         TREE: "tree",
@@ -37,6 +39,6 @@ module.exports = {
         BINOCULARS: "binoculars",
     },
     Abilities: {
-
+        FIREBOLT: "firebolt",
     },
 }

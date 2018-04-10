@@ -101,6 +101,10 @@ document.addEventListener("keydown", (event) => {
     playerInput.pickup = false;
     playerInput.cycleEquipmentForward = false;
     playerInput.cycleEquipmentBackward = false;
+    playerInput.ability1 = false;
+    playerInput.ability2 = false;
+    playerInput.ability3 = false;
+    playerInput.ability4 = false;
 });
 document.addEventListener("keyup", (event) => {
     switch (event.keyCode) {
@@ -246,11 +250,21 @@ socket.on("state", (objects: any) => {
                     case types.Player.GOD:
                         foreground.draw(louvre.godPlayerMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
+                    case types.Player.FIRE_MAGE:        // TODO: Draw fire mage
+                        foreground.draw(louvre.playerMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
                 }
                 foreground.draw(louvre.healthBarMasterPiece(object, renderOffsetX, renderOffsetY, cubeSize));
                 break;
             case types.ObjectTypes.PROJECTILE:
-                env.draw(louvre.projectileMasterPiece(object, renderOffsetX, renderOffsetY));
+                switch (object.subtype) {
+                    case types.Projectile.BASIC_PROJECTILE:
+                        env.draw(louvre.projectileMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                    case types.Projectile.FIREBOLT_PROJECTILE:
+                        env.draw(louvre.fireboltProjectileMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                }
                 break;
             case types.ObjectTypes.GRAVESTONE:
                 env.draw(louvre.graveStoneMasterPiece(object, renderOffsetX, renderOffsetY));

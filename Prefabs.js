@@ -11,6 +11,12 @@ var baseProjectileDamage = 10;
 var projectileSpeed = 0.8; 
 var maxProjDist = 1600;
 
+var fireboltSpeed = 0.5;
+var fireboltWidth = 3;
+var fireboltHeight = 2;
+var fireboltHitBoxRadius = 2;
+var fireboltDamage = 18;
+
 // Player
 var playerSpeed = 0.2;
 var playerHealth = 100;
@@ -81,6 +87,8 @@ var carColors = [
     "#8B008B",      // Dark Magenta
 ];
 
+// Abilities
+
 // Equipment
 var binocularsViewRange = 2;
 
@@ -110,6 +118,7 @@ module.exports = {
                     maxHealth: playerHealth,
                     currentEquipment: undefined,
                     equipment: [ ],
+                    abilities: [ ],
                     viewRange: playerViewRange,
                     deathrattle: (obs, selfRef) => {
                         module.exports.generateNew(obs, selfRef, obs[selfRef].x, obs[selfRef].y, types.ObjectTypes.GRAVESTONE);
@@ -186,6 +195,10 @@ module.exports = {
                             player.currentEquipment = player.currentEquipment - 1 < 0 ? player.equipment.length - 1 : player.currentEquipment - 1;
                             player.equipment[player.currentEquipment].onEquip(obs, selfId);
                         }
+
+                        if (playerInput.ability1 && obs[selfId].abilities[0]) {
+                            obs[selfId].abilities[0].cast(obs, selfId, playerInput.targetX, playerInput.targetY);
+                        }
                 
                         if (playerInput.pickup) {
                             collisions.checkCollisions(selfId, obs, renderSize, (srcId, collisionId) => {
@@ -221,6 +234,15 @@ module.exports = {
                                 module.exports.newEquipment(obs, types.EquipmentTypes.SCANNER),
                                 module.exports.newEquipment(obs, types.EquipmentTypes.BUILDER, { type: types.ObjectTypes.TERRAIN, subtype: types.Terrain.TREE }),
                                 module.exports.newEquipment(obs, types.EquipmentTypes.BINOCULARS),
+                            ],
+                        }
+                        break;
+                    case types.Player.FIRE_MAGE:
+                        newObj = {
+                            ...newObj,
+                            subtype: subtype,
+                            abilities: [
+                                module.exports.newAbility(obs, types.Abilities.FIREBOLT),
                             ],
                         }
                         break;
@@ -290,66 +312,78 @@ module.exports = {
                 obs[src] = newObj;
                 return;
             case types.ObjectTypes.PROJECTILE:
-                switch (subtype) {
-                    case types.Projectile.BASIC_PROJECTILE:
-                        var angle = Math.atan2(
-                            posY - obs[src].y,
-                            posX - obs[src].x);
-                        // Generate unique Id for new projectile
-                        var newId = src.concat(":" + type + ":" + subtype + ":", posX, ":", posY);
-                        var dup = 0;
-                        while (obs[newId.concat(":" + dup)]){
-                            dup++;
-                        }
-                        
-                        // Projetile generation should be in generateNew()
-                        obs[newId.concat(":" + dup)] = {
-                            type: type,
-                            subtype: subtype,
-                            source: src,
-                            x: obs[src].x,
-                            y: obs[src].y,
-                            velocityX: Math.cos(angle) * projectileSpeed,
-                            velocityY: Math.sin(angle) * projectileSpeed,
-                            width: projectileWidth,
-                            height: projectileHeight,
-                            hitboxWidth: projectileHitBoxRadius,
-                            hitboxHeight: projectileHitBoxRadius,
-                            facing: angle * 180 / Math.PI,
-                            dist: 0,
-                            damage: baseProjectileDamage,
-                            update: (obs, selfId, delta) => {
-                                // Calculate projectile movement
-                                obs[selfId].x += obs[selfId].velocityX * delta;
-                                obs[selfId].y += obs[selfId].velocityY * delta;
-                                obs[selfId].dist += Math.sqrt(
-                                    Math.pow(obs[selfId].velocityX * delta, 2) +
-                                    Math.pow(obs[selfId].velocityY * delta, 2));
+                var angle = Math.atan2(
+                    posY - obs[src].y,
+                    posX - obs[src].x);
+                // Generate unique Id for new projectile
+                var newId = src.concat(":" + type + ":" + subtype + ":", posX, ":", posY);
+                var dup = 0;
+                while (obs[newId.concat(":" + dup)]){
+                    dup++;
+                }
 
-                                // TODO: Change projectile collisions to ray cast
-                                collisions.checkCollisions(selfId, obs, renderSize, (srcId, collisionId) => {
-                                    if (obs[srcId] && collisionId != srcId && collisionId != obs[srcId].source){
-                                        switch (obs[collisionId].type) {
-                                            case types.ObjectTypes.PLAYER:
-                                            case types.ObjectTypes.GRAVESTONE:
-                                            case types.ObjectTypes.VEHICLE:
-                                            case types.ObjectTypes.TERRAIN:
-                                                if (obs[srcId]) {
-                                                    if (obs[collisionId] && obs[collisionId].damage) {
-                                                        obs[collisionId].damage(obs, collisionId, obs[srcId].damage);
-                                                    }
-                                                    delete obs[srcId];
-                                                }
-                                                break;
+                newObj = {
+                    type: type,
+                    subtype: subtype,
+                    source: src,
+                    x: obs[src].x,
+                    y: obs[src].y,
+                    velocityX: Math.cos(angle) * projectileSpeed,
+                    velocityY: Math.sin(angle) * projectileSpeed,
+                    width: projectileWidth,
+                    height: projectileHeight,
+                    hitboxWidth: projectileHitBoxRadius,
+                    hitboxHeight: projectileHitBoxRadius,
+                    facing: angle * 180 / Math.PI,
+                    dist: 0,
+                    damage: baseProjectileDamage,
+                    update: (obs, selfId, delta) => {
+                        // Calculate projectile movement
+                        obs[selfId].x += obs[selfId].velocityX * delta;
+                        obs[selfId].y += obs[selfId].velocityY * delta;
+                        obs[selfId].dist += Math.sqrt(
+                            Math.pow(obs[selfId].velocityX * delta, 2) +
+                            Math.pow(obs[selfId].velocityY * delta, 2));
+
+                        // TODO: Change projectile collisions to ray cast
+                        collisions.checkCollisions(selfId, obs, renderSize, (srcId, collisionId) => {
+                            if (obs[srcId] && collisionId != srcId && collisionId != obs[srcId].source){
+                                switch (obs[collisionId].type) {
+                                    case types.ObjectTypes.PLAYER:
+                                    case types.ObjectTypes.GRAVESTONE:
+                                    case types.ObjectTypes.VEHICLE:
+                                    case types.ObjectTypes.TERRAIN:
+                                        if (obs[srcId]) {
+                                            if (obs[collisionId] && obs[collisionId].damage) {
+                                                obs[collisionId].damage(obs, collisionId, obs[srcId].damage);
+                                            }
+                                            delete obs[srcId];
                                         }
-                                    }
-                                });
-                                if (obs[id]) {
-                                    if (obs[id].dist > maxProjDist) {
-                                        delete obs[id];
-                                    }
+                                        break;
                                 }
                             }
+                        });
+                        if (obs[id]) {
+                            if (obs[id].dist > maxProjDist) {
+                                delete obs[id];
+                            }
+                        }
+                    }
+                }
+                switch (subtype) {
+                    case types.Projectile.BASIC_PROJECTILE:
+                        obs[newId.concat(":" + dup)] = newObj;
+                        return;
+                    case types.Projectile.FIREBOLT_PROJECTILE:
+                        obs[newId.concat(":" + dup)] = {
+                            ...newObj,
+                            velocityX: Math.cos(angle) * fireboltSpeed,
+                            velocityY: Math.sin(angle) * fireboltSpeed,
+                            width: fireboltWidth,
+                            height: fireboltHeight,
+                            hitboxWidth: fireboltHitBoxRadius,
+                            hitboxHeight: fireboltHitBoxRadius,
+                            damage: fireboltDamage,             // TODO: Get firebolt damage from firemage's firecounters
                         }
                         return;
                 }
@@ -654,7 +688,6 @@ module.exports = {
                     obs[selfId].health -= amount;
 
                     if (obs[selfId].health <= 0){
-                        console.log(obs);
                         obs[selfId].deathrattle(obs, selfId);
                     }
                 },
@@ -710,6 +743,18 @@ module.exports = {
                     },
                     onDequip: (obs, sourceId) => {
                         obs[sourceId].viewRange = playerViewRange;
+                    },
+                }
+        }
+    },
+    newAbility: (obs, type, params = { }) => {      // TODO: Pass the ability index along
+        switch (type) {
+            case types.Abilities.FIREBOLT:
+                return {
+                    type: type,
+                    cast: (obs, sourceId, targetX, targetY) => {
+                        // TODO: Abilities need timers
+                        module.exports.generateNew(obs, sourceId, targetX, targetY, types.ObjectTypes.PROJECTILE, types.Projectile.FIREBOLT_PROJECTILE);
                     },
                 }
         }

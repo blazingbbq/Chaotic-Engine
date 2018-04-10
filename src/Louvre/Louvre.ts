@@ -203,8 +203,8 @@ export function graveStoneMasterPiece(object: any, renderOffsetX: number, render
 /**
  * Get master piece for basic projectile
  * @param object The projectile object
- * @param renderOffsetX Horizontal offset for rendering objects
- * @param renderOffsetY Vertical offset for render objects
+ * @param renderOffsetX Horizontal offset for rendering the objects
+ * @param renderOffsetY Vertical offset for rendering the objects
  */
 export function projectileMasterPiece(object: any, renderOffsetX: number, renderOffsetY: number): masterPiece {
     return {
@@ -224,6 +224,42 @@ export function projectileMasterPiece(object: any, renderOffsetX: number, render
             // swatch: Math.floor(Math.random() * 6)
             swatch: 0
         }]
+    }
+}
+
+/**
+ * Get master piece for firebolt projectile
+ * @param object The firebolt projectile object
+ * @param renderOffsetX Horizontal offset for rendering the objects
+ * @param renderOffsetY Vertical offset for rendering the objects
+ */
+export function fireboltProjectileMasterPiece(object: any, renderOffsetX: number, renderOffsetY: number): masterPiece {
+    return {
+        palette: ["#B22222", "#CD5C5C"],
+        posX: object.x - renderOffsetX,
+        posY: object.y - renderOffsetY,
+        width: object.width,
+        height: object.height,
+        facing: object.facing,
+        strokes: [{         // TODO: Make firebolt prettier... Looks horrible
+            cellX: 0,
+            cellY: 0,
+            width: 1,
+            height: 3,
+            swatch: 0
+        }, {
+            cellX: 0,
+            cellY: 0,
+            width: 2,
+            height: 2,
+            swatch: 0
+        }, {
+            cellX: 0,
+            cellY: 1,
+            width: 1,
+            height: 1,
+            swatch: 1
+        },]
     }
 }
 
