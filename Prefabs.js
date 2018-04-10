@@ -11,11 +11,11 @@ var baseProjectileDamage = 10;
 var projectileSpeed = 0.8; 
 var maxProjDist = 1600;
 
-var fireboltSpeed = 0.5;
+var fireboltSpeed = 0.35;
 var fireboltWidth = 3;
-var fireboltHeight = 2;
+var fireboltHeight = 3;
 var fireboltHitBoxRadius = 2;
-var fireboltDamage = 18;
+var fireboltDamage = 34;
 
 // Player
 var playerSpeed = 0.2;
@@ -26,6 +26,9 @@ var playerViewRange = 1 / 2;
 
 var godSpeed = 0.28;
 var godHealth = 350;
+
+var firemageSpeed = 0.18;
+var firemageHealth = 64;
 
 // Gravestone
 var gravestoneWidth = 3;
@@ -88,6 +91,7 @@ var carColors = [
 ];
 
 // Abilities
+var fireboltCooldown = 1200;
 
 // Equipment
 var binocularsViewRange = 2;
@@ -197,7 +201,16 @@ module.exports = {
                         }
 
                         if (playerInput.ability1 && obs[selfId].abilities[0]) {
-                            obs[selfId].abilities[0].cast(obs, selfId, playerInput.targetX, playerInput.targetY);
+                            obs[selfId].abilities[0].cast(obs, selfId, 0, playerInput.targetX, playerInput.targetY);
+                        }
+                        if (playerInput.ability2 && obs[selfId].abilities[1]) {
+                            obs[selfId].abilities[1].cast(obs, selfId, 1, playerInput.targetX, playerInput.targetY);
+                        }
+                        if (playerInput.ability3 && obs[selfId].abilities[2]) {
+                            obs[selfId].abilities[2].cast(obs, selfId, 2, playerInput.targetX, playerInput.targetY);
+                        }
+                        if (playerInput.ability4 && obs[selfId].abilities[3]) {
+                            obs[selfId].abilities[3].cast(obs, selfId, 3, playerInput.targetX, playerInput.targetY);
                         }
                 
                         if (playerInput.pickup) {
@@ -241,6 +254,9 @@ module.exports = {
                         newObj = {
                             ...newObj,
                             subtype: subtype,
+                            maxHealth: firemageHealth,
+                            health: firemageHealth,
+                            speed: firemageSpeed,
                             abilities: [
                                 module.exports.newAbility(obs, types.Abilities.FIREBOLT),
                             ],
@@ -747,14 +763,20 @@ module.exports = {
                 }
         }
     },
-    newAbility: (obs, type, params = { }) => {      // TODO: Pass the ability index along
+    newAbility: (obs, type, params = { }) => {
         switch (type) {
             case types.Abilities.FIREBOLT:
                 return {
                     type: type,
-                    cast: (obs, sourceId, targetX, targetY) => {
-                        // TODO: Abilities need timers
-                        module.exports.generateNew(obs, sourceId, targetX, targetY, types.ObjectTypes.PROJECTILE, types.Projectile.FIREBOLT_PROJECTILE);
+                    cooldown: fireboltCooldown,
+                    lastcast: undefined,
+                    cast: (obs, sourceId, abilityIndex, targetX, targetY) => {
+                        var newTime = Date.now();
+                        if (!obs[sourceId].abilities[abilityIndex].lastcast
+                            || newTime - obs[sourceId].abilities[abilityIndex].lastcast >= obs[sourceId].abilities[abilityIndex].cooldown) {
+                            obs[sourceId].abilities[abilityIndex].lastcast = newTime;
+                            module.exports.generateNew(obs, sourceId, targetX, targetY, types.ObjectTypes.PROJECTILE, types.Projectile.FIREBOLT_PROJECTILE);
+                        }
                     },
                 }
         }

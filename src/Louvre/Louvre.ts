@@ -91,6 +91,60 @@ export function godPlayerMasterPiece(object: any, renderOffsetX: number, renderO
 }
 
 /**
+ * Get master piece for firemage player object
+ * @param object The firemage player object
+ * @param renderOffsetX Horizontal offset for rendering objects
+ * @param renderOffsetY Vertical offset for render objects
+ */
+export function firemagePlayerMasterPiece(object: any, renderOffsetX: number, renderOffsetY: number): masterPiece {
+    return {    // Skin,      Pants,     Hands,     Shirt
+        palette: ["#abab9a", "#775050", "#CD5C5C", "#000080"],  // TODO: Draw fire mage better...
+        posX: object.x - renderOffsetX,
+        posY: object.y - renderOffsetY,
+        width: object.width,
+        height: object.height,
+        facing: 0,
+        strokes: [{
+            cellX: 0,
+            cellY: 2,
+            width: 4,
+            height: 2,
+            swatch: 3
+        }, {
+            cellX: 1,
+            cellY: 0,
+            width: 2,
+            height: 2,
+            swatch: 0
+        }, {
+            cellX: 0,
+            cellY: 3,
+            width: 1,
+            height: 1,
+            swatch: 2
+        }, {
+            cellX: 3,
+            cellY: 3,
+            width: 1,
+            height: 1,
+            swatch: 2
+        }, {
+            cellX: 1,
+            cellY: 4,
+            width: 1,
+            height: 2,
+            swatch: 1
+        }, {
+            cellX: 2,
+            cellY: 4,
+            width: 1,
+            height: 2,
+            swatch: 1
+        }],
+    }
+}
+
+/**
  * Get master piece for object's health bar
  * @param object The object that needs a health bar
  * @param renderOffsetX Horizontal offset for rendering objects
@@ -235,26 +289,32 @@ export function projectileMasterPiece(object: any, renderOffsetX: number, render
  */
 export function fireboltProjectileMasterPiece(object: any, renderOffsetX: number, renderOffsetY: number): masterPiece {
     return {
-        palette: ["#B22222", "#CD5C5C"],
+        palette: ["#CD5C5C", "#FF8C00"],
         posX: object.x - renderOffsetX,
         posY: object.y - renderOffsetY,
         width: object.width,
         height: object.height,
         facing: object.facing,
-        strokes: [{         // TODO: Make firebolt prettier... Looks horrible
-            cellX: 0,
+        strokes: [{
+            cellX: 1,
             cellY: 0,
             width: 1,
-            height: 3,
+            height: object.height,
             swatch: 0
         }, {
             cellX: 0,
-            cellY: 0,
+            cellY: 1,
+            width: object.width,
+            height: 1,
+            swatch: 0
+        }, {
+            cellX: 0.5,
+            cellY: 0.5,
             width: 2,
             height: 2,
             swatch: 0
         }, {
-            cellX: 0,
+            cellX: 1,
             cellY: 1,
             width: 1,
             height: 1,

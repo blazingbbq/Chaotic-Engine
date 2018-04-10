@@ -250,8 +250,8 @@ socket.on("state", (objects: any) => {
                     case types.Player.GOD:
                         foreground.draw(louvre.godPlayerMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
-                    case types.Player.FIRE_MAGE:        // TODO: Draw fire mage
-                        foreground.draw(louvre.playerMasterPiece(object, renderOffsetX, renderOffsetY));
+                    case types.Player.FIRE_MAGE:
+                        foreground.draw(louvre.firemagePlayerMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
                 }
                 foreground.draw(louvre.healthBarMasterPiece(object, renderOffsetX, renderOffsetY, cubeSize));
