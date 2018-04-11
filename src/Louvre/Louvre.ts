@@ -97,8 +97,8 @@ export function godPlayerMasterPiece(object: any, renderOffsetX: number, renderO
  * @param renderOffsetY Vertical offset for render objects
  */
 export function firemagePlayerMasterPiece(object: any, renderOffsetX: number, renderOffsetY: number): masterPiece {
-    return {    // Skin,      Pants,     Hands,     Shirt
-        palette: ["#abab9a", "#775050", "#CD5C5C", "#000080"],  // TODO: Draw fire mage better...
+    return {    // Skin,      Pants,     Shirt,      Face
+        palette: ["#D2B48C", "#A52A2A", "#DC143C", "#dbc3a3"],
         posX: object.x - renderOffsetX,
         posY: object.y - renderOffsetY,
         width: object.width,
@@ -109,25 +109,19 @@ export function firemagePlayerMasterPiece(object: any, renderOffsetX: number, re
             cellY: 2,
             width: 4,
             height: 2,
-            swatch: 3
+            swatch: 2
+        }, {
+            cellX: 1,
+            cellY: 0,
+            width: 2,
+            height: 4,
+            swatch: 0
         }, {
             cellX: 1,
             cellY: 0,
             width: 2,
             height: 2,
-            swatch: 0
-        }, {
-            cellX: 0,
-            cellY: 3,
-            width: 1,
-            height: 1,
-            swatch: 2
-        }, {
-            cellX: 3,
-            cellY: 3,
-            width: 1,
-            height: 1,
-            swatch: 2
+            swatch: 3
         }, {
             cellX: 1,
             cellY: 4,
@@ -140,7 +134,25 @@ export function firemagePlayerMasterPiece(object: any, renderOffsetX: number, re
             width: 1,
             height: 2,
             swatch: 1
-        }],
+        }, {
+            cellX: 1,
+            cellY: 0,
+            width: 0.5,
+            height: 6,
+            swatch: 2
+        }, {
+            cellX: 2.5,
+            cellY: 0,
+            width: 0.5,
+            height: 6,
+            swatch: 2
+        }, {
+            cellX: 1,
+            cellY: 0,
+            width: 2,
+            height: 0.5,
+            swatch: 2
+        },],
     }
 }
 
