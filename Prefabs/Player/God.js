@@ -1,10 +1,10 @@
-var types = require("../../ObjectTypes");
-var prefabs = require("../Prefabs");
-
 var godSpeed = 0.28;
 var godHealth = 350;
 
 function generateNew(obs, src, posX, posY, base) {
+    var types = require("../../ObjectTypes");
+    var prefabs = require("../Prefabs");
+    
     return { 
         ...base,
         subtype: types.Player.GOD,

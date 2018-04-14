@@ -1,8 +1,4 @@
-var playerSpeed = 0.2;
-var playerHealth = 100;
-var playerWidth = 4;
-var playerHeight = 6;
-var playerViewRange = 1 / 2;
+var defaultVehicleViewRange = 1 / 4;
 
 function generateNew(obs, src, posX, posY) {
     var types = require("../../ObjectTypes");
@@ -10,37 +6,50 @@ function generateNew(obs, src, posX, posY) {
     var prefabs = require("../Prefabs");
 
     return {
-        type: types.ObjectTypes.PLAYER,
-        subtype: types.Player.HUMAN,
-        x: 0,
-        y: 0,
+        type: types.ObjectTypes.VEHICLE,
+        x: posX,
+        y: posY,
         velocityX: 0,
         velocityY: 0,
-        speed: playerSpeed,
-        width: playerWidth,
-        height: playerHeight,
-        hitboxWidth: playerWidth - 2,
-        hitboxHeight: playerHeight,
-        health: playerHealth,
-        maxHealth: playerHealth,
+        facing: 0,
         currentEquipment: undefined,
         equipment: [ ],
-        abilities: [ ],
-        viewRange: playerViewRange,
-        deathrattle: (obs, selfRef) => {
-            prefabs.generateNew(obs, selfRef, obs[selfRef].x, obs[selfRef].y, types.ObjectTypes.GRAVESTONE);
+        viewRange: defaultVehicleViewRange,
+        rider: undefined,
+        deathrattle: (obs, selfId) => {
+            if (obs[selfId].rider) {
+                delete obs[obs[selfId].interactableId];
+                var rider = obs[selfId].rider;
+
+                // Reset velocities and position
+                rider.velocityX = 0;
+                rider.velocityY = 0;
+                rider.x = obs[selfId].x;
+                rider.y = obs[selfId].y;
+
+                delete obs[selfId];
+                obs[selfId] = rider;
+            } else {
+                delete obs[obs[selfId].interactableId];
+                delete obs[selfId];
+            }
         },
         update: (obs, selfId, delta) => {
-            // Calculate player movement
+            // Calculate car movement
             obs[selfId].x += obs[selfId].velocityX * delta;
             obs[selfId].y += obs[selfId].velocityY * delta;
+
+            if (obs[obs[selfId].interactableId]) {
+                obs[obs[selfId].interactableId].x = obs[selfId].x;
+                obs[obs[selfId].interactableId].y = obs[selfId].y;
+            }
 
             // Check collisions with terrain and reposition accordingly
             collisions.checkCollisions(selfId, obs, prefabs.renderSize, (srcId, collisionId) => {
                 if (obs[srcId] && collisionId != srcId){
                     switch (obs[collisionId].type) {
-                        case types.ObjectTypes.VEHICLE:
                         case types.ObjectTypes.TERRAIN:
+                        case types.ObjectTypes.VEHICLE:
                             // Push object back out of collision terrain towards which ever side is the closest to the terrain object
                             var distRight = Math.abs((obs[collisionId].x - obs[collisionId].hitboxWidth * prefabs.renderSize / 2) - (obs[srcId].x + obs[srcId].hitboxWidth * prefabs.renderSize / 2));
                             var distLeft =  Math.abs((obs[collisionId].x + obs[collisionId].hitboxWidth * prefabs.renderSize / 2) - (obs[srcId].x - obs[srcId].hitboxWidth * prefabs.renderSize / 2));
@@ -64,12 +73,7 @@ function generateNew(obs, src, posX, posY) {
                 }
             });
         },
-        mouseDown: (obs, mouseEvent) => {
-            if (obs[mouseEvent.sourceId].currentEquipment != undefined) {
-                obs[mouseEvent.sourceId].equipment[obs[mouseEvent.sourceId].currentEquipment]
-                    .use(obs, mouseEvent.sourceId, mouseEvent.targetX, mouseEvent.targetY);
-            }
-        },
+        mouseDown: (obs, mouseEvent) => { },
         onPlayerInput: (obs, selfId, playerInput) => {
             player = obs[selfId];
             var xDir = 0;
@@ -81,7 +85,7 @@ function generateNew(obs, src, posX, posY) {
             if (playerInput.right) {
                 xDir += 1;
             }
-
+    
             if (playerInput.up) {
                 yDir -= 1;
             }
@@ -91,43 +95,36 @@ function generateNew(obs, src, posX, posY) {
 
             player.velocityX = xDir * player.speed;
             player.velocityY = yDir * player.speed;
-    
-            if (obs[selfId].currentEquipment != undefined && playerInput.cycleEquipmentForward && !playerInput.cycleEquipmentBackward) {
-                player.equipment[player.currentEquipment].onDequip(obs, selfId);
-                player.currentEquipment = player.currentEquipment + 1 >= player.equipment.length ? 0 : player.currentEquipment + 1;
-                player.equipment[player.currentEquipment].onEquip(obs, selfId);
-            }
-            if (obs[selfId].currentEquipment != undefined && playerInput.cycleEquipmentBackward && !playerInput.cycleEquipmentForward) {
-                player.equipment[player.currentEquipment].onDequip(obs, selfId);
-                player.currentEquipment = player.currentEquipment - 1 < 0 ? player.equipment.length - 1 : player.currentEquipment - 1;
-                player.equipment[player.currentEquipment].onEquip(obs, selfId);
+            
+            if (xDir != 0 || yDir != 0) {
+                player.facing = (Math.atan(player.velocityY / player.velocityX) * 57.2958 + 90) +(xDir < 0 ? 180 : 0);
             }
 
-            if (playerInput.ability1 && obs[selfId].abilities[0]) {
-                obs[selfId].abilities[0].cast(obs, selfId, 0, playerInput.targetX, playerInput.targetY);
+            if (xDir != 0) {
+                player.hitboxWidth = obs[selfId].height;
+                player.hitboxHeight = obs[selfId].width;
             }
-            if (playerInput.ability2 && obs[selfId].abilities[1]) {
-                obs[selfId].abilities[1].cast(obs, selfId, 1, playerInput.targetX, playerInput.targetY);
+            if (yDir != 0) {
+                player.hitboxWidth = obs[selfId].width;
+                player.hitboxHeight = obs[selfId].height;
             }
-            if (playerInput.ability3 && obs[selfId].abilities[2]) {
-                obs[selfId].abilities[2].cast(obs, selfId, 2, playerInput.targetX, playerInput.targetY);
-            }
-            if (playerInput.ability4 && obs[selfId].abilities[3]) {
-                obs[selfId].abilities[3].cast(obs, selfId, 3, playerInput.targetX, playerInput.targetY);
-            }
-    
+            
             if (playerInput.pickup) {
-                collisions.checkCollisions(selfId, obs, prefabs.renderSize, (srcId, collisionId) => {
-                    if (obs[srcId] && collisionId != srcId && obs[collisionId].type == types.ObjectTypes.INTERACTABLE) {
-                        obs[collisionId].onInteract(obs, collisionId, srcId);
-                    }
-                });
+                var newVechicleId = selfId + ":" + obs[selfId].type + ":" + obs[selfId].subtype + ":" + obs[selfId].x + ":" + obs[selfId].y;
+                obs[obs[selfId].interactableId].vehicleId = newVechicleId;
+                obs[newVechicleId] = obs[selfId];
+                delete obs[selfId];
+                obs[selfId] = obs[newVechicleId].rider;
+                obs[newVechicleId].rider = undefined;
+
+                // Reset velocities and position
+                obs[selfId].velocityX = 0;
+                obs[selfId].velocityY = 0;
+                obs[newVechicleId].velocityX = 0;
+                obs[newVechicleId].velocityY = 0;
+                obs[selfId].x = obs[newVechicleId].x + obs[newVechicleId].width / 2 + obs[selfId].width / 2;
+                obs[selfId].y = obs[newVechicleId].y;
             }
-        },
-        heal: (obs, selfId, amount) => {
-            obs[selfId].health + amount >= obs[selfId].maxHealth
-                ? obs[selfId].health = obs[selfId].maxHealth
-                : obs[selfId].health += amount;
         },
         damage: (obs, selfId, amount) => {
             obs[selfId].health -= amount;

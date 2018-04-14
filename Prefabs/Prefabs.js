@@ -1,89 +1,39 @@
 var types = require("../ObjectTypes");
 var collisions = require("../Collisions");
 
-// All prefabs
+// ----- Prefabs ----- //
+// Player
 var _player = require("./Player/_Player");
 var god = require("./Player/God");
-
-var renderSize = 4;
-
-// Projectile
-var projectileWidth = 2;
-var projectileHeight = 0.5;
-var projectileHitBoxRadius = 1.5;
-var baseProjectileDamage = 10;
-var projectileSpeed = 0.8; 
-var maxProjDist = 1600;
-
-var fireboltSpeed = 0.35;
-var fireboltWidth = 3;
-var fireboltHeight = 3;
-var fireboltHitBoxRadius = 2;
-var fireboltDamage = 34;
-
-// Player
-var firemageSpeed = 0.18;
-var firemageHealth = 64;
+var firemage = require("./Player/FireMage");
 
 // Gravestone
-var gravestoneWidth = 3;
-var gravestoneHeight = 4;
-var gravestoneHitboxWidth = gravestoneWidth;
-var gravestoneHitboxHeight = gravestoneHeight;
-var gravestoneHealth = 40;
-var gravestoneViewRange = 1 / 4;
+var _gravestone = require("./Gravestone/_Gravestone");
+
+// Projectile
+var _projectile = require("./Projectile/_Projectile");
+var fireboltProjectile = require("./Projectile/FireboltProjectile");
 
 // Terrain
-var treeWidth = 4;
-var treeHeight = 8;
-var treeHitboxWidth = 4;
-var treeHitboxHeight = 8;
-var treeHealth = 200;
+var _terrain = require("./Terrain/_Terrain");
+var tree = require("./Terrain/Tree");
+var wallHoriz = require("./Terrain/WallHoriz");
 
-var wallHorizWidth = 20;
-var wallHorizHeight = 12;
-var wallHorizHitboxWidth = 20;
-var wallHorizHitboxHeight = 2;
-var wallHorizHealth = 250;
-
-// Interactables
-var healthPickupWidth = 3;
-var healthPickupHeight = 3;
-var healthPickupHitboxWidth = 3;
-var healthPickupHitboxHeight = 3;
-var healthPickupHealing = 40;
-
-var carEnterWidth = 24;
-var carEnterHeight = 24;
-var carEnterHitboxWidth = 24;
-var carEnterHitboxHeight = 24;
+// Interactable
+var _interactable = require("./Interactable/_Interactable");
+var healthPickup = require("./Interactable/HealthPickup");
+var carEnter = require("./Interactable/CarEnter");
 
 // Trigger
-var spikeTrapWidth = 5;
-var spikeTrapHeight = 5;
-var spikeTrapHitboxWidth = 5;
-var spikeTrapHitboxHeight = 5;
-var spikeTrapDamage = 20;
+var _trigger = require("./Trigger/_Trigger");
+var spikeTrap = require("./Trigger/SpikeTrap");
 
 // Vehicle
-var carSpeed = 0.35;
-var carWidth = 10;
-var carHeight = 16;
-var carHitboxWidth = 10;
-var carHitboxHeight = 16;
-var carHealth = 200;
-var carViewRange = 1 / 3;
-var carColors = [
-    "#DC143C",      // Crimson
-    "#006400",      // Dark Green
-    "#FF69B4",      // Hot Pink
-    "#FFD700",      // Gold
-    "#708090",      // Slate Gray
-    "#00BFFF",      // Deep Sky Blue
-    "#0000CD",      // Medium Blue
-    "#FF4500",      // Orange Red
-    "#8B008B",      // Dark Magenta
-];
+var _vehicle = require("./Vehicle/_Vehicle");
+var car = require("./Vehicle/Car");
+
+// Export render size
+var renderSize = 4;
 
 // Abilities
 var fireboltCooldown = 1200;
@@ -91,10 +41,8 @@ var fireboltCooldown = 1200;
 // Equipment
 var binocularsViewRange = 2;
 
-
 module.exports = {
     renderSize: renderSize,
-    maxProjDist: maxProjDist,
     // Generate a new terrain object
     generateNew: (obs, src, posX, posY, type, subtype) => {
         var newObj;
@@ -107,86 +55,16 @@ module.exports = {
                         newObj = god.generateNew(obs, src, posX, posY, newObj);
                         break;
                     case types.Player.FIRE_MAGE:
-                        newObj = {
-                            ...newObj,
-                            subtype: subtype,
-                            maxHealth: firemageHealth,
-                            health: firemageHealth,
-                            speed: firemageSpeed,
-                            abilities: [
-                                module.exports.newAbility(obs, types.Abilities.FIREBOLT),
-                            ],
-                        }
+                        newObj = firemage.generateNew(obs, src, posX, posY, newObj);
                         break;
                 }
                 obs[src] = newObj;
                 return;
             case types.ObjectTypes.GRAVESTONE:
-                newObj = {
-                    type: types.ObjectTypes.GRAVESTONE,
-                    subtype: obs[src].subtype,
-                    x: posX,
-                    y: posY + 1 * renderSize,
-                    velocityX: 0,
-                    velocityY: 0,
-                    speed: 0,
-                    width: gravestoneWidth,
-                    height: gravestoneHeight,
-                    hitboxWidth: gravestoneHitboxWidth,
-                    hitboxHeight: gravestoneHitboxHeight,
-                    health: gravestoneHealth,
-                    maxHealth: gravestoneHealth,
-                    currentEquipment: undefined,
-                    equipment: [],
-                    viewRange: gravestoneViewRange,
-                    deathrattle: (obs, selfRef) => {
-                        module.exports.generateNew(obs, selfRef, 0, 0, types.ObjectTypes.PLAYER);
-                    },
-                    update: (obs, selfId, delta) => {
-                        // Check collisions with vehicles and reposition accordingly
-                        collisions.checkCollisions(selfId, obs, renderSize, (srcId, collisionId) => {
-                            if (obs[srcId] && collisionId != srcId){
-                                switch (obs[collisionId].type) {
-                                    case types.ObjectTypes.VEHICLE:
-                                        // Push object back out of collision vehicle towards which ever side is the closest to the vehicle object
-                                        var distRight = Math.abs((obs[collisionId].x - obs[collisionId].hitboxWidth * renderSize / 2) - (obs[srcId].x + obs[srcId].hitboxWidth * renderSize / 2));
-                                        var distLeft =  Math.abs((obs[collisionId].x + obs[collisionId].hitboxWidth * renderSize / 2) - (obs[srcId].x - obs[srcId].hitboxWidth * renderSize / 2));
-                                        var distUp =    Math.abs((obs[collisionId].y + obs[collisionId].hitboxHeight * renderSize / 2) - (obs[srcId].y - obs[srcId].hitboxHeight * renderSize / 2));
-                                        var distDown =  Math.abs((obs[collisionId].y - obs[collisionId].hitboxHeight * renderSize / 2) - (obs[srcId].y + obs[srcId].hitboxHeight * renderSize / 2));
-                                        
-                                        if (distRight < distLeft && distRight < distUp && distRight < distDown) {
-                                            obs[srcId].x = obs[srcId].x - distRight;
-                                        }
-                                        if (distLeft < distRight && distLeft < distUp && distLeft < distDown) {
-                                            obs[srcId].x = obs[srcId].x + distLeft;
-                                        }
-                                        if (distUp < distRight && distUp < distLeft && distUp < distDown) {
-                                            obs[srcId].y = obs[srcId].y + distUp;
-                                        }
-                                        if (distDown < distRight && distDown < distLeft && distDown < distUp) {
-                                            obs[srcId].y = obs[srcId].y - distDown;
-                                        }
-                                        break;
-                                }
-                            }
-                        });
-                    },
-                    mouseDown: (obs, mouseEvent) => { },
-                    onPlayerInput: (obs, selfId, playerInput) => { },
-                    damage: (obs, selfId, amount) => {
-                        obs[selfId].health -= amount;
-
-                        if (obs[selfId].health <= 0){
-                            obs[selfId].deathrattle(obs, selfId);
-                        }
-                    },
-                }
+                newObj = _gravestone.generateNew(obs, src, posX, posY);
                 obs[src] = newObj;
                 return;
             case types.ObjectTypes.PROJECTILE:
-                var angle = Math.atan2(
-                    posY - obs[src].y,
-                    posX - obs[src].x);
                 // Generate unique Id for new projectile
                 var newId = src.concat(":" + type + ":" + subtype + ":", posX, ":", posY);
                 var dup = 0;
@@ -194,355 +72,60 @@ module.exports = {
                     dup++;
                 }
 
-                newObj = {
-                    type: type,
-                    subtype: subtype,
-                    source: src,
-                    x: obs[src].x,
-                    y: obs[src].y,
-                    velocityX: Math.cos(angle) * projectileSpeed,
-                    velocityY: Math.sin(angle) * projectileSpeed,
-                    width: projectileWidth,
-                    height: projectileHeight,
-                    hitboxWidth: projectileHitBoxRadius,
-                    hitboxHeight: projectileHitBoxRadius,
-                    facing: angle * 180 / Math.PI,
-                    dist: 0,
-                    damage: baseProjectileDamage,
-                    update: (obs, selfId, delta) => {
-                        // Calculate projectile movement
-                        obs[selfId].x += obs[selfId].velocityX * delta;
-                        obs[selfId].y += obs[selfId].velocityY * delta;
-                        obs[selfId].dist += Math.sqrt(
-                            Math.pow(obs[selfId].velocityX * delta, 2) +
-                            Math.pow(obs[selfId].velocityY * delta, 2));
-
-                        // TODO: Change projectile collisions to ray cast
-                        collisions.checkCollisions(selfId, obs, renderSize, (srcId, collisionId) => {
-                            if (obs[srcId] && collisionId != srcId && collisionId != obs[srcId].source){
-                                switch (obs[collisionId].type) {
-                                    case types.ObjectTypes.PLAYER:
-                                    case types.ObjectTypes.GRAVESTONE:
-                                    case types.ObjectTypes.VEHICLE:
-                                    case types.ObjectTypes.TERRAIN:
-                                        if (obs[srcId]) {
-                                            if (obs[collisionId] && obs[collisionId].damage) {
-                                                obs[collisionId].damage(obs, collisionId, obs[srcId].damage);
-                                            }
-                                            delete obs[srcId];
-                                        }
-                                        break;
-                                }
-                            }
-                        });
-                        if (obs[id]) {
-                            if (obs[id].dist > maxProjDist) {
-                                delete obs[id];
-                            }
-                        }
-                    }
-                }
+                newObj = _projectile.generateNew(obs, src, posX, posY);
                 switch (subtype) {
                     case types.Projectile.BASIC_PROJECTILE:
                         obs[newId.concat(":" + dup)] = newObj;
                         return;
                     case types.Projectile.FIREBOLT_PROJECTILE:
-                        obs[newId.concat(":" + dup)] = {
-                            ...newObj,
-                            velocityX: Math.cos(angle) * fireboltSpeed,
-                            velocityY: Math.sin(angle) * fireboltSpeed,
-                            width: fireboltWidth,
-                            height: fireboltHeight,
-                            hitboxWidth: fireboltHitBoxRadius,
-                            hitboxHeight: fireboltHitBoxRadius,
-                            damage: fireboltDamage,             // TODO: Get firebolt damage from firemage's firecounters
-                        }
+                        obs[newId.concat(":" + dup)] = fireboltProjectile.generateNew(obs, src, posX, posY, newObj);
                         return;
                 }
                 break;
-            case types.ObjectTypes.TERRAIN: 
+            case types.ObjectTypes.TERRAIN:
+                newObj = _terrain.generateNew(obs, src, posX, posY);
                 switch (subtype) {
                     case types.Terrain.TREE:
-                        newObj =  {
-                            type: type,
-                            subtype: subtype,
-                            x: posX,
-                            y: posY,
-                            width: treeWidth,
-                            height: treeHeight,
-                            hitboxWidth: treeHitboxWidth,
-                            hitboxHeight: treeHitboxHeight,
-                            health: treeHealth,
-                            maxHealth: treeHealth,
-                            update: (obs, selfId, delta) => { },
-                            damage: (obs, selfId, amount) => {
-                                obs[selfId].health -= amount;
-        
-                                if (obs[selfId].health <= 0){
-                                    delete obs[selfId];
-                                }
-                            },
-                        };
+                        newObj = tree.generateNew(obs, src, posX, posY, newObj);
                         break;
                     case types.Terrain.WALL_HORIZ:
-                        newObj = {
-                            type: type,
-                            subtype: subtype,
-                            x: posX,
-                            y: posY,
-                            width: wallHorizWidth,
-                            height: wallHorizHeight,
-                            hitboxWidth: wallHorizHitboxWidth,
-                            hitboxHeight: wallHorizHitboxHeight,
-                            health: wallHorizHealth,
-                            maxHealth: wallHorizHealth,
-                            update: (obs, selfId, delta) => { },
-                            damage: (obs, selfId, amount) => {
-                                obs[selfId].health -= amount;
-        
-                                if (obs[selfId].health <= 0){
-                                    delete obs[selfId];
-                                }
-                            },
-                        };
+                        newObj = wallHoriz.generateNew(obs, src, posX, posY, newObj);
                         break;
                 }
                 break;
             case types.ObjectTypes.INTERACTABLE:
+                newObj = _interactable.generateNew(obs, src, posX, posY);
                 switch (subtype) {
                     case types.Interactable.HEALTH_PICKUP:
-                        newObj = {
-                            type: type,
-                            subtype: subtype,
-                            x: posX,
-                            y: posY,
-                            width: healthPickupWidth,
-                            height: healthPickupHeight,
-                            hitboxWidth: healthPickupHitboxWidth,
-                            hitboxHeight: healthPickupHitboxHeight,
-                            onInteract: (obs, selfRef, interactId) => {
-                                if (obs[interactId].heal) {
-                                    obs[interactId].heal(obs, interactId, healthPickupHealing);
-                                }
-                                delete obs[selfRef];
-                            },
-                            update: (obs, selfId, delta) => { },
-                        };
+                        newObj = healthPickup.generateNew(obs, src, posX, posY, newObj);
                         break;
                     case types.Interactable.CAR_ENTER:
-                        newObj = {
-                            type: type,
-                            subtype: subtype,
-                            x: posX,
-                            y: posY,
-                            width: carEnterWidth,
-                            height: carEnterHeight,
-                            hitboxWidth: carEnterHitboxWidth,
-                            hitboxHeight: carEnterHitboxHeight,
-                            vehicleId: src,
-                            onInteract: (obs, selfRef, interactId) => {
-                                if (obs[interactId] &&
-                                    obs[interactId].type === types.ObjectTypes.PLAYER &&
-                                    obs[obs[selfRef].vehicleId].rider == undefined
-                                ) {
-                                    obs[obs[selfRef].vehicleId].rider = obs[interactId];
-                                    obs[interactId] = obs[obs[selfRef].vehicleId];
-                                    delete obs[obs[selfRef].vehicleId];
-                                    obs[selfRef].vehicleId = interactId;
-                                }
-                            },
-                            update: (obs, selfId, delta) => { },
-                        };
+                        newObj = carEnter.generateNew(obs, src, posX, posY, newObj);
 
                         obs[src + ":" + type + ":" + subtype] = newObj;
                         return;
                 }
                 break;
             case types.ObjectTypes.TRIGGER:
+                newObj = _trigger.generateNew(obs, src, posX, posY);
                 switch (subtype) {
                     case types.Trigger.SPIKE_TRAP:
-                        newObj = {
-                            type: type,
-                            subtype: subtype,
-                            x: posX,
-                            y: posY,
-                            width: spikeTrapWidth,
-                            height: spikeTrapHeight,
-                            hitboxWidth: spikeTrapHitboxWidth,
-                            hitboxHeight: spikeTrapHitboxHeight,
-                            onTrigger: (obs, selfRef, triggerId) => {
-                                if (obs[triggerId] && (
-                                    obs[triggerId].type == types.ObjectTypes.PLAYER ||
-                                    obs[triggerId].type == types.ObjectTypes.VEHICLE
-                                )) {
-                                    if (obs[triggerId].damage) {
-                                        obs[triggerId].damage(obs, triggerId, spikeTrapDamage);
-                                    }
-                                    delete obs[selfRef];
-                                }
-                            },
-                            update: (obs, selfId, delta) => {
-                                collisions.checkCollisions(selfId, obs, renderSize, (srcId, collisionId) => {
-                                    if (obs[srcId] && collisionId != srcId){
-                                        obs[srcId].onTrigger(obs, srcId, collisionId);
-                                    }
-                                });
-                            },
-                        };
+                        newObj = spikeTrap.generateNew(obs, src, posX, posY, newObj);
                         break;
                 }
                 break;
             case types.ObjectTypes.VEHICLE:
-                var vehicleId = src + ":" + type + ":" + subtype + ":" + posX + ":" + posY;
+                newObj = _vehicle.generateNew(obs, src, posX, posY);
                 switch (subtype) {
                     case types.Vehicle.CAR:
-                        var carColor = Math.floor(Math.random() * (carColors.length));
-                        newObj = {
-                            type: type,
-                            subtype: subtype,
-                            x: posX,
-                            y: posY,
-                            velocityX: 0,
-                            velocityY: 0,
-                            speed: carSpeed,
-                            width: carWidth,
-                            height: carHeight,
-                            hitboxWidth: carHitboxWidth,
-                            hitboxHeight: carHitboxHeight,
-                            health: carHealth,
-                            maxHealth: carHealth,
-                            carColor: carColors[carColor],
-                            facing: 0,
-                            currentEquipment: undefined,
-                            equipment: [ ],
-                            viewRange: carViewRange,
-                            rider: undefined,
-                            interactableId: vehicleId + ":" + types.ObjectTypes.INTERACTABLE + ":" + types.Interactable.CAR_ENTER,
-                            deathrattle: (obs, selfId) => {
-                                if (obs[selfId].rider) {
-                                    delete obs[obs[selfId].interactableId];
-                                    var rider = obs[selfId].rider;
-
-                                    // Reset velocities and position
-                                    rider.velocityX = 0;
-                                    rider.velocityY = 0;
-                                    rider.x = obs[selfId].x;
-                                    rider.y = obs[selfId].y;
-
-                                    delete obs[selfId];
-                                    obs[selfId] = rider;
-                                } else {
-                                    delete obs[obs[selfId].interactableId];
-                                    delete obs[selfId];
-                                }
-                            },
-                            update: (obs, selfId, delta) => {
-                                // Calculate car movement
-                                obs[selfId].x += obs[selfId].velocityX * delta;
-                                obs[selfId].y += obs[selfId].velocityY * delta;
-
-                                if (obs[obs[selfId].interactableId]) {
-                                    obs[obs[selfId].interactableId].x = obs[selfId].x;
-                                    obs[obs[selfId].interactableId].y = obs[selfId].y;
-                                }
-
-                                // Check collisions with terrain and reposition accordingly
-                                collisions.checkCollisions(selfId, obs, renderSize, (srcId, collisionId) => {
-                                    if (obs[srcId] && collisionId != srcId){
-                                        switch (obs[collisionId].type) {
-                                            case types.ObjectTypes.TERRAIN:
-                                            case types.ObjectTypes.VEHICLE:
-                                                // Push object back out of collision terrain towards which ever side is the closest to the terrain object
-                                                var distRight = Math.abs((obs[collisionId].x - obs[collisionId].hitboxWidth * renderSize / 2) - (obs[srcId].x + obs[srcId].hitboxWidth * renderSize / 2));
-                                                var distLeft =  Math.abs((obs[collisionId].x + obs[collisionId].hitboxWidth * renderSize / 2) - (obs[srcId].x - obs[srcId].hitboxWidth * renderSize / 2));
-                                                var distUp =    Math.abs((obs[collisionId].y + obs[collisionId].hitboxHeight * renderSize / 2) - (obs[srcId].y - obs[srcId].hitboxHeight * renderSize / 2));
-                                                var distDown =  Math.abs((obs[collisionId].y - obs[collisionId].hitboxHeight * renderSize / 2) - (obs[srcId].y + obs[srcId].hitboxHeight * renderSize / 2));
-                                                
-                                                if (distRight < distLeft && distRight < distUp && distRight < distDown) {
-                                                    obs[srcId].x = obs[srcId].x - distRight;
-                                                }
-                                                if (distLeft < distRight && distLeft < distUp && distLeft < distDown) {
-                                                    obs[srcId].x = obs[srcId].x + distLeft;
-                                                }
-                                                if (distUp < distRight && distUp < distLeft && distUp < distDown) {
-                                                    obs[srcId].y = obs[srcId].y + distUp;
-                                                }
-                                                if (distDown < distRight && distDown < distLeft && distDown < distUp) {
-                                                    obs[srcId].y = obs[srcId].y - distDown;
-                                                }
-                                                break;
-                                        }
-                                    }
-                                });
-                            },
-                            mouseDown: (obs, mouseEvent) => { },
-                            onPlayerInput: (obs, selfId, playerInput) => {
-                                player = obs[selfId];
-                                var xDir = 0;
-                                var yDir = 0;
-
-                                if (playerInput.left) {
-                                    xDir -= 1;
-                                }
-                                if (playerInput.right) {
-                                    xDir += 1;
-                                }
-                        
-                                if (playerInput.up) {
-                                    yDir -= 1;
-                                }
-                                if (playerInput.down) {
-                                    yDir += 1;
-                                }
-
-                                player.velocityX = xDir * player.speed;
-                                player.velocityY = yDir * player.speed;
-                                
-                                if (xDir != 0 || yDir != 0) {
-                                    player.facing = (Math.atan(player.velocityY / player.velocityX) * 57.2958 + 90) +(xDir < 0 ? 180 : 0);
-                                }
-
-                                if (yDir != 0) {
-                                    player.hitboxWidth = carHitboxWidth;
-                                }
-                                if (xDir != 0) {
-                                    player.hitboxWidth = carHitboxHeight;
-                                }
-                                
-                                if (playerInput.pickup) {
-                                    var newVechicleId = selfId + ":" + obs[selfId].type + ":" + obs[selfId].subtype + ":" + obs[selfId].x + ":" + obs[selfId].y;
-                                    obs[obs[selfId].interactableId].vehicleId = newVechicleId;
-                                    obs[newVechicleId] = obs[selfId];
-                                    delete obs[selfId];
-                                    obs[selfId] = obs[newVechicleId].rider;
-                                    obs[newVechicleId].rider = undefined;
-
-                                    // Reset velocities and position
-                                    obs[selfId].velocityX = 0;
-                                    obs[selfId].velocityY = 0;
-                                    obs[newVechicleId].velocityX = 0;
-                                    obs[newVechicleId].velocityY = 0;
-                                    obs[selfId].x = obs[newVechicleId].x + obs[newVechicleId].width / 2 + obs[selfId].width / 2;
-                                    obs[selfId].y = obs[newVechicleId].y;
-                                }
-                            },
-                            damage: (obs, selfId, amount) => {
-                                obs[selfId].health -= amount;
-        
-                                if (obs[selfId].health <= 0){
-                                    obs[selfId].deathrattle(obs, selfId);
-                                }
-                            },
-                        };
-                        obs[vehicleId] = newObj;
-                        module.exports.generateNew(obs, vehicleId, posX, posY, types.ObjectTypes.INTERACTABLE, types.Interactable.CAR_ENTER);
+                        newObj = car.generateNew(obs, src, posX, posY, newObj);
                         return;
                 }
                 break;
             default:
                 break;
         }
-
+        // TODO: Consider removing this?
         if (!newObj) {
             newObj = {
                 type: types.ObjectTypes.TERRAIN,
@@ -563,6 +146,7 @@ module.exports = {
                         obs[selfId].deathrattle(obs, selfId);
                     }
                 },
+                deathrattle: (obs, selfId) => { },
             }
         }
         obs[src + ":" + type + ":" + subtype + ":" + posX + ":" + posY] = newObj;
