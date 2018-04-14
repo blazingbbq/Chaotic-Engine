@@ -2,44 +2,38 @@ var types = require("../ObjectTypes");
 var collisions = require("../Collisions");
 
 // ----- Prefabs ----- //
-// Player
 var _player = require("./Player/_Player");
 var god = require("./Player/God");
 var firemage = require("./Player/FireMage");
 
-// Gravestone
 var _gravestone = require("./Gravestone/_Gravestone");
 
-// Projectile
 var _projectile = require("./Projectile/_Projectile");
 var fireboltProjectile = require("./Projectile/FireboltProjectile");
 
-// Terrain
 var _terrain = require("./Terrain/_Terrain");
 var tree = require("./Terrain/Tree");
 var wallHoriz = require("./Terrain/WallHoriz");
 
-// Interactable
 var _interactable = require("./Interactable/_Interactable");
 var healthPickup = require("./Interactable/HealthPickup");
 var carEnter = require("./Interactable/CarEnter");
 
-// Trigger
 var _trigger = require("./Trigger/_Trigger");
 var spikeTrap = require("./Trigger/SpikeTrap");
 
-// Vehicle
 var _vehicle = require("./Vehicle/_Vehicle");
 var car = require("./Vehicle/Car");
 
+var blaster = require("./Equipment/Blaster");
+var scanner = require("./Equipment/Scanner");
+var builder = require("./Equipment/Builder");
+var binoculars = require("./Equipment/Binoculars");
+
+var firebolt = require("./Abilities/Firebolt");
+
 // Export render size
 var renderSize = 4;
-
-// Abilities
-var fireboltCooldown = 1200;
-
-// Equipment
-var binocularsViewRange = 2;
 
 module.exports = {
     renderSize: renderSize,
@@ -154,71 +148,19 @@ module.exports = {
     newEquipment: (obs, type, params = { }) => {
         switch (type) {
             case types.EquipmentTypes.BLASTER:
-                return {
-                    type: type,
-                    use: (obs, sourceId, targetX, targetY) => {
-                        module.exports.generateNew(obs, sourceId, targetX, targetY, types.ObjectTypes.PROJECTILE, types.Projectile.BASIC_PROJECTILE);
-                    },
-                    onEquip: (obs, sourceId) => { },
-                    onDequip: (obs, sourceId) => { },
-                }
+                return blaster.generateNew(obs, params);
             case types.EquipmentTypes.SCANNER:
-                return {
-                    type: type,
-                    use: (obs, sourceId, targetX, targetY) => {
-                        // Replaces all builders with this build type...
-                        collisions.checkClickCollisions(targetX, targetY, obs, renderSize, (collisionId) => {
-                            if (obs[collisionId].subtype != types.Interactable.CAR_ENTER) {
-                                obs[sourceId].equipment = obs[sourceId].equipment.map((item) => {
-                                    if (item.type == types.EquipmentTypes.BUILDER) {
-                                        item = module.exports.newEquipment(obs, types.EquipmentTypes.BUILDER, { type: obs[collisionId].type, subtype: obs[collisionId].subtype });
-                                    }
-                                    return item;
-                                });
-                            }
-                        });
-                    },
-                    onEquip: (obs, sourceId) => { },
-                    onDequip: (obs, sourceId) => { },
-                }
+                return scanner.generateNew(obs, params);
             case types.EquipmentTypes.BUILDER:
-                return {
-                    type: type,
-                    use: (obs, sourceId, targetX, targetY) => {
-                        module.exports.generateNew(obs, sourceId, targetX, targetY, params.type, params.subtype);
-                    },
-                    onEquip: (obs, sourceId) => { },
-                    onDequip: (obs, sourceId) => { },
-                }
+                return builder.generateNew(obs, params);
             case types.EquipmentTypes.BINOCULARS:
-                return {
-                    type: type,
-                    use: (obs, sourceId, targetX, targetY) => { },
-                    onEquip: (obs, sourceId) => {
-                        obs[sourceId].viewRange = binocularsViewRange;
-                    },
-                    onDequip: (obs, sourceId) => {
-                        obs[sourceId].viewRange = playerViewRange;
-                    },
-                }
+                return binoculars.generateNew(obs, params);
         }
     },
     newAbility: (obs, type, params = { }) => {
         switch (type) {
             case types.Abilities.FIREBOLT:
-                return {
-                    type: type,
-                    cooldown: fireboltCooldown,
-                    lastcast: undefined,
-                    cast: (obs, sourceId, abilityIndex, targetX, targetY) => {
-                        var newTime = Date.now();
-                        if (!obs[sourceId].abilities[abilityIndex].lastcast
-                            || newTime - obs[sourceId].abilities[abilityIndex].lastcast >= obs[sourceId].abilities[abilityIndex].cooldown) {
-                            obs[sourceId].abilities[abilityIndex].lastcast = newTime;
-                            module.exports.generateNew(obs, sourceId, targetX, targetY, types.ObjectTypes.PROJECTILE, types.Projectile.FIREBOLT_PROJECTILE);
-                        }
-                    },
-                }
+                return firebolt.generateNew(obs, params);
         }
     },
 }

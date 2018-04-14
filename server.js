@@ -33,7 +33,7 @@ initializeMap(objects);
 io.on("connection", (socket) => {
     // Handle connection
     socket.on("new-player", () => {
-        prefabs.generateNew(objects, socket.id, 0, 0, types.ObjectTypes.PLAYER, types.Player.GOD);
+        prefabs.generateNew(objects, socket.id, 0, 0, types.ObjectTypes.PLAYER, types.Player.FIRE_MAGE);
 
         socket.emit("handshake", {
             id: socket.id,
