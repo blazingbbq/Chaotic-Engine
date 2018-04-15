@@ -18,6 +18,7 @@ var wallHoriz = require("./Terrain/WallHoriz");
 var _interactable = require("./Interactable/_Interactable");
 var healthPickup = require("./Interactable/HealthPickup");
 var carEnter = require("./Interactable/CarEnter");
+var playerTypeChanger = require("./Interactable/PlayerTypeChanger");
 
 var _trigger = require("./Trigger/_Trigger");
 var spikeTrap = require("./Trigger/SpikeTrap");
@@ -38,7 +39,7 @@ var renderSize = 4;
 module.exports = {
     renderSize: renderSize,
     // Generate a new terrain object
-    generateNew: (obs, src, posX, posY, type, subtype) => {
+    generateNew: (obs, src, posX, posY, type, subtype, params = { }) => {
         var newObj;
         
         switch (type) {
@@ -98,6 +99,9 @@ module.exports = {
 
                         obs[src + ":" + type + ":" + subtype] = newObj;
                         return;
+                    case types.Interactable.PLAYER_TYPE_CHANGER:
+                        newObj = playerTypeChanger.generateNew(obs, src, posX, posY, newObj, params);
+                        break;
                 }
                 break;
             case types.ObjectTypes.TRIGGER:

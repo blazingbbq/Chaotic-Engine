@@ -12,7 +12,6 @@ module.exports = {
         HUMAN: "human",
         GOD: "god",
         FIRE_MAGE: "fire-mage",
-        KNIGHT: "knight",
     },
     Projectile: {
         BASIC_PROJECTILE: "basic-projectile",
@@ -25,6 +24,7 @@ module.exports = {
     Interactable: {
         HEALTH_PICKUP: "health-pickup",
         CAR_ENTER: "car-enter",
+        PLAYER_TYPE_CHANGER: "player-type-changer",
     },
     Trigger: {
         SPIKE_TRAP: "spike-trap",

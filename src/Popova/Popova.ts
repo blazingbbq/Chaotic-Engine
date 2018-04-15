@@ -6,7 +6,7 @@ export interface masterPiece {
     height: number,
     facing: number,
     strokes: stroke[],
-    freeHand?: boolean,
+    customRenderSize?: number,
 }
 
 export interface stroke {
@@ -82,10 +82,9 @@ export class Popova {
             masterPiece.posY,
             masterPiece.width,
             masterPiece.height,
-            masterPiece.facing,
-            masterPiece.freeHand);
+            masterPiece.facing);
         masterPiece.strokes.forEach((stroke: stroke) => {
-            this.renderStroke(stroke, masterPiece.palette, masterPiece.freeHand);
+            this.renderStroke(stroke, masterPiece.palette, masterPiece.customRenderSize);
         });
 
         this.ctx.restore();
@@ -98,30 +97,26 @@ export class Popova {
      * @param width The width of what is being drawn
      * @param height The height of what is being drawn
      * @param degrees Degrees to rotate the canvas by
-     * @param freeHand If the stroke is rendered with blocks or free hand
+     * @param customRenderSize Render the master piece with custom cube sizing
      */
-    prepCanvas(positionX: number, positionY: number, width: number, height: number, degrees: number, freeHand?: boolean){
+    prepCanvas(positionX: number, positionY: number, width: number, height: number, degrees: number){
         this.ctx.beginPath();
         this.ctx.translate(positionX, positionY);
         this.ctx.rotate(degrees * Math.PI / 180);
-        if (freeHand) {
-            this.ctx.translate(- width / 2, - height / 2);
-        } else {
-            this.ctx.translate(- width * this.cubeSize / 2, - height * this.cubeSize / 2);
-        }
+        this.ctx.translate(- width * this.cubeSize / 2, - height * this.cubeSize / 2);
     }
 
     /**
      * Renders 
      * @param stroke Stroke to render
      * @param palette Contains the master piece's color swatches
-     * @param freeHand If the stroke is rendered with blocks or free hand
+     * @param customRenderSize Render the master piece with custom cube sizing
      */
-    renderStroke(stroke: stroke, palette: string[], freeHand?: boolean){
+    renderStroke(stroke: stroke, palette: string[], customRenderSize?: number){
         this.ctx.fillStyle = palette[stroke.swatch];
-        if (freeHand){
-            this.ctx.fillRect(stroke.cellX, stroke.cellY,
-                stroke.width, stroke.height);
+        if (customRenderSize){
+            this.ctx.fillRect(stroke.cellX * customRenderSize, stroke.cellY * customRenderSize,
+                stroke.width * customRenderSize, stroke.height * customRenderSize);
         } else {
             this.ctx.fillRect(stroke.cellX * this.cubeSize, stroke.cellY * this.cubeSize,
                 stroke.width * this.cubeSize, stroke.height * this.cubeSize);

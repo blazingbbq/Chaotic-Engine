@@ -16,6 +16,7 @@ import * as tree from "../../Prefabs/Terrain/Tree.template";
 import * as wallHoriz from "../../Prefabs/Terrain/WallHoriz.template";
 
 import * as healthPickup from "../../Prefabs/Interactable/HealthPickup.template";
+import * as playerTypeChanger from "../../Prefabs/Interactable/PlayerTypeChanger.template";
 
 import * as spikeTrap from "../../Prefabs/Trigger/SpikeTrap.template";
 
@@ -210,6 +211,10 @@ export function renderObjects(
                 switch (object.subtype) {
                     case types.Interactable.HEALTH_PICKUP:
                         env.draw(healthPickup.healthPickupMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                    case types.Interactable.PLAYER_TYPE_CHANGER:
+                        env.draw(playerTypeChanger.playerTypeChangerMasterPiece(object, renderOffsetX, renderOffsetY));
+                        env.draw(playerTypeChanger.littleManMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
                 }
                 break;

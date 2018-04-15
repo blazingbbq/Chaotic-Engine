@@ -33,7 +33,7 @@ initializeMap(objects);
 io.on("connection", (socket) => {
     // Handle connection
     socket.on("new-player", () => {
-        prefabs.generateNew(objects, socket.id, 0, 0, types.ObjectTypes.PLAYER, types.Player.GOD);
+        prefabs.generateNew(objects, socket.id, 0, 0, types.ObjectTypes.PLAYER, types.Player.HUMAN);
 
         socket.emit("handshake", {
             id: socket.id,
@@ -89,8 +89,12 @@ function initializeMap(obs) {
     prefabs.generateNew(obs, "init", 104, 125, types.ObjectTypes.TERRAIN, types.Terrain.WALL_HORIZ);
 
     prefabs.generateNew(obs, "init", -100, 0, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
-    prefabs.generateNew(obs, "init", -120, 0, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
-    prefabs.generateNew(obs, "init", -140, 0, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
+    prefabs.generateNew(obs, "init", -124, 0, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
+    prefabs.generateNew(obs, "init", -148, 0, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
+
+    prefabs.generateNew(obs, "init", -100, 32, types.ObjectTypes.INTERACTABLE, types.Interactable.PLAYER_TYPE_CHANGER, { newType: types.Player.HUMAN });
+    prefabs.generateNew(obs, "init", -124, 32, types.ObjectTypes.INTERACTABLE, types.Interactable.PLAYER_TYPE_CHANGER, { newType: types.Player.FIRE_MAGE });
+    prefabs.generateNew(obs, "init", -148, 32, types.ObjectTypes.INTERACTABLE, types.Interactable.PLAYER_TYPE_CHANGER, { newType: types.Player.GOD });
 
     prefabs.generateNew(obs, "init", 150, 0, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);
     prefabs.generateNew(obs, "init", 150, 24, types.ObjectTypes.TRIGGER, types.Trigger.SPIKE_TRAP);

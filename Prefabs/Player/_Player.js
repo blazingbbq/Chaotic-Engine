@@ -38,8 +38,7 @@ function generateNew(obs, src, posX, posY) {
             // Check collisions with terrain and reposition accordingly
             collisions.checkCollisions(selfId, obs, prefabs.renderSize, (srcId, collisionId) => {
                 if (obs[srcId] && collisionId != srcId){
-                    switch (obs[collisionId].type) {
-                        case types.ObjectTypes.PLAYER:      // Should players really collide with eachother?
+                    switch (obs[collisionId].type) {        // Should players collide with other players?
                         case types.ObjectTypes.VEHICLE:
                         case types.ObjectTypes.TERRAIN:
                             collisions.pushBack(obs, srcId, collisionId, prefabs.renderSize);

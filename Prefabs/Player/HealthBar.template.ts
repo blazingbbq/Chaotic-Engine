@@ -12,8 +12,8 @@ export function healthBarMasterPiece(object: any, renderOffsetX: number, renderO
         palette: ["#00a400", "#FF0000"],
         posX: object.x - renderOffsetX,
         posY: object.y - renderOffsetY - (object.height + 2) * cubeSize / 2,
-        width: object.width * cubeSize,
-        height: 1 * cubeSize,
+        width: object.width,
+        height: 1,
         facing: 0,
         strokes: [{
             cellX: 0,
@@ -22,5 +22,5 @@ export function healthBarMasterPiece(object: any, renderOffsetX: number, renderO
             height: cubeSize * 3 / 4,
             swatch: (object.health > object.maxHealth / 3) ? 0 : 1,
         },],
-    freeHand: true};
+    customRenderSize: 1 };
 }
