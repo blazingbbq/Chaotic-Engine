@@ -47,10 +47,9 @@ function generateNew(obs, src, posX, posY) {
                 }
             });
         },
-        mouseDown: (obs, mouseEvent) => {
-            if (obs[mouseEvent.sourceId].currentEquipment != undefined) {
-                obs[mouseEvent.sourceId].equipment[obs[mouseEvent.sourceId].currentEquipment]
-                    .use(obs, mouseEvent.sourceId, mouseEvent.targetX, mouseEvent.targetY);
+        mouseDown: (obs, mouseEvent) => {   // Primary click casts first ability
+            if (obs[mouseEvent.sourceId].abilities[0]) {
+                obs[mouseEvent.sourceId].abilities[0].cast(obs, mouseEvent.sourceId, 0, mouseEvent.targetX, mouseEvent.targetY);
             }
         },
         onPlayerInput: (obs, selfId, playerInput) => {
@@ -75,15 +74,19 @@ function generateNew(obs, src, posX, posY) {
             player.velocityX = xDir * player.speed;
             player.velocityY = yDir * player.speed;
     
-            if (obs[selfId].currentEquipment != undefined && playerInput.cycleEquipmentForward && !playerInput.cycleEquipmentBackward) {
+            if (playerInput.cycleEquipmentForward && !playerInput.cycleEquipmentBackward && obs[selfId].currentEquipment != undefined) {
                 player.equipment[player.currentEquipment].onDequip(obs, selfId);
                 player.currentEquipment = player.currentEquipment + 1 >= player.equipment.length ? 0 : player.currentEquipment + 1;
                 player.equipment[player.currentEquipment].onEquip(obs, selfId);
             }
-            if (obs[selfId].currentEquipment != undefined && playerInput.cycleEquipmentBackward && !playerInput.cycleEquipmentForward) {
+            if (playerInput.cycleEquipmentBackward && !playerInput.cycleEquipmentForward && obs[selfId].currentEquipment != undefined) {
                 player.equipment[player.currentEquipment].onDequip(obs, selfId);
                 player.currentEquipment = player.currentEquipment - 1 < 0 ? player.equipment.length - 1 : player.currentEquipment - 1;
                 player.equipment[player.currentEquipment].onEquip(obs, selfId);
+            }
+            if (playerInput.useEquipment && obs[selfId].currentEquipment != undefined) {
+                obs[selfId].equipment[obs[selfId].currentEquipment]
+                    .use(obs, selfId, playerInput.targetX, playerInput.targetY);
             }
 
             if (playerInput.ability1 && obs[selfId].abilities[0]) {

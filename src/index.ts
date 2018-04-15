@@ -30,6 +30,7 @@ var playerInput = {
     right: false,
     cycleEquipmentForward: false,
     cycleEquipmentBackward: false,
+    useEquipment: false,
     pickup: false,
     ability1: false,
     ability2: false,
@@ -45,6 +46,7 @@ var KEY_RIGHT = 68;                     // Default to D
 var KEY_LEFT = 65;                      // Default to A
 var KEY_CYCLE_EQUIPMENT_FORWARD = 69;   // Default to E
 var KEY_CYCLE_EQUIPMENT_BACKWARD = 81;  // Default to Q
+var KEY_USE_EQUIPMENT = 82              // Default to R
 var KEY_PICKUP = 70;                    // Default to F
 var KEY_ABILITY_1 = 49;                 // Default to 1
 var KEY_ABILITY_2 = 50;                 // Default to 2
@@ -75,6 +77,9 @@ document.addEventListener("keydown", (event) => {
         case KEY_CYCLE_EQUIPMENT_BACKWARD:
             playerInput.cycleEquipmentBackward = true;
             break;
+        case KEY_USE_EQUIPMENT:
+            playerInput.useEquipment = true;
+            break;
         case KEY_PICKUP:
             playerInput.pickup = true;
             break;
@@ -101,10 +106,7 @@ document.addEventListener("keydown", (event) => {
     playerInput.pickup = false;
     playerInput.cycleEquipmentForward = false;
     playerInput.cycleEquipmentBackward = false;
-    playerInput.ability1 = false;
-    playerInput.ability2 = false;
-    playerInput.ability3 = false;
-    playerInput.ability4 = false;
+    playerInput.useEquipment = false;
 });
 document.addEventListener("keyup", (event) => {
     switch (event.keyCode) {
@@ -119,6 +121,18 @@ document.addEventListener("keyup", (event) => {
             break;
         case KEY_LEFT:
             playerInput.left = false;
+            break;
+        case KEY_ABILITY_1:
+            playerInput.ability1 = false;
+            break;
+        case KEY_ABILITY_2:
+            playerInput.ability2 = false;
+            break;
+        case KEY_ABILITY_3:
+            playerInput.ability3 = false;
+            break;
+        case KEY_ABILITY_4:
+            playerInput.ability4 = false;
             break;
         default:
             return;
@@ -218,25 +232,9 @@ socket.on("state", (objects: any) => {
         ui.drawText(delta.toString() + "ms", canvasSize.width - 48, 16);
     }
 
-    // Draw current equipment ui icon
-    if (player && player.currentEquipment != undefined) {
-        switch (player.equipment[player.currentEquipment].type) {
-            case types.EquipmentTypes.BLASTER:
-                ui.draw(louvre.blasterUIMasterPiece(equipmentIconPosX, equipmentIconPosY));
-                break;
-            case types.EquipmentTypes.SCANNER:
-                ui.draw(louvre.scannerUIMasterPiece(equipmentIconPosX, equipmentIconPosY));
-                break;
-            case types.EquipmentTypes.BUILDER:
-                ui.draw(louvre.builderUIMasterPiece(equipmentIconPosX, equipmentIconPosY));
-                break;
-            case types.EquipmentTypes.BINOCULARS:
-                ui.draw(louvre.binocularsUIMasterPiece(equipmentIconPosX, equipmentIconPosY));
-                break;
-            default:
-                break;
-        }
-    }
+    // Render current equipment ui icon
+    louvre.renderCurrentEquipment(player, equipmentIconPosX, equipmentIconPosY, ui);
 
+    // Render objects
     louvre.renderObjects(objects, renderOffsetX, renderOffsetY, cubeSize, background, env, foreground, cover, ui);
 });

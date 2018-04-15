@@ -22,135 +22,10 @@ import * as spikeTrap from "../../Prefabs/Trigger/SpikeTrap.template";
 
 import * as car from "../../Prefabs/Vehicle/Car.template";
 
-// --- UI Icons ---
-/**
- * Get master piece for blaster ui icon
- * @param posX Horizontal icon position
- * @param posY Vertical icon position
- */
-export function blasterUIMasterPiece(posX: number, posY: number): masterPiece {
-    return {
-        palette: ["#000000"],
-        posX: posX,
-        posY: posY,
-        width: 3,
-        height: 2,
-        facing: -45,
-        strokes: [{
-            cellX: 0,
-            cellY: 0,
-            width: 1,
-            height: 2,
-            swatch: 0
-        }, {
-            cellX: 0,
-            cellY: 0,
-            width: 3,
-            height: 1,
-            swatch: 0
-        },]
-    };
-}
-
-/**
- * Get master piece for scanner ui icon
- * @param posX Horizontal icon position
- * @param posY Vertical icon position
- */
-export function scannerUIMasterPiece(posX: number, posY: number): masterPiece {
-    return {
-        palette: ["#FFFFFF", "#3399FF"],
-        posX: posX,
-        posY: posY,
-        width: 3,
-        height: 3,
-        facing: 0,
-        strokes: [{
-            cellX: 0,
-            cellY: 0,
-            width: 3,
-            height: 3,
-            swatch: 0
-        }, {
-            cellX: -1,
-            cellY: 1,
-            width: 5,
-            height: 1,
-            swatch: 0
-        }, {
-            cellX: 1,
-            cellY: 1,
-            width: 1,
-            height: 1,
-            swatch: 1
-        },]
-    };
-}
-
-/**
- * Get master piece for builder ui icon
- * @param posX Horizontal icon position
- * @param posY Vertical icon position
- */
-export function builderUIMasterPiece(posX: number, posY: number): masterPiece {
-    return {
-        palette: ["#000000", "#935200"],
-        posX: posX,
-        posY: posY,
-        width: 3,
-        height: 3,
-        facing: -45,
-        strokes: [{
-            cellX: 1,
-            cellY: 0,
-            width: 1,
-            height: 3,
-            swatch: 1
-        }, {
-            cellX: 0,
-            cellY: 0,
-            width: 3,
-            height: 1,
-            swatch: 0
-        },]
-    };
-}
-
-/**
- * Get master piece for binoculars ui icon
- * @param posX Horizontal icon position
- * @param posY Vertical icon position
- */
-export function binocularsUIMasterPiece(posX: number, posY: number): masterPiece {
-    return {
-        palette: ["#000000", "#333333"],
-        posX: posX,
-        posY: posY,
-        width: 3,
-        height: 3,
-        facing: -45,
-        strokes: [ {
-            cellX: 0,
-            cellY: 1,
-            width: 3,
-            height: 1,
-            swatch: 1
-        }, {
-            cellX: 0,
-            cellY: 0,
-            width: 1,
-            height: 3,
-            swatch: 0
-        }, {
-            cellX: 2,
-            cellY: 0,
-            width: 1,
-            height: 3,
-            swatch: 0
-        },]
-    };
-}
-
+import * as binocularsIcon from "../../Prefabs/Equipment/Binoculars.icon";
+import * as blasterIcon from "../../Prefabs/Equipment/Blaster.icon";
+import * as builderIcon from "../../Prefabs/Equipment/Builder.icon";
+import * as scannerIcon from "../../Prefabs/Equipment/Scanner.icon";
 
 export function renderObjects(
     objects: any,
@@ -234,6 +109,27 @@ export function renderObjects(
                 break;
             default:
                 env.draw(_terrain.defaultTerrainMasterPiece(object, renderOffsetX, renderOffsetY));
+                break;
+        }
+    }
+}
+
+export function renderCurrentEquipment(player: any, renderOffsetX: number, renderOffsetY: number, ui: Popova) {
+    if (player && player.currentEquipment != undefined) {
+        switch (player.equipment[player.currentEquipment].type) {
+            case types.EquipmentTypes.BLASTER:
+                ui.draw(blasterIcon.blasterUIMasterPiece(renderOffsetX, renderOffsetY));
+                break;
+            case types.EquipmentTypes.SCANNER:
+                ui.draw(scannerIcon.scannerUIMasterPiece(renderOffsetX, renderOffsetY));
+                break;
+            case types.EquipmentTypes.BUILDER:
+                ui.draw(builderIcon.builderUIMasterPiece(renderOffsetX, renderOffsetY));
+                break;
+            case types.EquipmentTypes.BINOCULARS:
+                ui.draw(binocularsIcon.binocularsUIMasterPiece(renderOffsetX, renderOffsetY));
+                break;
+            default:
                 break;
         }
     }
