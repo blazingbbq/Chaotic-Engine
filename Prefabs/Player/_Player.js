@@ -12,8 +12,8 @@ function generateNew(obs, src, posX, posY) {
     return {
         type: types.ObjectTypes.PLAYER,
         subtype: types.Player.HUMAN,
-        x: 0,
-        y: 0,
+        x: posX,
+        y: posY,
         velocityX: 0,
         velocityY: 0,
         speed: playerSpeed,
@@ -39,26 +39,10 @@ function generateNew(obs, src, posX, posY) {
             collisions.checkCollisions(selfId, obs, prefabs.renderSize, (srcId, collisionId) => {
                 if (obs[srcId] && collisionId != srcId){
                     switch (obs[collisionId].type) {
+                        case types.ObjectTypes.PLAYER:      // Should players really collide with eachother?
                         case types.ObjectTypes.VEHICLE:
                         case types.ObjectTypes.TERRAIN:
-                            // Push object back out of collision terrain towards which ever side is the closest to the terrain object
-                            var distRight = Math.abs((obs[collisionId].x - obs[collisionId].hitboxWidth * prefabs.renderSize / 2) - (obs[srcId].x + obs[srcId].hitboxWidth * prefabs.renderSize / 2));
-                            var distLeft =  Math.abs((obs[collisionId].x + obs[collisionId].hitboxWidth * prefabs.renderSize / 2) - (obs[srcId].x - obs[srcId].hitboxWidth * prefabs.renderSize / 2));
-                            var distUp =    Math.abs((obs[collisionId].y + obs[collisionId].hitboxHeight * prefabs.renderSize / 2) - (obs[srcId].y - obs[srcId].hitboxHeight * prefabs.renderSize / 2));
-                            var distDown =  Math.abs((obs[collisionId].y - obs[collisionId].hitboxHeight * prefabs.renderSize / 2) - (obs[srcId].y + obs[srcId].hitboxHeight * prefabs.renderSize / 2));
-                            
-                            if (distRight < distLeft && distRight < distUp && distRight < distDown) {
-                                obs[srcId].x = obs[srcId].x - distRight;
-                            }
-                            if (distLeft < distRight && distLeft < distUp && distLeft < distDown) {
-                                obs[srcId].x = obs[srcId].x + distLeft;
-                            }
-                            if (distUp < distRight && distUp < distLeft && distUp < distDown) {
-                                obs[srcId].y = obs[srcId].y + distUp;
-                            }
-                            if (distDown < distRight && distDown < distLeft && distDown < distUp) {
-                                obs[srcId].y = obs[srcId].y - distDown;
-                            }
+                            collisions.pushBack(obs, srcId, collisionId, prefabs.renderSize);
                             break;
                     }
                 }

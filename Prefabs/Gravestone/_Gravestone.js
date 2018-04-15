@@ -37,23 +37,7 @@ function generateNew(obs, src, posX, posY) {
                     switch (obs[collisionId].type) {
                         case types.ObjectTypes.VEHICLE:
                             // Push object back out of collision vehicle towards which ever side is the closest to the vehicle object
-                            var distRight = Math.abs((obs[collisionId].x - obs[collisionId].hitboxWidth * prefabs.renderSize / 2) - (obs[srcId].x + obs[srcId].hitboxWidth * prefabs.renderSize / 2));
-                            var distLeft =  Math.abs((obs[collisionId].x + obs[collisionId].hitboxWidth * prefabs.renderSize / 2) - (obs[srcId].x - obs[srcId].hitboxWidth * prefabs.renderSize / 2));
-                            var distUp =    Math.abs((obs[collisionId].y + obs[collisionId].hitboxHeight * prefabs.renderSize / 2) - (obs[srcId].y - obs[srcId].hitboxHeight * prefabs.renderSize / 2));
-                            var distDown =  Math.abs((obs[collisionId].y - obs[collisionId].hitboxHeight * prefabs.renderSize / 2) - (obs[srcId].y + obs[srcId].hitboxHeight * prefabs.renderSize / 2));
-                            
-                            if (distRight < distLeft && distRight < distUp && distRight < distDown) {
-                                obs[srcId].x = obs[srcId].x - distRight;
-                            }
-                            if (distLeft < distRight && distLeft < distUp && distLeft < distDown) {
-                                obs[srcId].x = obs[srcId].x + distLeft;
-                            }
-                            if (distUp < distRight && distUp < distLeft && distUp < distDown) {
-                                obs[srcId].y = obs[srcId].y + distUp;
-                            }
-                            if (distDown < distRight && distDown < distLeft && distDown < distUp) {
-                                obs[srcId].y = obs[srcId].y - distDown;
-                            }
+                            collisions.pushBack(obs, srcId, collisionId, prefabs.renderSize);
                             break;
                     }
                 }

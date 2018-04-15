@@ -41,6 +41,26 @@ module.exports = {
             }
         }
     },
+    pushBack: (obs, srcId, collisionId, renderSize) => {
+        // Push object back out of collision terrain towards which ever side is the closest to the terrain object
+        var distRight   = Math.abs((obs[collisionId].x - obs[collisionId].hitboxWidth * renderSize / 2) - (obs[srcId].x + obs[srcId].hitboxWidth * renderSize / 2));
+        var distLeft    = Math.abs((obs[collisionId].x + obs[collisionId].hitboxWidth * renderSize / 2) - (obs[srcId].x - obs[srcId].hitboxWidth * renderSize / 2));
+        var distUp      = Math.abs((obs[collisionId].y + obs[collisionId].hitboxHeight * renderSize / 2) - (obs[srcId].y - obs[srcId].hitboxHeight * renderSize / 2));
+        var distDown    = Math.abs((obs[collisionId].y - obs[collisionId].hitboxHeight * renderSize / 2) - (obs[srcId].y + obs[srcId].hitboxHeight * renderSize / 2));
+        
+        if (distRight < distLeft && distRight < distUp && distRight < distDown) {
+            obs[srcId].x = obs[srcId].x - distRight;
+        }
+        if (distLeft < distRight && distLeft < distUp && distLeft < distDown) {
+            obs[srcId].x = obs[srcId].x + distLeft;
+        }
+        if (distUp < distRight && distUp < distLeft && distUp < distDown) {
+            obs[srcId].y = obs[srcId].y + distUp;
+        }
+        if (distDown < distRight && distDown < distLeft && distDown < distUp) {
+            obs[srcId].y = obs[srcId].y - distDown;
+        }
+    },
 }
 
 // Collision detection helper, checks if value is between min and max
