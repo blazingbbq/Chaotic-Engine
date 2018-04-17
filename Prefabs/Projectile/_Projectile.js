@@ -42,19 +42,7 @@ function generateNew(obs, src, posX, posY) {
             // TODO: Change projectile collisions to ray cast
             collisions.checkCollisions(selfId, obs, prefabs.renderSize, (srcId, collisionId) => {
                 if (obs[srcId] && collisionId != srcId && collisionId != obs[srcId].source){
-                    switch (obs[collisionId].type) {
-                        case types.ObjectTypes.PLAYER:
-                        case types.ObjectTypes.GRAVESTONE:
-                        case types.ObjectTypes.VEHICLE:
-                        case types.ObjectTypes.TERRAIN:
-                            if (obs[srcId]) {
-                                if (obs[collisionId] && obs[collisionId].damage) {
-                                    obs[collisionId].damage(obs, collisionId, obs[srcId].damage);
-                                }
-                                delete obs[srcId];
-                            }
-                            break;
-                    }
+                    obs[srcId].onHit(obs, srcId, collisionId);
                 }
             });
             if (obs[id]) {
@@ -62,7 +50,22 @@ function generateNew(obs, src, posX, posY) {
                     delete obs[id];
                 }
             }
-        }
+        },
+        onHit: (obs, srcId, collisionId) => {
+            switch (obs[collisionId].type) {
+                case types.ObjectTypes.PLAYER:
+                case types.ObjectTypes.GRAVESTONE:
+                case types.ObjectTypes.VEHICLE:
+                case types.ObjectTypes.TERRAIN:
+                    if (obs[srcId]) {
+                        if (obs[collisionId] && obs[collisionId].damage) {
+                            obs[collisionId].damage(obs, collisionId, obs[srcId].damage);
+                        }
+                        delete obs[srcId];
+                    }
+                    break;
+            }
+        },
     };
 }
 

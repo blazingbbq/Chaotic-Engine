@@ -1,4 +1,4 @@
-var fireboltCooldown = 1200;
+var fireboltCooldown = 800;
 
 function generateNew(obs, params = { }) {
     var types = require("../../ObjectTypes");
