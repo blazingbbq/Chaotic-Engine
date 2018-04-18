@@ -26,11 +26,14 @@ function generateNew(obs, src, posX, posY) {
         currentEquipment: undefined,
         equipment: [ ],
         abilities: [ ],
+        statusEffects: { },
         viewRange: playerViewRange,
         deathrattle: (obs, selfRef) => {
             prefabs.generateNew(obs, selfRef, obs[selfRef].x, obs[selfRef].y, types.ObjectTypes.GRAVESTONE);
         },
         update: (obs, selfId, delta) => {
+            obs[selfId].updateStatusEffects(obs, selfId);
+
             // Calculate player movement
             obs[selfId].x += obs[selfId].velocityX * delta;
             obs[selfId].y += obs[selfId].velocityY * delta;
@@ -122,7 +125,38 @@ function generateNew(obs, src, posX, posY) {
                 obs[selfId].deathrattle(obs, selfId);
             }
         },
+        updateStatusEffects: (obs, selfId) => {
+            var newTime = Date.now();
+
+            statusEffectCheckHelper(obs, selfId, types.StatusEffects.STUNNED, newTime);
+        },
+        addStatusEffect: (obs, selfId, effect, duration) => {
+            var newTime = Date.now();
+            
+            // Only replace the current status effect last cast and duration if the new duration is longer than what's left
+            if (
+                !obs[id].statusEffects[effect] ||
+                obs[id].statusEffects[effect].duration - (newTime - obs[id].statusEffects[effect].last) < duration
+            ) {
+                obs[id].statusEffects[effect] = { };
+                obs[id].statusEffects[effect].last = newTime;
+                obs[id].statusEffects[effect].duration = duration;
+            }
+        },
     };
+}
+
+function statusEffectCheckHelper(obs, id, effect, newTime) {
+    if (
+        obs[id].statusEffects[effect] &&
+        newTime - obs[id].statusEffects[effect].last >= obs[id].statusEffects[effect].duration
+    ) {
+        delete obs[id].statusEffects[effect];
+    }
+}
+
+function checkStatusEffect(obs, id, effect) {
+    return obs[id].statusEffects[effect];
 }
 
 module.exports = {

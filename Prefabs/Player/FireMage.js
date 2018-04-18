@@ -17,6 +17,7 @@ function generateNew(obs, src, posX, posY, base) {
         fireTicksDuration: firemageFireTicksDuration,
         abilities: [
             prefabs.newAbility(obs, types.Abilities.FIREBOLT),
+            prefabs.newAbility(obs, types.Abilities.FLAME_PILLAR),
         ],
     }
 }

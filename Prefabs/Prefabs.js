@@ -10,6 +10,7 @@ var _gravestone = require("./Gravestone/_Gravestone");
 
 var _projectile = require("./Projectile/_Projectile");
 var fireboltProjectile = require("./Projectile/FireboltProjectile");
+var flamePillarProjectile = require("./Projectile/FlamePillarProjectile");
 
 var _terrain = require("./Terrain/_Terrain");
 var tree = require("./Terrain/Tree");
@@ -32,6 +33,7 @@ var builder = require("./Equipment/Builder");
 var binoculars = require("./Equipment/Binoculars");
 
 var firebolt = require("./Abilities/Firebolt");
+var flamePillar = require("./Abilities/FlamePillar");
 
 // Export render size
 var renderSize = 4;
@@ -75,6 +77,8 @@ module.exports = {
                     case types.Projectile.FIREBOLT_PROJECTILE:
                         obs[newId.concat(":" + dup)] = fireboltProjectile.generateNew(obs, src, posX, posY, newObj);
                         return;
+                    case types.Projectile.FLAME_PILLAR_PROJECTILE:
+                        obs[newId.concat(":" + dup)] = flamePillarProjectile.generateNew(obs, src, posX, posY, newObj);
                 }
                 break;
             case types.ObjectTypes.TERRAIN:
@@ -164,7 +168,9 @@ module.exports = {
     newAbility: (obs, type, params = { }) => {
         switch (type) {
             case types.Abilities.FIREBOLT:
-                return firebolt.generateNew(obs, params);
+                return firebolt.generateNew(obs);
+            case types.Abilities.FLAME_PILLAR:
+                return flamePillar.generateNew(obs);
         }
     },
 }
