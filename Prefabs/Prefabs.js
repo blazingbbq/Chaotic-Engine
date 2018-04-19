@@ -79,6 +79,7 @@ module.exports = {
                         return;
                     case types.Projectile.FLAME_PILLAR_PROJECTILE:
                         obs[newId.concat(":" + dup)] = flamePillarProjectile.generateNew(obs, src, posX, posY, newObj);
+                        return;
                 }
                 break;
             case types.ObjectTypes.TERRAIN:
