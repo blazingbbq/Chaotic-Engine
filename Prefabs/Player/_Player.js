@@ -51,66 +51,71 @@ function generateNew(obs, src, posX, posY) {
             });
         },
         mouseDown: (obs, mouseEvent) => {   // Primary click casts first ability
-            if (obs[mouseEvent.sourceId].abilities[0]) {
+            if (obs[mouseEvent.sourceId].abilities[0] && checkStatusEffect(obs, mouseEvent.sourceId, types.StatusEffects.STUNNED)) {
                 obs[mouseEvent.sourceId].abilities[0].cast(obs, mouseEvent.sourceId, 0, mouseEvent.targetX, mouseEvent.targetY);
             }
         },
         onPlayerInput: (obs, selfId, playerInput) => {
             player = obs[selfId];
-            var xDir = 0;
-            var yDir = 0;
-
-            if (playerInput.left) {
-                xDir -= 1;
-            }
-            if (playerInput.right) {
-                xDir += 1;
-            }
-
-            if (playerInput.up) {
-                yDir -= 1;
-            }
-            if (playerInput.down) {
-                yDir += 1;
-            }
-
-            player.velocityX = xDir * player.speed;
-            player.velocityY = yDir * player.speed;
+            if (checkStatusEffect(obs, selfId, types.StatusEffects.STUNNED)) {
+                 player.velocityX = 0;
+                 player.velocityY = 0;
+            } else {
+                var xDir = 0;
+                var yDir = 0;
     
-            if (playerInput.cycleEquipmentForward && !playerInput.cycleEquipmentBackward && obs[selfId].currentEquipment != undefined) {
-                player.equipment[player.currentEquipment].onDequip(obs, selfId);
-                player.currentEquipment = player.currentEquipment + 1 >= player.equipment.length ? 0 : player.currentEquipment + 1;
-                player.equipment[player.currentEquipment].onEquip(obs, selfId);
-            }
-            if (playerInput.cycleEquipmentBackward && !playerInput.cycleEquipmentForward && obs[selfId].currentEquipment != undefined) {
-                player.equipment[player.currentEquipment].onDequip(obs, selfId);
-                player.currentEquipment = player.currentEquipment - 1 < 0 ? player.equipment.length - 1 : player.currentEquipment - 1;
-                player.equipment[player.currentEquipment].onEquip(obs, selfId);
-            }
-            if (playerInput.useEquipment && obs[selfId].currentEquipment != undefined) {
-                obs[selfId].equipment[obs[selfId].currentEquipment]
-                    .use(obs, selfId, playerInput.targetX, playerInput.targetY);
-            }
-
-            if (playerInput.ability1 && obs[selfId].abilities[0]) {
-                obs[selfId].abilities[0].cast(obs, selfId, 0, playerInput.targetX, playerInput.targetY);
-            }
-            if (playerInput.ability2 && obs[selfId].abilities[1]) {
-                obs[selfId].abilities[1].cast(obs, selfId, 1, playerInput.targetX, playerInput.targetY);
-            }
-            if (playerInput.ability3 && obs[selfId].abilities[2]) {
-                obs[selfId].abilities[2].cast(obs, selfId, 2, playerInput.targetX, playerInput.targetY);
-            }
-            if (playerInput.ability4 && obs[selfId].abilities[3]) {
-                obs[selfId].abilities[3].cast(obs, selfId, 3, playerInput.targetX, playerInput.targetY);
-            }
+                if (playerInput.left) {
+                    xDir -= 1;
+                }
+                if (playerInput.right) {
+                    xDir += 1;
+                }
     
-            if (playerInput.pickup) {
-                collisions.checkCollisions(selfId, obs, prefabs.renderSize, (srcId, collisionId) => {
-                    if (obs[srcId] && collisionId != srcId && obs[collisionId].type == types.ObjectTypes.INTERACTABLE) {
-                        obs[collisionId].onInteract(obs, collisionId, srcId);
-                    }
-                });
+                if (playerInput.up) {
+                    yDir -= 1;
+                }
+                if (playerInput.down) {
+                    yDir += 1;
+                }
+    
+                player.velocityX = xDir * player.speed;
+                player.velocityY = yDir * player.speed;
+        
+                if (playerInput.cycleEquipmentForward && !playerInput.cycleEquipmentBackward && obs[selfId].currentEquipment != undefined) {
+                    player.equipment[player.currentEquipment].onDequip(obs, selfId);
+                    player.currentEquipment = player.currentEquipment + 1 >= player.equipment.length ? 0 : player.currentEquipment + 1;
+                    player.equipment[player.currentEquipment].onEquip(obs, selfId);
+                }
+                if (playerInput.cycleEquipmentBackward && !playerInput.cycleEquipmentForward && obs[selfId].currentEquipment != undefined) {
+                    player.equipment[player.currentEquipment].onDequip(obs, selfId);
+                    player.currentEquipment = player.currentEquipment - 1 < 0 ? player.equipment.length - 1 : player.currentEquipment - 1;
+                    player.equipment[player.currentEquipment].onEquip(obs, selfId);
+                }
+                if (playerInput.useEquipment && obs[selfId].currentEquipment != undefined) {
+                    obs[selfId].equipment[obs[selfId].currentEquipment]
+                        .use(obs, selfId, playerInput.targetX, playerInput.targetY);
+                }
+    
+                if (playerInput.ability1 && obs[selfId].abilities[0]) {
+                    obs[selfId].abilities[0].cast(obs, selfId, 0, playerInput.targetX, playerInput.targetY);
+                }
+                if (playerInput.ability2 && obs[selfId].abilities[1]) {
+                    obs[selfId].abilities[1].cast(obs, selfId, 1, playerInput.targetX, playerInput.targetY);
+                }
+                if (playerInput.ability3 && obs[selfId].abilities[2]) {
+                    obs[selfId].abilities[2].cast(obs, selfId, 2, playerInput.targetX, playerInput.targetY);
+                }
+                if (playerInput.ability4 && obs[selfId].abilities[3]) {
+                    obs[selfId].abilities[3].cast(obs, selfId, 3, playerInput.targetX, playerInput.targetY);
+                }
+        
+                if (playerInput.pickup) {
+                    collisions.checkCollisions(selfId, obs, prefabs.renderSize, (srcId, collisionId) => {
+                        if (obs[srcId] && collisionId != srcId && obs[collisionId].type == types.ObjectTypes.INTERACTABLE) {
+                            obs[collisionId].onInteract(obs, collisionId, srcId);
+                        }
+                    });
+                }
             }
         },
         heal: (obs, selfId, amount) => {
@@ -159,6 +164,11 @@ function checkStatusEffect(obs, id, effect) {
     return obs[id].statusEffects[effect];
 }
 
+function checkStatusEffectObject(object, effect) {
+    return object.statusEffects[effect];
+}
+
 module.exports = {
     generateNew: generateNew,
+    checkStatusEffect: checkStatusEffectObject,
 }

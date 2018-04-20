@@ -1,15 +1,15 @@
 var flamePillarSpeed = 0;
-var flamePillarWidth = 8;
-var flamePillarHeight = 8;
-var flamePillarHitBoxWidth = 8;
-var flamePillarHitBoxHeight = 8;
+var flamePillarWidth = 6;
+var flamePillarHeight = 12;
+var flamePillarHitBoxWidth = 6;
+var flamePillarHitBoxHeight = 12;
 var flamePillarDamage = 26;
 var flamePillarTickIncrease = 3;
 var flamePillarStunDuration = 3000;
 var fireTickDamage = 8;
 
-var flamePillarTriggerDelay = 1500;
-var flamePillarTimeout = 4000;
+var flamePillarTriggerDelay = 1000;
+var flamePillarTimeout = 1500;
 
 function generateNew(obs, src, posX, posY, base) {
     var types = require("../../ObjectTypes");
@@ -24,22 +24,25 @@ function generateNew(obs, src, posX, posY, base) {
         y: posY,
         velocityX: flamePillarSpeed,
         velocityY: flamePillarSpeed,
+        facing: 0,
         width: flamePillarWidth,
         height: flamePillarHeight,
         hitboxWidth: flamePillarHitBoxWidth,
         hitboxHeight: flamePillarHitBoxHeight,
         damage: flamePillarDamage,
         initTime: Date.now(),
+        triggered: false,
         update: (obs, selfId, delta) => {
             var newTime = Date.now();
 
             // If timeout is passed, delete item
             if (obs[selfId] && newTime - obs[selfId].initTime >= flamePillarTimeout) {
-                delete obs[id];
+                delete obs[selfId];
             }
 
             // If trigger delay elapsed, check for object collisions
             if (obs[selfId] && newTime - obs[selfId].initTime >= flamePillarTriggerDelay) {
+                obs[selfId].triggered = true;
                 collisions.checkCollisions(selfId, obs, prefabs.renderSize, (srcId, collisionId) => {
                     if (obs[srcId] && collisionId != srcId && collisionId != obs[srcId].source){
                         obs[srcId].onHit(obs, srcId, collisionId);

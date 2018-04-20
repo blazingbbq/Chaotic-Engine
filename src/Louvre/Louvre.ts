@@ -1,6 +1,7 @@
 import { masterPiece, Popova } from "../Popova/Popova";
 import * as types from "../../ObjectTypes";
 
+import { checkStatusEffect } from "../../Prefabs/Player/_Player";
 import * as player from "../../Prefabs/Player/_Player.template";
 import * as god from "../../Prefabs/Player/God.template";
 import * as firemage from "../../Prefabs/Player/FireMage.template";
@@ -8,6 +9,7 @@ import * as healthbar from "../../Prefabs/Player/HealthBar.template";
 
 import * as projectile from "../../Prefabs/Projectile/_Projectile.template";
 import * as firebolt from "../../Prefabs/Projectile/FireboltProjectile.template";
+import * as flamePillar from "../../Prefabs/Projectile/FlamePillarProjectile.template";
 
 import * as gravestone from "../../Prefabs/Gravestone/_Gravestone.template";
 
@@ -54,6 +56,9 @@ export function renderObjects(
                         foreground.draw(firemage.firemagePlayerMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
                 }
+                if (checkStatusEffect(object, types.StatusEffects.STUNNED)) {
+                    // foreground.draw();       TODO: Draw stun indicator
+                }
                 foreground.draw(healthbar.healthBarMasterPiece(object, renderOffsetX, renderOffsetY, renderSize));
                 break;
             case types.ObjectTypes.PROJECTILE:
@@ -63,6 +68,9 @@ export function renderObjects(
                         break;
                     case types.Projectile.FIREBOLT_PROJECTILE:
                         env.draw(firebolt.fireboltProjectileMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                    case types.Projectile.FLAME_PILLAR_PROJECTILE:
+                        env.draw(flamePillar.flamePillarProjectileMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
                 }
                 break;
