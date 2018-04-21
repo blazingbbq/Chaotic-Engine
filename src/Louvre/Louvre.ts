@@ -7,6 +7,8 @@ import * as god from "../../Prefabs/Player/God.template";
 import * as firemage from "../../Prefabs/Player/FireMage.template";
 import * as healthbar from "../../Prefabs/Player/HealthBar.template";
 
+import * as stunnedStatusEffect from "../../Prefabs/Player/StatusEffects/Stunned.template";
+
 import * as projectile from "../../Prefabs/Projectile/_Projectile.template";
 import * as firebolt from "../../Prefabs/Projectile/FireboltProjectile.template";
 import * as flamePillar from "../../Prefabs/Projectile/FlamePillarProjectile.template";
@@ -57,7 +59,7 @@ export function renderObjects(
                         break;
                 }
                 if (checkStatusEffect(object, types.StatusEffects.STUNNED)) {
-                    // foreground.draw();       TODO: Draw stun indicator
+                    foreground.draw(stunnedStatusEffect.stunnedStatusEffectMasterPiece(object, renderOffsetX, renderOffsetY, renderSize));
                 }
                 foreground.draw(healthbar.healthBarMasterPiece(object, renderOffsetX, renderOffsetY, renderSize));
                 break;

@@ -55,7 +55,7 @@ export class Popova {
         this.ctx.beginPath();
         this.ctx.save();
         // Draw grid on background
-        this.ctx.strokeStyle = "#d0d0d0";
+        this.ctx.strokeStyle = "#cbab80";
         for (var x = (!!offsetX) ? offsetX % spacing : 0; x <= this.width; x += spacing) {
             this.ctx.moveTo(x, 0);
             this.ctx.lineTo(x, this.height);

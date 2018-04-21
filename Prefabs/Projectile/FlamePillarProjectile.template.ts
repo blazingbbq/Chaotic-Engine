@@ -3,8 +3,8 @@ import { masterPiece } from "../../src/Popova/Popova";
 /**
  * Get master piece for fire pillar projectile
  * @param object The fire pillar projectile object
- * @param renderOffsetX Horizontal offset for rendering the objects
- * @param renderOffsetY Vertical offset for rendering the objects
+ * @param renderOffsetX Horizontal offset for rendering the object
+ * @param renderOffsetY Vertical offset for rendering the object
  */
 export function flamePillarProjectileMasterPiece(object: any, renderOffsetX: number, renderOffsetY: number): masterPiece {
     return {

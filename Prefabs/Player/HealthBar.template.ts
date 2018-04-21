@@ -22,5 +22,6 @@ export function healthBarMasterPiece(object: any, renderOffsetX: number, renderO
             height: cubeSize * 3 / 4,
             swatch: (object.health > object.maxHealth / 3) ? 0 : 1,
         },],
-    customRenderSize: 1 };
+        customRenderSize: 1
+    };
 }
