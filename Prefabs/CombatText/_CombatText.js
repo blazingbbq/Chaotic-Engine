@@ -1,20 +1,21 @@
 var combatTextAnimationSpeed = 0.12;
-var combatTextFontSize = 10;
-var combatTextColor = "#999999FF";
+var combatTextFontSize = 9;
+var combatTextColor = "#000000FF";
 var combatTextDuration = 200;
 
 function generateNew(obs, src, posX, posY, params) {
     var types = require("../../ObjectTypes");
 
-    var angle = obs[src] ? Math.atan2(posY - obs[src].y, posX - obs[src].x) : 0;
+    const x = obs[src] ? obs[src].x + (Math.random() - 0.5) * obs[src].width * 4: posX;
+    const y = obs[src] ? obs[src].y - Math.random() * obs[src].height * 3 - obs[src].height * 3 : posY;
+    const angle = obs[src] ? Math.atan2(y - obs[src].y, x - obs[src].x) : 0;
 
     return {
         type: types.ObjectTypes.COMBAT_TEXT,
-        x: posX,
-        y: posY,
-        velocityX: Math.cos(angle) * combatTextAnimationSpeed,
-        velocityY: Math.sin(angle) * combatTextAnimationSpeed,
-        text: "Boop!",
+        x: x,
+        y: y,
+        angle: angle,
+        text: params.text,
         size: combatTextFontSize,
         color: combatTextColor,
         facing: angle * 180 / Math.PI + 90,
@@ -22,7 +23,11 @@ function generateNew(obs, src, posX, posY, params) {
         duration: combatTextDuration,
         hitboxWidth: 0,
         hitboxHeight: 0,
+        animationSpeed: combatTextAnimationSpeed,
         update: (obs, selfId, delta) => {
+            obs[selfId].velocityX = Math.cos(angle) * obs[selfId].animationSpeed;
+            obs[selfId].velocityY = Math.sin(angle) * obs[selfId].animationSpeed;
+
             const newTime = Date.now();
             const lifeTime = newTime - obs[selfId].initTime;
 

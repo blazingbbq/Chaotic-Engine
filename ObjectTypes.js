@@ -49,5 +49,6 @@ module.exports = {
     },
     CombatText: {
         DAMAGE_TEXT: "damage-text",
+        FIRE_DAMAGE_TEXT: "fire-damage-text",
     }
 }

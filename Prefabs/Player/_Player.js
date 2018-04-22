@@ -51,7 +51,7 @@ function generateNew(obs, src, posX, posY) {
             });
         },
         mouseDown: (obs, mouseEvent) => {   // Primary click casts first ability
-            if (obs[mouseEvent.sourceId].abilities[0] && checkStatusEffect(obs, mouseEvent.sourceId, types.StatusEffects.STUNNED)) {
+            if (obs[mouseEvent.sourceId].abilities[0] && !checkStatusEffect(obs, mouseEvent.sourceId, types.StatusEffects.STUNNED)) {
                 obs[mouseEvent.sourceId].abilities[0].cast(obs, mouseEvent.sourceId, 0, mouseEvent.targetX, mouseEvent.targetY);
             }
         },

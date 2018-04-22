@@ -1,4 +1,4 @@
-var flamePillarCooldown = 4000;
+var flamePillarCooldown = 3000;
 
 function generateNew(obs) {
     var types = require("../../ObjectTypes");

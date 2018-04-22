@@ -52,17 +52,28 @@ function generateNew(obs, src, posX, posY, base) {
         onHit: (obs, srcId, collisionId) => {
             switch (obs[collisionId].type) {
                 case types.ObjectTypes.PLAYER:
-                    firemage.increaseFireTick(obs, obs[srcId].source, flamePillarTickIncrease);
                     obs[collisionId].addStatusEffect(obs, collisionId, types.StatusEffects.STUNNED, flamePillarStunDuration);
                 case types.ObjectTypes.GRAVESTONE:
                 case types.ObjectTypes.VEHICLE:
                 case types.ObjectTypes.TERRAIN:
                     if (obs[srcId]) {
                         if (obs[collisionId] && obs[collisionId].damage) {
+                            firemage.increaseFireTick(
+                                obs,
+                                obs[srcId].source,
+                                obs[collisionId].type === types.ObjectTypes.PLAYER ? flamePillarTickIncrease : 0
+                            );
+
+                            const damage = obs[srcId].damage;
+                            const fireDamage = obs[obs[srcId].source].fireTicks ? obs[obs[srcId].source].fireTicks * firemage.fireTickDamage: 0;
+
+                            prefabs.generateNew(obs, collisionId, 0, 0, types.ObjectTypes.COMBAT_TEXT, types.CombatText.DAMAGE_TEXT, { text: "-" + damage });
+                            if (fireDamage) prefabs.generateNew(obs, collisionId, 0, 0, types.ObjectTypes.COMBAT_TEXT, types.CombatText.FIRE_DAMAGE_TEXT, { text: "-" + fireDamage });
+
                             obs[collisionId].damage(
                                 obs,
                                 collisionId,
-                                obs[srcId].damage + (obs[obs[srcId].source].fireTicks ? obs[obs[srcId].source].fireTicks * firemage.fireTickDamage: 0)
+                                damage + fireDamage
                             );
                         }
                         delete obs[srcId];

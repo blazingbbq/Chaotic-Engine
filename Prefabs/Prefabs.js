@@ -35,7 +35,9 @@ var binoculars = require("./Equipment/Binoculars");
 var firebolt = require("./Abilities/Firebolt");
 var flamePillar = require("./Abilities/FlamePillar");
 
-var _combarText = require("./CombatText/_CombatText");
+var _combatText = require("./CombatText/_CombatText");
+var damageText = require("./CombatText/DamageText");
+var fireDamageText = require("./CombatText/FireDamageText");
 
 // Export render size
 var renderSize = 4;
@@ -128,12 +130,23 @@ module.exports = {
                 }
                 break;
             case types.ObjectTypes.COMBAT_TEXT:
-                newObj = _combarText.generateNew(obs, src, posX, posY);
+                // Generate unique Id for new combat text
+                var newId = src.concat(":" + type + ":" + subtype + ":", posX, ":", posY);
+                var dup = 0;
+                while (obs[newId.concat(":" + dup)]){
+                    dup++;
+                }
+                newObj = _combatText.generateNew(obs, src, posX, posY, params);
                 switch (subtype) {
                     case types.CombatText.DAMAGE_TEXT:
+                        newObj = damageText.generateNew(obs, src, posX, posY, newObj);
+                        break;
+                    case types.CombatText.FIRE_DAMAGE_TEXT:
+                        newObj = fireDamageText.generateNew(obs, src, posX, posY, newObj);
                         break;
                 }
-                break;
+                obs[newId.concat(":" + dup)] = newObj;
+                return;
             default:
                 break;
         }

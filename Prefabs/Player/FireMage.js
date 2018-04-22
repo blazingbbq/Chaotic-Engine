@@ -1,8 +1,8 @@
 var firemageSpeed = 0.18;
 var firemageHealth = 64;
 
-var baseFireTicksDuration = 1500;
-var firemageFireTicksDuration = 2500;
+var baseFireTicksDuration = 500;
+var firemageFireTicksDuration = 750;
 
 var fireTickDamage = 6;
 

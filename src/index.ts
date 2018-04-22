@@ -229,7 +229,7 @@ socket.on("state", (objects: any) => {
     }
 
     if (debug) {
-        ui.drawText(delta.toString() + "ms", canvasSize.width - 32, 16, 16, "#0000FF");
+        ui.drawText(delta.toString() + "ms", canvasSize.width - 32, 16, 16, "#444444");
     }
 
     // Render current equipment ui icon
