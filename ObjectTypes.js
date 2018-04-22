@@ -7,6 +7,7 @@ module.exports = {
         INTERACTABLE: "interactable",
         TRIGGER: "trigger",
         VEHICLE: "vehicle",
+        COMBAT_TEXT: "combat-text",
     },
     Player: {
         HUMAN: "human",
@@ -46,4 +47,7 @@ module.exports = {
     StatusEffects: {
         STUNNED: "stunned",
     },
+    CombatText: {
+        DAMAGE_TEXT: "damage-text",
+    }
 }

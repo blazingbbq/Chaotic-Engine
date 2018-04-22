@@ -2,9 +2,8 @@ var fireboltSpeed = 0.35;
 var fireboltWidth = 3;
 var fireboltHeight = 3;
 var fireboltHitBoxRadius = 2;
-var fireboltDamage = 18;
+var fireboltDamage = 12;
 var fireboltTickIncrease = 1;
-var fireTickDamage = 8;
 
 function generateNew(obs, src, posX, posY, base) {
     var types = require("../../ObjectTypes");
@@ -33,7 +32,7 @@ function generateNew(obs, src, posX, posY, base) {
                             obs[collisionId].damage(
                                 obs,
                                 collisionId,
-                                obs[srcId].damage + (obs[obs[srcId].source].fireTicks ? obs[obs[srcId].source].fireTicks * fireTickDamage: 0)
+                                obs[srcId].damage + (obs[obs[srcId].source].fireTicks ? obs[obs[srcId].source].fireTicks * firemage.fireTickDamage: 0)
                             );
                         }
                         delete obs[srcId];

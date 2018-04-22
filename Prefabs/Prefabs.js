@@ -35,6 +35,8 @@ var binoculars = require("./Equipment/Binoculars");
 var firebolt = require("./Abilities/Firebolt");
 var flamePillar = require("./Abilities/FlamePillar");
 
+var _combarText = require("./CombatText/_CombatText");
+
 // Export render size
 var renderSize = 4;
 
@@ -123,6 +125,13 @@ module.exports = {
                     case types.Vehicle.CAR:
                         newObj = car.generateNew(obs, src, posX, posY, newObj);
                         return;
+                }
+                break;
+            case types.ObjectTypes.COMBAT_TEXT:
+                newObj = _combarText.generateNew(obs, src, posX, posY);
+                switch (subtype) {
+                    case types.CombatText.DAMAGE_TEXT:
+                        break;
                 }
                 break;
             default:

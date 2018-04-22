@@ -4,6 +4,8 @@ var firemageHealth = 64;
 var baseFireTicksDuration = 1500;
 var firemageFireTicksDuration = 2500;
 
+var fireTickDamage = 6;
+
 function generateNew(obs, src, posX, posY, base) {
     var types = require("../../ObjectTypes");
     var prefabs = require("../Prefabs");
@@ -39,4 +41,5 @@ function increaseFireTick(obs, sourceId, amount) {
 module.exports = {
     generateNew: generateNew,
     increaseFireTick: increaseFireTick,
+    fireTickDamage: fireTickDamage,
 }

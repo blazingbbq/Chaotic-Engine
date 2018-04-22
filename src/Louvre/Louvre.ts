@@ -117,6 +117,9 @@ export function renderObjects(
                         break;
                 }
                 break;
+            case types.ObjectTypes.COMBAT_TEXT:
+                ui.drawText(object.text, object.x - renderOffsetX, object.y - renderOffsetY, object.size, object.color, object.facing);
+                break;
             default:
                 env.draw(_terrain.defaultTerrainMasterPiece(object, renderOffsetX, renderOffsetY));
                 break;

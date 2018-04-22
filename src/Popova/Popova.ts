@@ -55,7 +55,7 @@ export class Popova {
         this.ctx.beginPath();
         this.ctx.save();
         // Draw grid on background
-        this.ctx.strokeStyle = "#cbab80";
+        this.ctx.strokeStyle = "#f0e7db";
         for (var x = (!!offsetX) ? offsetX % spacing : 0; x <= this.width; x += spacing) {
             this.ctx.moveTo(x, 0);
             this.ctx.lineTo(x, this.height);
@@ -99,11 +99,13 @@ export class Popova {
      * @param degrees Degrees to rotate the canvas by
      * @param customRenderSize Render the master piece with custom cube sizing
      */
-    prepCanvas(positionX: number, positionY: number, width: number, height: number, degrees: number){
+    prepCanvas(positionX: number, positionY: number, width: number, height: number, degrees: number, customRenderSize?: number){
+        const renderSize = customRenderSize ? customRenderSize : this.cubeSize;
+
         this.ctx.beginPath();
         this.ctx.translate(positionX, positionY);
         this.ctx.rotate(degrees * Math.PI / 180);
-        this.ctx.translate(- width * this.cubeSize / 2, - height * this.cubeSize / 2);
+        this.ctx.translate(- width * renderSize / 2, - height * renderSize / 2);
     }
 
     /**
@@ -186,9 +188,25 @@ export class Popova {
         };
     }
 
-    drawText(text: string, posX: number, posY: number) {
-        this.ctx.font = "16px Arial"
-        this.ctx.fillText(text, posX, posY);
+    /**
+     * Draw text to the canvas
+     * @param text The text to draw
+     * @param posX The horizontal position to draw the text
+     * @param posY The vertical position to draw the text
+     * @param size The font size of the text
+     * @param color The color to draw the text
+     * @param facing The angle to render the text
+     */
+    drawText(text: string, posX: number, posY: number, size?: number, color?: string, facing?: number) {
+        this.ctx.save();
+
+        const actualSize = size ? size : 16;
+        this.prepCanvas(posX, posY, this.ctx.measureText(text).width, 0, facing, 1);
+        this.ctx.font = String(actualSize) + "px Arial";
+        this.ctx.fillStyle = color ? color : "black";
+        this.ctx.fillText(text, 0, 0);
+
+        this.ctx.restore();
     }
 
 }

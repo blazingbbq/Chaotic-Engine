@@ -3,13 +3,12 @@ var flamePillarWidth = 6;
 var flamePillarHeight = 12;
 var flamePillarHitBoxWidth = 6;
 var flamePillarHitBoxHeight = 12;
-var flamePillarDamage = 26;
+var flamePillarDamage = 16;
 var flamePillarTickIncrease = 3;
-var flamePillarStunDuration = 3000;
-var fireTickDamage = 8;
+var flamePillarStunDuration = 1500;
 
-var flamePillarTriggerDelay = 1000;
-var flamePillarTimeout = 1500;
+var flamePillarTriggerDelay = 500;
+var flamePillarTimeout = 1000;
 
 function generateNew(obs, src, posX, posY, base) {
     var types = require("../../ObjectTypes");
@@ -63,7 +62,7 @@ function generateNew(obs, src, posX, posY, base) {
                             obs[collisionId].damage(
                                 obs,
                                 collisionId,
-                                obs[srcId].damage + (obs[obs[srcId].source].fireTicks ? obs[obs[srcId].source].fireTicks * fireTickDamage: 0)
+                                obs[srcId].damage + (obs[obs[srcId].source].fireTicks ? obs[obs[srcId].source].fireTicks * firemage.fireTickDamage: 0)
                             );
                         }
                         delete obs[srcId];
