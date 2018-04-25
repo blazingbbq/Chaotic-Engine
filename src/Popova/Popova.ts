@@ -40,8 +40,8 @@ export class Popova {
      */
     init(canvasId: string) {
         this.canvas = <any> document.getElementById(canvasId);
-        this.width = this.canvas.offsetWidth;
-        this.height = this.canvas.offsetHeight;
+        this.width = this.canvas.offsetWidth - 4;
+        this.height = this.canvas.offsetHeight - 4;
         this.canvas.width = this.width;
         this.canvas.height = this.height;
         this.ctx = this.canvas.getContext("2d");
@@ -201,8 +201,8 @@ export class Popova {
         this.ctx.save();
 
         const actualSize = size ? size : 16;
-        this.prepCanvas(posX, posY, this.ctx.measureText(text).width, 0, facing, 1);
         this.ctx.font = String(actualSize) + "px Arial";
+        this.prepCanvas(posX, posY, this.ctx.measureText(text).width, 0, facing, 1);
         this.ctx.fillStyle = color ? color : "black";
         this.ctx.fillText(text, 0, 0);
 

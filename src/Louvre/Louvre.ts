@@ -147,3 +147,56 @@ export function renderCurrentEquipment(player: any, renderOffsetX: number, rende
         }
     }
 }
+
+export function renderAbilities(player: any, ui: Popova) {
+    if (player && player.abilities) {
+        const iconSize = 48;
+        const numAbilities = player.abilities.length;
+        const renderWidth = ui.size().width / 2;
+        const renderHeight = ui.size().height - iconSize;
+        
+        player.abilities.forEach((ability: any, index: number) => {
+            const iconPosX = renderWidth + (0.5 - numAbilities / 2 + index) * iconSize;
+            const remaining: number = (ability.cooldown - (Date.now() - ability.lastcast)) / 1000;
+            ui.draw({
+                palette: ["#888888", "#CCCCCC", "#BBBBBB"],
+                posX: iconPosX,
+                posY: renderHeight,
+                width: 8,
+                height: 8,
+                facing: 0,
+                strokes: [{
+                    cellX: 1,
+                    cellY: 0,
+                    width: 14,
+                    height: 16,
+                    swatch: 0
+                }, {
+                    cellX: 0,
+                    cellY: 1,
+                    width: 16,
+                    height: 14,
+                    swatch: 0
+                }, {
+                    cellX: 1,
+                    cellY: 1,
+                    width: 14,
+                    height: 14,
+                    swatch: (remaining > 0) ? 1 : 2
+                },],
+                customRenderSize: 2
+            });
+            if (remaining > 0) {
+                ui.drawText(
+                    remaining.toFixed(1),
+                    iconPosX,
+                    renderHeight + 4,
+                    12,
+                    "#EEEEEE"
+                );
+            } else {
+                ui.drawText(String(index + 1), iconPosX, renderHeight + 6, 18, "#EEEEEE");
+            }
+        });
+    }
+}

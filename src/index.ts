@@ -235,6 +235,9 @@ socket.on("state", (objects: any) => {
     // Render current equipment ui icon
     louvre.renderCurrentEquipment(player, equipmentIconPosX, equipmentIconPosY, ui);
 
+    // Render player's abilities
+    louvre.renderAbilities(player, ui);
+
     // Render objects
     louvre.renderObjects(objects, renderOffsetX, renderOffsetY, cubeSize, background, env, foreground, cover, ui);
 });
