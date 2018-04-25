@@ -11,6 +11,7 @@ var _gravestone = require("./Gravestone/_Gravestone");
 var _projectile = require("./Projectile/_Projectile");
 var fireboltProjectile = require("./Projectile/FireboltProjectile");
 var flamePillarProjectile = require("./Projectile/FlamePillarProjectile");
+var flameDashProjectile = require("./Projectile/FlameDashProjectile");
 
 var _terrain = require("./Terrain/_Terrain");
 var tree = require("./Terrain/Tree");
@@ -34,6 +35,7 @@ var binoculars = require("./Equipment/Binoculars");
 
 var firebolt = require("./Abilities/Firebolt");
 var flamePillar = require("./Abilities/FlamePillar");
+var flameDash = require("./Abilities/FlameDash");
 
 var _combatText = require("./CombatText/_CombatText");
 var damageText = require("./CombatText/DamageText");
@@ -75,15 +77,18 @@ module.exports = {
 
                 newObj = _projectile.generateNew(obs, src, posX, posY);
                 switch (subtype) {
-                    case types.Projectile.BASIC_PROJECTILE:
-                        obs[newId.concat(":" + dup)] = newObj;
-                        return;
                     case types.Projectile.FIREBOLT_PROJECTILE:
-                        obs[newId.concat(":" + dup)] = fireboltProjectile.generateNew(obs, src, posX, posY, newObj);
-                        return;
+                        newObj = fireboltProjectile.generateNew(obs, src, posX, posY, newObj);
+                        break;
                     case types.Projectile.FLAME_PILLAR_PROJECTILE:
-                        obs[newId.concat(":" + dup)] = flamePillarProjectile.generateNew(obs, src, posX, posY, newObj);
-                        return;
+                        newObj = flamePillarProjectile.generateNew(obs, src, posX, posY, newObj);
+                        break;
+                    case types.Projectile.FLAME_DASH_PROJECTILE:
+                        newObj = flameDashProjectile.generateNew(obs, src, posX, posY, newObj);
+                        if (!newObj) return;
+                        break;
+                    obs[newId.concat(":" + dup)] = newObj;
+                    return;
                 }
                 break;
             case types.ObjectTypes.TERRAIN:
@@ -194,6 +199,8 @@ module.exports = {
                 return firebolt.generateNew(obs);
             case types.Abilities.FLAME_PILLAR:
                 return flamePillar.generateNew(obs);
+            case types.Abilities.FLAME_DASH:
+                return flameDash.generateNew(obs);
         }
     },
 }

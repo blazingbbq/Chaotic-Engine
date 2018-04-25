@@ -18,6 +18,7 @@ module.exports = {
         BASIC_PROJECTILE: "basic-projectile",
         FIREBOLT_PROJECTILE: "firebold-projectile",
         FLAME_PILLAR_PROJECTILE: "flame-pillar-projectile",
+        FLAME_DASH_PROJECTILE: "flame-dash-projectile",
     },
     Terrain: {
         TREE: "tree",
@@ -43,6 +44,7 @@ module.exports = {
     Abilities: {
         FIREBOLT: "firebolt",
         FLAME_PILLAR: "flame-pillar",
+        FLAME_DASH: "flame-dash",
     },
     StatusEffects: {
         STUNNED: "stunned",

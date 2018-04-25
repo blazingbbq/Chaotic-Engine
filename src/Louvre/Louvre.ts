@@ -12,6 +12,7 @@ import * as stunnedStatusEffect from "../../Prefabs/Player/StatusEffects/Stunned
 import * as projectile from "../../Prefabs/Projectile/_Projectile.template";
 import * as firebolt from "../../Prefabs/Projectile/FireboltProjectile.template";
 import * as flamePillar from "../../Prefabs/Projectile/FlamePillarProjectile.template";
+import * as flameDash from "../../Prefabs/Projectile/FlameDashProjectile.template";
 
 import * as gravestone from "../../Prefabs/Gravestone/_Gravestone.template";
 
@@ -74,6 +75,8 @@ export function renderObjects(
                     case types.Projectile.FLAME_PILLAR_PROJECTILE:
                         env.draw(flamePillar.flamePillarProjectileMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
+                    case types.Projectile.FLAME_DASH_PROJECTILE:
+                        env.draw(flameDash.flameDashProjectileMasterPiece(object, renderOffsetX, renderOffsetY));
                 }
                 break;
             case types.ObjectTypes.GRAVESTONE:
@@ -154,7 +157,7 @@ export function renderAbilities(player: any, ui: Popova) {
         const numAbilities = player.abilities.length;
         const renderWidth = ui.size().width / 2;
         const renderHeight = ui.size().height - iconSize;
-        
+
         player.abilities.forEach((ability: any, index: number) => {
             const iconPosX = renderWidth + (0.5 - numAbilities / 2 + index) * iconSize;
             const remaining: number = (ability.cooldown - (Date.now() - ability.lastcast)) / 1000;

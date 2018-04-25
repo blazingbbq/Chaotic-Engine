@@ -20,6 +20,7 @@ function generateNew(obs, src, posX, posY, base) {
         abilities: [
             prefabs.newAbility(obs, types.Abilities.FIREBOLT),
             prefabs.newAbility(obs, types.Abilities.FLAME_PILLAR),
+            prefabs.newAbility(obs, types.Abilities.FLAME_DASH),
         ],
     }
 }

@@ -23,6 +23,30 @@ module.exports = {
             }
         }
     },
+    // Check collisions between all objects
+    checkZoneCollisions: (checkSrc, obs, radius, callBack) => {
+        var src = obs[checkSrc];
+
+        for (id in obs) {
+            var check = obs[id];
+
+            if (check) {
+                var xIn = 
+                    valueInRange(src.x - radius, check.x - radius, check.x + radius) ||
+                    valueInRange(src.x + radius, check.x - radius, check.x + radius) ||
+                    valueInRange(check.x - radius, src.x - radius, src.x + radius) ||
+                    valueInRange(check.x + radius, src.x - radius, src.x + radius);
+
+                var yIn =
+                    valueInRange(src.y - radius, check.y - radius, check.y + radius) ||
+                    valueInRange(src.y + radius, check.y - radius, check.y + radius) ||
+                    valueInRange(check.y - radius, src.y - radius, src.y + radius) ||
+                    valueInRange(check.y + radius, src.y - radius, src.y + radius);
+
+                if (xIn && yIn) callBack(checkSrc, id);
+            }
+        }
+    },
     // Check collisions between click location and all objects
     checkClickCollisions: (clickX, clickY, obs, renderSize, callBack) => {
         for (id in obs) {
