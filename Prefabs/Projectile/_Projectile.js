@@ -45,9 +45,9 @@ function generateNew(obs, src, posX, posY) {
                     obs[srcId].onHit(obs, srcId, collisionId);
                 }
             });
-            if (obs[id]) {
-                if (obs[id].dist > obs[id].maxProjDist) {
-                    delete obs[id];
+            if (obs[selfId]) {
+                if (obs[selfId].dist > obs[selfId].maxProjDist) {
+                    delete obs[selfId];
                 }
             }
         },

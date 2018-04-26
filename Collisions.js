@@ -24,26 +24,18 @@ module.exports = {
         }
     },
     // Check collisions between all objects
-    checkZoneCollisions: (checkSrc, obs, radius, callBack) => {
+    checkCollisionsByDistance: (checkSrc, obs, maxDist, callBack) => {
         var src = obs[checkSrc];
 
         for (id in obs) {
             var check = obs[id];
 
             if (check) {
-                var xIn = 
-                    valueInRange(src.x - radius, check.x - radius, check.x + radius) ||
-                    valueInRange(src.x + radius, check.x - radius, check.x + radius) ||
-                    valueInRange(check.x - radius, src.x - radius, src.x + radius) ||
-                    valueInRange(check.x + radius, src.x - radius, src.x + radius);
+                const dist = Math.sqrt(
+                    Math.pow(src.x - check.x, 2) +
+                    Math.pow(src.y - check.y, 2));
 
-                var yIn =
-                    valueInRange(src.y - radius, check.y - radius, check.y + radius) ||
-                    valueInRange(src.y + radius, check.y - radius, check.y + radius) ||
-                    valueInRange(check.y - radius, src.y - radius, src.y + radius) ||
-                    valueInRange(check.y + radius, src.y - radius, src.y + radius);
-
-                if (xIn && yIn) callBack(checkSrc, id);
+                if (dist <= maxDist) callBack(checkSrc, id, dist);
             }
         }
     },
