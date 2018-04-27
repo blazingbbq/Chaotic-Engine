@@ -1,3 +1,5 @@
+var types = require("./ObjectTypes");
+
 module.exports = {
     // Check collisions between all objects
     checkCollisions: (checkSrc, obs, renderSize, callBack) => {
@@ -5,25 +7,34 @@ module.exports = {
 
         for (id in obs) {
             var check = obs[id];
+            var collision = false;
 
             if (check) {
-                var xIn = 
-                    valueInRange(src.x - src.hitboxWidth / 2 * renderSize, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize) ||
-                    valueInRange(src.x + src.hitboxWidth / 2 * renderSize, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize) ||
-                    valueInRange(check.x - check.hitboxWidth / 2 * renderSize, src.x - src.hitboxWidth / 2 * renderSize, src.x + src.hitboxWidth / 2 * renderSize) ||
-                    valueInRange(check.x + check.hitboxWidth / 2 * renderSize, src.x - src.hitboxWidth / 2 * renderSize, src.x + src.hitboxWidth / 2 * renderSize);
+                switch (src.hitboxType) {
+                    case types.HitboxTypes.RECT:
+                        switch (check.hitboxType) {
+                            case types.HitboxTypes.RECT:
+                                collision = checkCollisionRectRect(src, check, renderSize);
+                                break;
+                            case types.HitboxTypes.CIRC:
+                                break;
+                        }
+                        break;
+                    case types.HitboxTypes.CIRC:
+                        switch (check.hitboxType) {
+                            case types.HitboxTypes.RECT:
+                                break;
+                            case types.HitboxTypes.CIRC:
+                                break;
+                        }
+                        break;
+                }
 
-                var yIn =
-                    valueInRange(src.y - src.hitboxHeight / 2 * renderSize, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize) ||
-                    valueInRange(src.y + src.hitboxHeight / 2 * renderSize, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize) ||
-                    valueInRange(check.y - check.hitboxHeight / 2 * renderSize, src.y - src.hitboxHeight / 2 * renderSize, src.y + src.hitboxHeight / 2 * renderSize) ||
-                    valueInRange(check.y + check.hitboxHeight / 2 * renderSize, src.y - src.hitboxHeight / 2 * renderSize, src.y + src.hitboxHeight / 2 * renderSize);
-
-                if (xIn && yIn) callBack(checkSrc, id);
+                if (collision) callBack(checkSrc, id);
             }
         }
     },
-    // Check collisions between all objects
+    // Check collisions between all objects by distance
     checkCollisionsByDistance: (checkSrc, obs, maxDist, callBack) => {
         var src = obs[checkSrc];
 
@@ -82,4 +93,21 @@ module.exports = {
 // Collision detection helper, checks if value is between min and max
 function valueInRange(value, min, max) { 
     return (value >= min) && (value <= max); 
+}
+
+// Check collision: rect - rect
+function checkCollisionRectRect(src, check, renderSize) {
+    var xIn = 
+        valueInRange(src.x - src.hitboxWidth / 2 * renderSize, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize) ||
+        valueInRange(src.x + src.hitboxWidth / 2 * renderSize, check.x - check.hitboxWidth / 2 * renderSize, check.x + check.hitboxWidth / 2 * renderSize) ||
+        valueInRange(check.x - check.hitboxWidth / 2 * renderSize, src.x - src.hitboxWidth / 2 * renderSize, src.x + src.hitboxWidth / 2 * renderSize) ||
+        valueInRange(check.x + check.hitboxWidth / 2 * renderSize, src.x - src.hitboxWidth / 2 * renderSize, src.x + src.hitboxWidth / 2 * renderSize);
+
+    var yIn =
+        valueInRange(src.y - src.hitboxHeight / 2 * renderSize, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize) ||
+        valueInRange(src.y + src.hitboxHeight / 2 * renderSize, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize) ||
+        valueInRange(check.y - check.hitboxHeight / 2 * renderSize, src.y - src.hitboxHeight / 2 * renderSize, src.y + src.hitboxHeight / 2 * renderSize) ||
+        valueInRange(check.y + check.hitboxHeight / 2 * renderSize, src.y - src.hitboxHeight / 2 * renderSize, src.y + src.hitboxHeight / 2 * renderSize);
+    
+    return xIn && yIn;
 }

@@ -40,6 +40,7 @@ function generateNew(obs, src, posX, posY, base) {
         velocityY: 0,
         width: flameDashWidth,
         height: flameDashHeight,
+        hitboxType: types.HitboxTypes.RECT,
         hitboxWidth: flameDashHitBoxRadius,
         hitboxHeight: flameDashHitBoxRadius,
         damage: flameDashDamage,

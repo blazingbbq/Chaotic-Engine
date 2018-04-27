@@ -26,6 +26,7 @@ function generateNew(obs, src, posX, posY, base) {
         facing: 0,
         width: flamePillarWidth,
         height: flamePillarHeight,
+        hitboxType: types.HitboxTypes.RECT,
         hitboxWidth: flamePillarHitBoxWidth,
         hitboxHeight: flamePillarHitBoxHeight,
         damage: flamePillarDamage,

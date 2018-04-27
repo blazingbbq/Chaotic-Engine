@@ -17,6 +17,7 @@ function generateNew(obs, src, posX, posY, base) {
         velocityY: Math.sin(base.angle) * fireboltSpeed,
         width: fireboltWidth,
         height: fireboltHeight,
+        hitboxType: types.HitboxTypes.RECT,
         hitboxWidth: fireboltHitBoxRadius,
         hitboxHeight: fireboltHitBoxRadius,
         damage: fireboltDamage,

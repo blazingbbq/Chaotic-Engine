@@ -12,6 +12,7 @@ function generateNew(obs, src, posX, posY, base) {
         subtype: types.Interactable.HEALTH_PICKUP,
         width: healthPickupWidth,
         height: healthPickupHeight,
+        hitboxType: types.HitboxTypes.RECT,
         hitboxWidth: healthPickupHitboxWidth,
         hitboxHeight: healthPickupHitboxHeight,
         onInteract: (obs, selfRef, interactId) => {

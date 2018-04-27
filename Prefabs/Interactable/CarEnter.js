@@ -11,6 +11,7 @@ function generateNew(obs, src, posX, posY, base) {
         subtype: types.Interactable.CAR_ENTER,
         width: carEnterWidth,
         height: carEnterHeight,
+        hitboxType: types.HitboxTypes.RECT,
         hitboxWidth: carEnterHitboxWidth,
         hitboxHeight: carEnterHitboxHeight,
         vehicleId: src,

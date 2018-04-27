@@ -12,6 +12,7 @@ function generateNew(obs, src, posX, posY, base) {
         subtype: types.Trigger.SPIKE_TRAP,
         width: spikeTrapWidth,
         height: spikeTrapHeight,
+        hitboxType: types.HitboxTypes.RECT,
         hitboxWidth: spikeTrapHitboxWidth,
         hitboxHeight: spikeTrapHitboxHeight,
         onTrigger: (obs, selfRef, triggerId) => {

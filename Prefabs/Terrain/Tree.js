@@ -12,6 +12,7 @@ function generateNew(obs, src, posX, posY, base) {
         subtype: types.Terrain.TREE,
         width: treeWidth,
         height: treeHeight,
+        hitboxType: types.HitboxTypes.RECT,
         hitboxWidth: treeHitboxWidth,
         hitboxHeight: treeHitboxHeight,
         health: treeHealth,

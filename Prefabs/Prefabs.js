@@ -164,6 +164,7 @@ module.exports = {
                 y: posY,
                 width: 6,
                 height: 6,
+                hitboxType: types.HitboxTypes.RECT,
                 hitboxWidth: 6,
                 hitboxHeight: 6,
                 health: 1,

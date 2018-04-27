@@ -20,6 +20,7 @@ function generateNew(obs, src, posX, posY) {
         speed: 0,
         width: gravestoneWidth,
         height: gravestoneHeight,
+        hitboxType: types.HitboxTypes.RECT,
         hitboxWidth: gravestoneHitboxWidth,
         hitboxHeight: gravestoneHitboxHeight,
         health: gravestoneHealth,

@@ -12,6 +12,7 @@ function generateNew(obs, src, posX, posY, base, params = { }) {
         subtype: types.Interactable.PLAYER_TYPE_CHANGER,
         width: playerTypeChangerWidth,
         height: playerTypeChangerHeight,
+        hitboxType: types.HitboxTypes.RECT,
         hitboxWidth: playerTypeChangerHitboxWidth,
         hitboxHeight: playerTypeChangerHitboxHeight,
         newPlayerType: params.newType,

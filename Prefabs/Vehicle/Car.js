@@ -31,6 +31,7 @@ function generateNew(obs, src, posX, posY, base) {
         speed: carSpeed,
         width: carWidth,
         height: carHeight,
+        hitboxType: types.HitboxTypes.RECT,
         hitboxWidth: carHitboxWidth,
         hitboxHeight: carHitboxHeight,
         health: carHealth,

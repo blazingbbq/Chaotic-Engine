@@ -25,6 +25,7 @@ function generateNew(obs, src, posX, posY) {
         velocityY: Math.sin(angle) * projectileSpeed,
         width: projectileWidth,
         height: projectileHeight,
+        hitboxType: types.HitboxTypes.RECT,
         hitboxWidth: projectileHitBoxRadius,
         hitboxHeight: projectileHitBoxRadius,
         facing: angle * 180 / Math.PI,

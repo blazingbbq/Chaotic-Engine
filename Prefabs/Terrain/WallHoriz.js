@@ -12,6 +12,7 @@ function generateNew(obs, src, posX, posY, base) {
         subtype: types.Terrain.WALL_HORIZ,
         width: wallHorizWidth,
         height: wallHorizHeight,
+        hitboxType: types.HitboxTypes.RECT,
         hitboxWidth: wallHorizHitboxWidth,
         hitboxHeight: wallHorizHitboxHeight,
         health: wallHorizHealth,

@@ -21,8 +21,7 @@ function generateNew(obs, src, posX, posY, params) {
         facing: angle * 180 / Math.PI + 90,
         initTime: Date.now(),
         duration: combatTextDuration,
-        hitboxWidth: 0,
-        hitboxHeight: 0,
+        hitboxType: types.HitboxTypes.NONE,
         animationSpeed: combatTextAnimationSpeed,
         update: (obs, selfId, delta) => {
             obs[selfId].velocityX = Math.cos(angle) * obs[selfId].animationSpeed;

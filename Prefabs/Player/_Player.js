@@ -19,6 +19,7 @@ function generateNew(obs, src, posX, posY) {
         speed: playerSpeed,
         width: playerWidth,
         height: playerHeight,
+        hitboxType: types.HitboxTypes.RECT,
         hitboxWidth: playerWidth - 2,
         hitboxHeight: playerHeight,
         health: playerHealth,
