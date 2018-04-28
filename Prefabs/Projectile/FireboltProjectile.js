@@ -1,7 +1,7 @@
 var fireboltSpeed = 0.35;
 var fireboltWidth = 3;
 var fireboltHeight = 3;
-var fireboltHitBoxRadius = 2;
+var fireboltHitBoxRadius = 1.5;
 var fireboltDamage = 12;
 var fireboltTickIncrease = 1;
 
@@ -17,9 +17,8 @@ function generateNew(obs, src, posX, posY, base) {
         velocityY: Math.sin(base.angle) * fireboltSpeed,
         width: fireboltWidth,
         height: fireboltHeight,
-        hitboxType: types.HitboxTypes.RECT,
-        hitboxWidth: fireboltHitBoxRadius,
-        hitboxHeight: fireboltHitBoxRadius,
+        hitboxType: types.HitboxTypes.CIRC,
+        hitboxRadius: fireboltHitBoxRadius,
         damage: fireboltDamage,
         onHit: (obs, srcId, collisionId) => {
             switch (obs[collisionId].type) {

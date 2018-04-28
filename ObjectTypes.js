@@ -16,7 +16,7 @@ module.exports = {
     },
     Projectile: {
         BASIC_PROJECTILE: "basic-projectile",
-        FIREBOLT_PROJECTILE: "firebold-projectile",
+        FIREBOLT_PROJECTILE: "firebolt-projectile",
         FLAME_PILLAR_PROJECTILE: "flame-pillar-projectile",
         FLAME_DASH_PROJECTILE: "flame-dash-projectile",
     },

@@ -17,12 +17,14 @@ module.exports = {
                                 collision = checkCollisionRectRect(src, check, renderSize);
                                 break;
                             case types.HitboxTypes.CIRC:
+                                collision = checkCollisionCircRect(check, src, renderSize);
                                 break;
                         }
                         break;
                     case types.HitboxTypes.CIRC:
                         switch (check.hitboxType) {
                             case types.HitboxTypes.RECT:
+                                collision = checkCollisionCircRect(src, check, renderSize);
                                 break;
                             case types.HitboxTypes.CIRC:
                                 break;
@@ -108,6 +110,22 @@ function checkCollisionRectRect(src, check, renderSize) {
         valueInRange(src.y + src.hitboxHeight / 2 * renderSize, check.y - check.hitboxHeight / 2 * renderSize, check.y + check.hitboxHeight / 2 * renderSize) ||
         valueInRange(check.y - check.hitboxHeight / 2 * renderSize, src.y - src.hitboxHeight / 2 * renderSize, src.y + src.hitboxHeight / 2 * renderSize) ||
         valueInRange(check.y + check.hitboxHeight / 2 * renderSize, src.y - src.hitboxHeight / 2 * renderSize, src.y + src.hitboxHeight / 2 * renderSize);
-    
+
     return xIn && yIn;
+}
+
+// Check collision: circ - rect
+function checkCollisionCircRect(src, check, renderSize) {
+    var angle = Math.atan2(
+        src.y - check.y,
+        src.x - check.x);
+
+    var width = Math.abs(Math.cos(angle) * src.hitboxRadius * 2);
+    var height = Math.abs(Math.sin(angle) * src.hitboxRadius * 2);
+
+    return checkCollisionRectRect(
+        { x: src.x, y: src.y, hitboxWidth: width, hitboxHeight: height },
+        check,
+        renderSize
+    );
 }
