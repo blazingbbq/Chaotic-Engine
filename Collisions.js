@@ -27,6 +27,7 @@ module.exports = {
                                 collision = checkCollisionCircRect(src, check, renderSize);
                                 break;
                             case types.HitboxTypes.CIRC:
+                                collision = checkCollisionCircCirc(src, check, renderSize);
                                 break;
                         }
                         break;
@@ -126,6 +127,22 @@ function checkCollisionCircRect(src, check, renderSize) {
     return checkCollisionRectRect(
         { x: src.x, y: src.y, hitboxWidth: width, hitboxHeight: height },
         check,
+        renderSize
+    );
+}
+
+// Check collision: circ - circ
+function checkCollisionCircCirc(src, check, renderSize) {
+    var angle = Math.atan2(
+        src.y - check.y,
+        src.x - check.x);
+
+    var width = Math.abs(Math.cos(angle) * src.hitboxRadius * 2);
+    var height = Math.abs(Math.sin(angle) * src.hitboxRadius * 2);
+
+    return checkCollisionCircRect(
+        check,
+        { x: src.x, y: src.y, hitboxWidth: width, hitboxHeight: height },
         renderSize
     );
 }
