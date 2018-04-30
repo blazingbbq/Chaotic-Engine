@@ -15,6 +15,12 @@ export interface stroke {
     width: number,
     height: number,
     swatch: number,
+    type?: StrokeTypes,
+}
+
+export enum StrokeTypes {
+    RECT = "stroke-rect",
+    CIRC = "stroke-circ",
 }
 
 export interface mousePosition {
@@ -116,13 +122,17 @@ export class Popova {
      */
     renderStroke(stroke: stroke, palette: string[], customRenderSize?: number){
         this.ctx.fillStyle = palette[stroke.swatch];
-        if (customRenderSize){
-            this.ctx.fillRect(stroke.cellX * customRenderSize, stroke.cellY * customRenderSize,
-                stroke.width * customRenderSize, stroke.height * customRenderSize);
+
+        if (stroke.type && stroke.type === StrokeTypes.CIRC) {
+            this.ctx.fillCirc(2, 2, 2, 2);      // TODO: Draw circle to canvas
         } else {
-            this.ctx.fillRect(stroke.cellX * this.cubeSize, stroke.cellY * this.cubeSize,
-                stroke.width * this.cubeSize, stroke.height * this.cubeSize);
-            }
+            this.ctx.fillRect(
+                stroke.cellX * (customRenderSize ? customRenderSize : this.cubeSize),
+                stroke.cellY * (customRenderSize ? customRenderSize : this.cubeSize),
+                stroke.width * (customRenderSize ? customRenderSize : this.cubeSize),
+                stroke.height * (customRenderSize ? customRenderSize : this.cubeSize)
+            );
+        }
     }
 
     /**

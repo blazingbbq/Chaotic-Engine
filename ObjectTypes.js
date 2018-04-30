@@ -45,9 +45,11 @@ module.exports = {
         FIREBOLT: "firebolt",
         FLAME_PILLAR: "flame-pillar",
         FLAME_DASH: "flame-dash",
+        FLAME_BARRIER: "flame-barrier",
     },
     StatusEffects: {
         STUNNED: "stunned",
+        INVULNERABLE: "invulnerable",
     },
     CombatText: {
         DAMAGE_TEXT: "damage-text",

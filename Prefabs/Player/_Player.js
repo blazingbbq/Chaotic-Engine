@@ -125,18 +125,23 @@ function generateNew(obs, src, posX, posY) {
                 : obs[selfId].health += amount;
         },
         damage: (obs, selfId, amount) => {
-            obs[selfId].health -= amount;
+            if (checkStatusEffect(obs, selfId, types.StatusEffects.INVULNERABLE)) {
+                // TODO: Draw invuln text to screen
+            } else {
+                obs[selfId].health -= amount;
 
-            if (obs[selfId].health <= 0){
-                obs[selfId].deathrattle(obs, selfId);
+                if (obs[selfId].health <= 0){
+                    obs[selfId].deathrattle(obs, selfId);
+                }
             }
         },
         updateStatusEffects: (obs, selfId) => {
             var newTime = Date.now();
 
             statusEffectCheckHelper(obs, selfId, types.StatusEffects.STUNNED, newTime);
+            statusEffectCheckHelper(obs, selfId, types.StatusEffects.INVULNERABLE, newTime);
         },
-        addStatusEffect: (obs, selfId, effect, duration) => {
+        addStatusEffect: (obs, id, effect, duration) => {
             var newTime = Date.now();
             
             // Only replace the current status effect last cast and duration if the new duration is longer than what's left

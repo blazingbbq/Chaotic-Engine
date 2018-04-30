@@ -36,6 +36,7 @@ var binoculars = require("./Equipment/Binoculars");
 var firebolt = require("./Abilities/Firebolt");
 var flamePillar = require("./Abilities/FlamePillar");
 var flameDash = require("./Abilities/FlameDash");
+var flameBarrier = require("./Abilities/FlameBarrier");
 
 var _combatText = require("./CombatText/_CombatText");
 var damageText = require("./CombatText/DamageText");
@@ -202,6 +203,8 @@ module.exports = {
                 return flamePillar.generateNew(obs);
             case types.Abilities.FLAME_DASH:
                 return flameDash.generateNew(obs);
+            case types.Abilities.FLAME_BARRIER:
+                return flameBarrier.generateNew(obs);
         }
     },
 }

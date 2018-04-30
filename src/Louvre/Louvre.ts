@@ -8,6 +8,7 @@ import * as firemage from "../../Prefabs/Player/FireMage.template";
 import * as healthbar from "../../Prefabs/Player/HealthBar.template";
 
 import * as stunnedStatusEffect from "../../Prefabs/Player/StatusEffects/Stunned.template";
+import * as invulnearableStatusEffect from "../../Prefabs/Player/StatusEffects/Invulnerable.template";
 
 import * as projectile from "../../Prefabs/Projectile/_Projectile.template";
 import * as firebolt from "../../Prefabs/Projectile/FireboltProjectile.template";
@@ -61,6 +62,9 @@ export function renderObjects(
                 }
                 if (checkStatusEffect(object, types.StatusEffects.STUNNED)) {
                     foreground.draw(stunnedStatusEffect.stunnedStatusEffectMasterPiece(object, renderOffsetX, renderOffsetY, renderSize));
+                }
+                if (checkStatusEffect(object, types.StatusEffects.INVULNERABLE)) {
+                    cover.draw(invulnearableStatusEffect.invulnerableStatusEffectMasterPiece(object, renderOffsetX, renderOffsetY, renderSize));
                 }
                 foreground.draw(healthbar.healthBarMasterPiece(object, renderOffsetX, renderOffsetY, renderSize));
                 break;
@@ -158,6 +162,7 @@ export function renderAbilities(player: any, ui: Popova) {
         const renderWidth = ui.size().width / 2;
         const renderHeight = ui.size().height - iconSize;
 
+        // TODO: Move these to their own template files
         player.abilities.forEach((ability: any, index: number) => {
             const iconPosX = renderWidth + (0.5 - numAbilities / 2 + index) * iconSize;
             const remaining: number = (ability.cooldown - (Date.now() - ability.lastcast)) / 1000;
