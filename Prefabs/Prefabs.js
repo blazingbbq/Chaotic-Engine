@@ -41,6 +41,8 @@ var flameBarrier = require("./Abilities/FlameBarrier");
 var _combatText = require("./CombatText/_CombatText");
 var damageText = require("./CombatText/DamageText");
 var fireDamageText = require("./CombatText/FireDamageText");
+var invulnerableText = require("./CombatText/InvulnerableText");
+var healText = require("./CombatText/HealText");
 
 // Export render size
 var renderSize = 4;
@@ -149,6 +151,12 @@ module.exports = {
                         break;
                     case types.CombatText.FIRE_DAMAGE_TEXT:
                         newObj = fireDamageText.generateNew(obs, src, posX, posY, newObj);
+                        break;
+                    case types.CombatText.INVULNERABLE_TEXT:
+                        newObj = invulnerableText.generateNew(obs, src, posX, posY, newObj);
+                        break;
+                    case types.CombatText.HEAL_TEXT:
+                        newObj = healText.generateNew(obs, src, posX, posY, newObj);
                         break;
                 }
                 obs[newId.concat(":" + dup)] = newObj;

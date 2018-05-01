@@ -120,13 +120,17 @@ function generateNew(obs, src, posX, posY) {
             }
         },
         heal: (obs, selfId, amount) => {
-            obs[selfId].health + amount >= obs[selfId].maxHealth
-                ? obs[selfId].health = obs[selfId].maxHealth
-                : obs[selfId].health += amount;
+            if (obs[selfId]) {
+                var healAmount = obs[selfId].health + amount >= obs[selfId].maxHealth
+                    ? obs[selfId].maxHealth - obs[selfId].health
+                    : amount;
+                obs[selfId].health += healAmount
+                prefabs.generateNew(obs, selfId, 0, 0, types.ObjectTypes.COMBAT_TEXT, types.CombatText.HEAL_TEXT, { text: "+" + healAmount });
+            }
         },
         damage: (obs, selfId, amount) => {
             if (checkStatusEffect(obs, selfId, types.StatusEffects.INVULNERABLE)) {
-                // TODO: Draw invuln text to screen
+                prefabs.generateNew(obs, selfId, 0, 0, types.ObjectTypes.COMBAT_TEXT, types.CombatText.INVULNERABLE_TEXT, { text: "* " + amount });
             } else {
                 obs[selfId].health -= amount;
 

@@ -6,6 +6,7 @@ var spikeTrapDamage = 20;
 
 function generateNew(obs, src, posX, posY, base) {
     var types = require("../../ObjectTypes");
+    var prefabs = require("../Prefabs");
     
     return {
         ...base,
@@ -22,6 +23,7 @@ function generateNew(obs, src, posX, posY, base) {
             )) {
                 if (obs[triggerId].damage) {
                     obs[triggerId].damage(obs, triggerId, spikeTrapDamage);
+                    prefabs.generateNew(obs, triggerId, 0, 0, types.ObjectTypes.COMBAT_TEXT, types.CombatText.DAMAGE_TEXT, { text: "-" + spikeTrapDamage });
                 }
                 delete obs[selfRef];
             }

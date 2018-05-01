@@ -1,4 +1,4 @@
-var flameBarrierCooldown = 800;
+var flameBarrierCooldown = 8000;
 var flameBarrierInvulnDuration = 350;
 
 function generateNew(obs) {
