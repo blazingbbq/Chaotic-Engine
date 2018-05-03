@@ -1,5 +1,6 @@
 var types = require("../ObjectTypes");
 var collisions = require("../Collisions");
+var utils = require("./PrefabUtils");
 
 // ----- Prefabs ----- //
 var _player = require("./Player/_Player");
@@ -90,10 +91,9 @@ module.exports = {
                         newObj = flameDashProjectile.generateNew(obs, src, posX, posY, newObj);
                         if (!newObj) return;
                         break;
-                    obs[newId.concat(":" + dup)] = newObj;
-                    return;
                 }
-                break;
+                obs[newId.concat(":" + dup)] = newObj;
+                return;
             case types.ObjectTypes.TERRAIN:
                 newObj = _terrain.generateNew(obs, src, posX, posY);
                 switch (subtype) {
@@ -179,13 +179,7 @@ module.exports = {
                 health: 1,
                 maxHealth: 1,
                 update: (obs, selfId, delta) => { },
-                damage: (obs, selfId, amount) => {
-                    obs[selfId].health -= amount;
-
-                    if (obs[selfId].health <= 0){
-                        obs[selfId].deathrattle(obs, selfId);
-                    }
-                },
+                damage: utils.damage,
                 deathrattle: (obs, selfId) => { },
             }
         }

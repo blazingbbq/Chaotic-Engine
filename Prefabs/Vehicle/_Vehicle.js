@@ -4,6 +4,7 @@ function generateNew(obs, src, posX, posY) {
     var types = require("../../ObjectTypes");
     var collisions = require("../../Collisions");
     var prefabs = require("../Prefabs");
+    var utils = require("../PrefabUtils");
 
     return {
         type: types.ObjectTypes.VEHICLE,
@@ -109,13 +110,7 @@ function generateNew(obs, src, posX, posY) {
                 obs[selfId].y = obs[newVechicleId].y;
             }
         },
-        damage: (obs, selfId, amount) => {
-            obs[selfId].health -= amount;
-
-            if (obs[selfId].health <= 0){
-                obs[selfId].deathrattle(obs, selfId);
-            }
-        },
+        damage: utils.damage,
     };
 }
 

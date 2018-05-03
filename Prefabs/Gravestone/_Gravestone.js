@@ -9,6 +9,7 @@ function generateNew(obs, src, posX, posY) {
     var types = require("../../ObjectTypes");
     var collisions = require("../../Collisions");
     var prefabs = require("../Prefabs");
+    var utils = require("../PrefabUtils");
 
     return {
         type: types.ObjectTypes.GRAVESTONE,
@@ -46,13 +47,7 @@ function generateNew(obs, src, posX, posY) {
         },
         mouseDown: (obs, mouseEvent) => { },
         onPlayerInput: (obs, selfId, playerInput) => { },
-        damage: (obs, selfId, amount) => {
-            obs[selfId].health -= amount;
-
-            if (obs[selfId].health <= 0){
-                obs[selfId].deathrattle(obs, selfId);
-            }
-        },
+        damage: utils.damage,
     };
 }
 

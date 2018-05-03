@@ -60,8 +60,7 @@ function generateNew(obs, src, posX, posY) {
                 case types.ObjectTypes.TERRAIN:
                     if (obs[srcId]) {
                         if (obs[collisionId] && obs[collisionId].damage) {
-                            prefabs.generateNew(obs, collisionId, 0, 0, types.ObjectTypes.COMBAT_TEXT, types.CombatText.DAMAGE_TEXT, { text: "-" + obs[srcId].damage });
-                            obs[collisionId].damage(obs, collisionId, obs[srcId].damage);
+                            obs[collisionId].damage(obs, collisionId, obs[srcId].damage, types.DamageTypes.NORMAL);
                         }
                         delete obs[srcId];
                     }

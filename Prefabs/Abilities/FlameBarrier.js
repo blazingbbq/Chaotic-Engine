@@ -1,5 +1,5 @@
 var flameBarrierCooldown = 8000;
-var flameBarrierInvulnDuration = 350;
+var flameBarrierInvulnDuration = 500;
 
 function generateNew(obs) {
     var types = require("../../ObjectTypes");

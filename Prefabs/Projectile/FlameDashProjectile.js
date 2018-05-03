@@ -101,14 +101,8 @@ function generateNew(obs, src, posX, posY, base) {
                             const damage = obs[srcId].damage;
                             const fireDamage = obs[obs[srcId].source].fireTicks ? obs[obs[srcId].source].fireTicks * firemage.fireTickDamage: 0;
 
-                            prefabs.generateNew(obs, collisionId, 0, 0, types.ObjectTypes.COMBAT_TEXT, types.CombatText.DAMAGE_TEXT, { text: "-" + damage });
-                            if (fireDamage) prefabs.generateNew(obs, collisionId, 0, 0, types.ObjectTypes.COMBAT_TEXT, types.CombatText.FIRE_DAMAGE_TEXT, { text: "-" + fireDamage });
-
-                            obs[collisionId].damage(
-                                obs,
-                                collisionId,
-                                damage + fireDamage
-                            );
+                            obs[collisionId].damage(obs, collisionId, damage, types.DamageTypes.NORMAL);
+                            if (fireDamage) obs[collisionId].damage( obs, collisionId, fireDamage, types.DamageTypes.FIRE);
                         }
                         delete obs[srcId];
                     }

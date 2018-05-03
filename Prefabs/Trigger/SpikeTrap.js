@@ -22,8 +22,7 @@ function generateNew(obs, src, posX, posY, base) {
                 obs[triggerId].type == types.ObjectTypes.VEHICLE
             )) {
                 if (obs[triggerId].damage) {
-                    obs[triggerId].damage(obs, triggerId, spikeTrapDamage);
-                    prefabs.generateNew(obs, triggerId, 0, 0, types.ObjectTypes.COMBAT_TEXT, types.CombatText.DAMAGE_TEXT, { text: "-" + spikeTrapDamage });
+                    obs[triggerId].damage(obs, triggerId, spikeTrapDamage, types.DamageTypes.NORMAL);
                 }
                 delete obs[selfRef];
             }

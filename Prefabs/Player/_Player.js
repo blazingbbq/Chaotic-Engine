@@ -8,6 +8,7 @@ function generateNew(obs, src, posX, posY) {
     var types = require("../../ObjectTypes");
     var collisions = require("../../Collisions");
     var prefabs = require("../Prefabs");
+    var utils = require("../PrefabUtils");
 
     return {
         type: types.ObjectTypes.PLAYER,
@@ -128,15 +129,11 @@ function generateNew(obs, src, posX, posY) {
                 prefabs.generateNew(obs, selfId, 0, 0, types.ObjectTypes.COMBAT_TEXT, types.CombatText.HEAL_TEXT, { text: "+" + healAmount });
             }
         },
-        damage: (obs, selfId, amount) => {
+        damage: (obs, selfId, amount, damageType) => {
             if (checkStatusEffect(obs, selfId, types.StatusEffects.INVULNERABLE)) {
                 prefabs.generateNew(obs, selfId, 0, 0, types.ObjectTypes.COMBAT_TEXT, types.CombatText.INVULNERABLE_TEXT, { text: "* " + amount });
             } else {
-                obs[selfId].health -= amount;
-
-                if (obs[selfId].health <= 0){
-                    obs[selfId].deathrattle(obs, selfId);
-                }
+                utils.damage(obs, selfId, amount, damageType);
             }
         },
         updateStatusEffects: (obs, selfId) => {

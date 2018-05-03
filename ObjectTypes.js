@@ -62,4 +62,8 @@ module.exports = {
         RECT: "rect",
         CIRC: "circ",
     },
+    DamageTypes: {
+        NORMAL: "normal-damage",
+        FIRE: "fire-damage",
+    },
 }
