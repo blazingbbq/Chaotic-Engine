@@ -124,7 +124,14 @@ export class Popova {
         this.ctx.fillStyle = palette[stroke.swatch];
 
         if (stroke.type && stroke.type === StrokeTypes.CIRC) {
-            this.ctx.fillCirc(2, 2, 2, 2);      // TODO: Draw circle to canvas
+            this.ctx.arc(
+                stroke.cellX * (customRenderSize ? customRenderSize : this.cubeSize),
+                stroke.cellY * (customRenderSize ? customRenderSize : this.cubeSize),
+                Math.min(stroke.width, stroke.height) * (customRenderSize ? customRenderSize : this.cubeSize),
+                0,
+                Math.PI * 2
+            );
+            this.ctx.fill();
         } else {
             this.ctx.fillRect(
                 stroke.cellX * (customRenderSize ? customRenderSize : this.cubeSize),

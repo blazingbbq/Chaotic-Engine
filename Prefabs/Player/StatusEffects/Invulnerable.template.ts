@@ -11,16 +11,16 @@ export function invulnerableStatusEffectMasterPiece(object: any, renderOffsetX: 
         palette: ["#FFFF0066"],
         posX: object.x - renderOffsetX,
         posY: object.y - renderOffsetY,
-        width: object.width + 2,
-        height: object.height + 2,
+        width: object.width,
+        height: object.height,
         facing: 0,
         strokes: [{
-            cellX: 0,
-            cellY: 0,
-            width: object.width + 2,
-            height: object.height + 2,
+            cellX: object.width / 2,
+            cellY: object.height / 2,
+            width: object.width,
+            height: object.height,
             swatch: 0,
-            type: StrokeTypes.RECT, // TODO: Make circ
+            type: StrokeTypes.CIRC,
         },],
     }
 }
