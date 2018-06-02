@@ -45,6 +45,8 @@ var fireDamageText = require("./CombatText/FireDamageText");
 var invulnerableText = require("./CombatText/InvulnerableText");
 var healText = require("./CombatText/HealText");
 
+var _enemy = require("./Enemy/_Enemy");
+
 // Export render size
 var renderSize = 4;
 
@@ -161,6 +163,12 @@ module.exports = {
                 }
                 obs[newId.concat(":" + dup)] = newObj;
                 return;
+            case types.ObjectTypes.ENEMY:
+                newObj = _enemy.generateNew(obs, src, posX, posY);
+                switch (subtype) {
+                    
+                }
+                break;
             default:
                 break;
         }

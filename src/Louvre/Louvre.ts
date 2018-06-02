@@ -33,6 +33,8 @@ import * as blasterIcon from "../../Prefabs/Equipment/Blaster.icon";
 import * as builderIcon from "../../Prefabs/Equipment/Builder.icon";
 import * as scannerIcon from "../../Prefabs/Equipment/Scanner.icon";
 
+import * as _enemy from "../../Prefabs/Enemy/_Enemy.template";
+
 export function renderObjects(
     objects: any,
     renderOffsetX: number,
@@ -60,12 +62,7 @@ export function renderObjects(
                         foreground.draw(firemage.firemagePlayerMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
                 }
-                if (checkStatusEffect(object, types.StatusEffects.STUNNED)) {
-                    foreground.draw(stunnedStatusEffect.stunnedStatusEffectMasterPiece(object, renderOffsetX, renderOffsetY, renderSize));
-                }
-                if (checkStatusEffect(object, types.StatusEffects.INVULNERABLE)) {
-                    cover.draw(invulnearableStatusEffect.invulnerableStatusEffectMasterPiece(object, renderOffsetX, renderOffsetY, renderSize));
-                }
+                drawStatusEffects(object, renderOffsetX, renderOffsetY, renderSize, cover);
                 foreground.draw(healthbar.healthBarMasterPiece(object, renderOffsetX, renderOffsetY, renderSize));
                 break;
             case types.ObjectTypes.PROJECTILE:
@@ -126,6 +123,15 @@ export function renderObjects(
                 break;
             case types.ObjectTypes.COMBAT_TEXT:
                 ui.drawText(object.text, object.x - renderOffsetX, object.y - renderOffsetY, object.size, object.color, object.facing);
+                break;
+            case types.ObjectTypes.ENEMY:
+                switch (object.subtype) {
+                    case types.Enemy.TARGET_DUMMY:
+                        foreground.draw(_enemy.enemyMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                }
+                foreground.draw(healthbar.healthBarMasterPiece(object, renderOffsetX, renderOffsetY, renderSize));
+                drawStatusEffects(object, renderOffsetX, renderOffsetY, renderSize, cover);
                 break;
             default:
                 env.draw(_terrain.defaultTerrainMasterPiece(object, renderOffsetX, renderOffsetY));
@@ -206,5 +212,14 @@ export function renderAbilities(player: any, ui: Popova) {
                 ui.drawText(String(index + 1), iconPosX, renderHeight + 6, 18, "#EEEEEE");
             }
         });
+    }
+}
+
+function drawStatusEffects(object: any, renderOffsetX: number, renderOffsetY: number, renderSize: number, cover: Popova) {
+    if (checkStatusEffect(object, types.StatusEffects.STUNNED)) {
+        cover.draw(stunnedStatusEffect.stunnedStatusEffectMasterPiece(object, renderOffsetX, renderOffsetY, renderSize));
+    }
+    if (checkStatusEffect(object, types.StatusEffects.INVULNERABLE)) {
+        cover.draw(invulnearableStatusEffect.invulnerableStatusEffectMasterPiece(object, renderOffsetX, renderOffsetY, renderSize));
     }
 }

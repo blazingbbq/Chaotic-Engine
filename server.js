@@ -109,4 +109,6 @@ function initializeMap(obs) {
     prefabs.generateNew(obs, "init", -300, 74, types.ObjectTypes.VEHICLE, types.Vehicle.CAR);
     prefabs.generateNew(obs, "init", -350, 0, types.ObjectTypes.VEHICLE, types.Vehicle.CAR);
     prefabs.generateNew(obs, "init", -350, 74, types.ObjectTypes.VEHICLE, types.Vehicle.CAR);
+
+    prefabs.generateNew(obs, "init", 0, -100, types.ObjectTypes.ENEMY, types.Enemy.TARGET_DUMMY);
 }

@@ -8,6 +8,7 @@ module.exports = {
         TRIGGER: "trigger",
         VEHICLE: "vehicle",
         COMBAT_TEXT: "combat-text",
+        ENEMY: "enemy",
     },
     Player: {
         HUMAN: "human",
@@ -56,6 +57,9 @@ module.exports = {
         FIRE_DAMAGE_TEXT: "fire-damage-text",
         INVULNERABLE_TEXT: "invulnerable-text",
         HEAL_TEXT: "heal-text",
+    },
+    Enemy: {
+        TARGET_DUMMY: "target-dummy",
     },
     HitboxTypes: {
         NONE: "none",

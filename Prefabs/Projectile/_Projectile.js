@@ -55,6 +55,7 @@ function generateNew(obs, src, posX, posY) {
         onHit: (obs, srcId, collisionId) => {
             switch (obs[collisionId].type) {
                 case types.ObjectTypes.PLAYER:
+                case types.ObjectTypes.ENEMY:
                 case types.ObjectTypes.GRAVESTONE:
                 case types.ObjectTypes.VEHICLE:
                 case types.ObjectTypes.TERRAIN:

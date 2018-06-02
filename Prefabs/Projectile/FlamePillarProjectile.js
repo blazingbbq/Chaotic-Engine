@@ -4,7 +4,7 @@ var flamePillarHeight = 12;
 var flamePillarHitBoxWidth = 6;
 var flamePillarHitBoxHeight = 12;
 var flamePillarDamage = 16;
-var flamePillarTickIncrease = 3;
+var flamePillarTickIncrease = 2;
 var flamePillarStunDuration = 1500;
 
 var flamePillarTriggerDelay = 500;
@@ -53,6 +53,7 @@ function generateNew(obs, src, posX, posY, base) {
         onHit: (obs, srcId, collisionId) => {
             switch (obs[collisionId].type) {
                 case types.ObjectTypes.PLAYER:
+                case types.ObjectTypes.ENEMY:
                     obs[collisionId].addStatusEffect(obs, collisionId, types.StatusEffects.STUNNED, flamePillarStunDuration);
                 case types.ObjectTypes.GRAVESTONE:
                 case types.ObjectTypes.VEHICLE:
@@ -62,7 +63,7 @@ function generateNew(obs, src, posX, posY, base) {
                             firemage.increaseFireTick(
                                 obs,
                                 obs[srcId].source,
-                                obs[collisionId].type === types.ObjectTypes.PLAYER ? flamePillarTickIncrease : 0
+                                (obs[collisionId].type === types.ObjectTypes.PLAYER || obs[collisionId].type === types.ObjectTypes.ENEMY) ? flamePillarTickIncrease : 0
                             );
 
                             const damage = obs[srcId].damage;

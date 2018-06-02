@@ -2,7 +2,7 @@ var flameDashSpeed = 0.14;
 var flameDashWidth = 2;
 var flameDashHeight = 2;
 var flameDashHitBoxRadius = 1;
-var flameDashDamage = 8;
+var flameDashDamage = 6;
 var flameDashTickIncrease = 2;
 var flameDashTrackingRadius = 150;
 var flameDashMaxProjDistance = flameDashTrackingRadius * 2;
@@ -20,6 +20,7 @@ function generateNew(obs, src, posX, posY, base) {
         if (obs[collisionId] && obs[srcId] && srcId !== collisionId) {
             switch (obs[collisionId].type) {
                 case types.ObjectTypes.PLAYER:
+                case types.ObjectTypes.ENEMY:
                 case types.ObjectTypes.GRAVESTONE:
                 case types.ObjectTypes.VEHICLE:
                 case types.ObjectTypes.TERRAIN:
@@ -90,12 +91,13 @@ function generateNew(obs, src, posX, posY, base) {
                 case types.ObjectTypes.GRAVESTONE:
                 case types.ObjectTypes.VEHICLE:
                 case types.ObjectTypes.TERRAIN:
+                case types.ObjectTypes.ENEMY:
                     if (obs[srcId]) {
                         if (obs[collisionId] && obs[collisionId].damage) {
                             firemage.increaseFireTick(
                                 obs,
                                 obs[srcId].source,
-                                obs[collisionId].type === types.ObjectTypes.PLAYER ? flameDashTickIncrease : 0
+                                (obs[collisionId].type === types.ObjectTypes.PLAYER || obs[collisionId].type === types.ObjectTypes.ENEMY) ? flameDashTickIncrease : 0
                             );
 
                             const damage = obs[srcId].damage;

@@ -26,12 +26,13 @@ function generateNew(obs, src, posX, posY, base) {
                 case types.ObjectTypes.GRAVESTONE:
                 case types.ObjectTypes.VEHICLE:
                 case types.ObjectTypes.TERRAIN:
+                case types.ObjectTypes.ENEMY:
                     if (obs[srcId]) {
                         if (obs[collisionId] && obs[collisionId].damage) {
                             firemage.increaseFireTick(
                                 obs,
                                 obs[srcId].source,
-                                obs[collisionId].type === types.ObjectTypes.PLAYER ? fireboltTickIncrease : 0
+                                (obs[collisionId].type === types.ObjectTypes.PLAYER || obs[collisionId].type === types.ObjectTypes.ENEMY) ? fireboltTickIncrease : 0
                             );
 
                             const damage = obs[srcId].damage;
