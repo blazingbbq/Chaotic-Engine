@@ -26,7 +26,7 @@ function generateNew(obs, src, posX, posY) {
         maxHealth: enemyHealth,
         statusEffects: { },
         deathrattle: (obs, selfRef) => {
-            prefabs.generateNew(obs, selfRef, obs[selfRef].x, obs[selfRef].y + 1 * obs[selfRef].height / 3 * prefabs.renderSize, types.ObjectTypes.TERRAIN, types.Terrain.DEAD_DUMMY);
+            prefabs.generateNew(obs, selfRef, obs[selfRef].x, obs[selfRef].y + 1 * obs[selfRef].height / 3 * prefabs.renderSize, types.ObjectTypes.DECORATION, types.Decoration.DEAD_DUMMY);
             delete obs[selfRef];
         },
         update: (obs, selfId, delta) => {

@@ -10,7 +10,7 @@ function generateNew(obs, src, posX, posY, base) {
     
     return {
         ...base,
-        subtype: types.Terrain.DEAD_DUMMY,
+        subtype: types.Decoration.DEAD_DUMMY,
         width: deadDummyWidth,
         height: deadDummyHeight,
         hitboxType: types.HitboxTypes.RECT,
@@ -21,7 +21,9 @@ function generateNew(obs, src, posX, posY, base) {
         update: (obs, selfId, delta) => {
             if (obs[selfId]) {
                 obs[selfId].health -= deadDummyHealth / delta / 8;
-                if (obs[selfId].health <= 0) obs[selfId].deathrattle(obs, selfId);
+                if (obs[selfId].health <= 0) {
+                    obs[selfId].deathrattle(obs, selfId);
+                }
             }
         },
         deathrattle: (obs, selfId) => {

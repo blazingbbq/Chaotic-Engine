@@ -17,7 +17,6 @@ var flameDashProjectile = require("./Projectile/FlameDashProjectile");
 var _terrain = require("./Terrain/_Terrain");
 var tree = require("./Terrain/Tree");
 var wallHoriz = require("./Terrain/WallHoriz");
-var deadDummy = require("./Terrain/DeadDummy");
 
 var _interactable = require("./Interactable/_Interactable");
 var healthPickup = require("./Interactable/HealthPickup");
@@ -31,6 +30,9 @@ var invulnPlatform = require("./Trigger/InvulnPlatform");
 
 var _vehicle = require("./Vehicle/_Vehicle");
 var car = require("./Vehicle/Car");
+
+var _decoration = require("./Decoration/_Decoration");
+var deadDummy = require("./Decoration/DeadDummy");
 
 var blaster = require("./Equipment/Blaster");
 var scanner = require("./Equipment/Scanner");
@@ -108,9 +110,6 @@ module.exports = {
                     case types.Terrain.WALL_HORIZ:
                         newObj = wallHoriz.generateNew(obs, src, posX, posY, newObj);
                         break;
-                    case types.Terrain.DEAD_DUMMY:
-                        newObj = deadDummy.generateNew(obs, src, posX, posY, newObj);
-                        break;
                 }
                 break;
             case types.ObjectTypes.INTERACTABLE:
@@ -148,6 +147,14 @@ module.exports = {
                     case types.Vehicle.CAR:
                         newObj = car.generateNew(obs, src, posX, posY, newObj);
                         return;
+                }
+                break;
+            case types.ObjectTypes.DECORATION:
+                newObj = _decoration.generateNew(obs, src, posX, posY);
+                switch (subtype) {
+                    case types.Decoration.DEAD_DUMMY:
+                        newObj = deadDummy.generateNew(obs, src, posX, posY, newObj);
+                        break;
                 }
                 break;
             case types.ObjectTypes.COMBAT_TEXT:

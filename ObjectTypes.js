@@ -9,6 +9,7 @@ module.exports = {
         VEHICLE: "vehicle",
         COMBAT_TEXT: "combat-text",
         ENEMY: "enemy",
+        DECORATION: "decoration",
     },
     Player: {
         HUMAN: "human",
@@ -24,7 +25,6 @@ module.exports = {
     Terrain: {
         TREE: "tree",
         WALL_HORIZ: "wall-horiz",
-        DEAD_DUMMY: "dead-dummy",
     },
     Interactable: {
         HEALTH_PICKUP: "health-pickup",
@@ -38,6 +38,12 @@ module.exports = {
     },
     Vehicle: {
         CAR: "car",
+    },
+    Enemy: {
+        TARGET_DUMMY: "target-dummy",
+    },
+    Decoration: {
+        DEAD_DUMMY: "dead-dummy",
     },
     EquipmentTypes: {
         BLASTER: "blaster",
@@ -60,9 +66,6 @@ module.exports = {
         FIRE_DAMAGE_TEXT: "fire-damage-text",
         INVULNERABLE_TEXT: "invulnerable-text",
         HEAL_TEXT: "heal-text",
-    },
-    Enemy: {
-        TARGET_DUMMY: "target-dummy",
     },
     HitboxTypes: {
         NONE: "none",

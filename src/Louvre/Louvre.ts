@@ -20,7 +20,6 @@ import * as gravestone from "../../Prefabs/Gravestone/_Gravestone.template";
 import * as _terrain from "../../Prefabs/Terrain/_Terrain.template";
 import * as tree from "../../Prefabs/Terrain/Tree.template";
 import * as wallHoriz from "../../Prefabs/Terrain/WallHoriz.template";
-import * as deadDummy from "../../Prefabs/Terrain/DeadDummy.template";
 
 import * as healthPickup from "../../Prefabs/Interactable/HealthPickup.template";
 import * as playerTypeChanger from "../../Prefabs/Interactable/PlayerTypeChanger.template";
@@ -30,6 +29,8 @@ import * as spikeTrap from "../../Prefabs/Trigger/SpikeTrap.template";
 import * as invulnPlatform from "../../Prefabs/Trigger/InvulnPlatform.template";
 
 import * as car from "../../Prefabs/Vehicle/Car.template";
+
+import * as deadDummy from "../../Prefabs/Decoration/DeadDummy.template";
 
 import * as binocularsIcon from "../../Prefabs/Equipment/Binoculars.icon";
 import * as blasterIcon from "../../Prefabs/Equipment/Blaster.icon";
@@ -97,9 +98,6 @@ export function renderObjects(
                         env.draw(wallHoriz.wallHorizBaseMasterPiece(object, renderOffsetX, renderOffsetY));
                         cover.draw(wallHoriz.wallHorizCoverMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
-                    case types.Terrain.DEAD_DUMMY:
-                        env.draw(deadDummy.deadDummyMasterPiece(object, renderOffsetX, renderOffsetY));
-                        break;
                 }
                 break;
             case types.ObjectTypes.INTERACTABLE:
@@ -129,6 +127,13 @@ export function renderObjects(
                 switch (object.subtype) {
                     case types.Vehicle.CAR:
                         foreground.draw(car.carMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                }
+                break;
+            case types.ObjectTypes.DECORATION:
+                switch (object.subtype) {
+                    case types.Decoration.DEAD_DUMMY:
+                        env.draw(deadDummy.deadDummyMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
                 }
                 break;
