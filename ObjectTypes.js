@@ -25,6 +25,8 @@ module.exports = {
     Terrain: {
         TREE: "tree",
         WALL_HORIZ: "wall-horiz",
+        CASTLE_WALL_HORIZ: "castle-wall-horiz",
+        CASTLE_WALL_VERT: "castle-wall-vert",
     },
     Interactable: {
         HEALTH_PICKUP: "health-pickup",
@@ -44,6 +46,8 @@ module.exports = {
     },
     Decoration: {
         DEAD_DUMMY: "dead-dummy",
+        WATCH_TOWER: "watch-tower",
+        CASTLE_FLOOR: "castle-floor",
     },
     EquipmentTypes: {
         BLASTER: "blaster",

@@ -20,6 +20,8 @@ import * as gravestone from "../../Prefabs/Gravestone/_Gravestone.template";
 import * as _terrain from "../../Prefabs/Terrain/_Terrain.template";
 import * as tree from "../../Prefabs/Terrain/Tree.template";
 import * as wallHoriz from "../../Prefabs/Terrain/WallHoriz.template";
+import * as castleWallHoriz from "../../Prefabs/Terrain/CastleWallHoriz.template";
+import * as castleWallVert from "../../Prefabs/Terrain/CastleWallVert.template";
 
 import * as healthPickup from "../../Prefabs/Interactable/HealthPickup.template";
 import * as playerTypeChanger from "../../Prefabs/Interactable/PlayerTypeChanger.template";
@@ -31,6 +33,8 @@ import * as invulnPlatform from "../../Prefabs/Trigger/InvulnPlatform.template";
 import * as car from "../../Prefabs/Vehicle/Car.template";
 
 import * as deadDummy from "../../Prefabs/Decoration/DeadDummy.template";
+import * as watchTower from "../../Prefabs/Decoration/WatchTower.template";
+import * as castleFloor from "../../Prefabs/Decoration/CastleFloor.template";
 
 import * as binocularsIcon from "../../Prefabs/Equipment/Binoculars.icon";
 import * as blasterIcon from "../../Prefabs/Equipment/Blaster.icon";
@@ -98,6 +102,13 @@ export function renderObjects(
                         env.draw(wallHoriz.wallHorizBaseMasterPiece(object, renderOffsetX, renderOffsetY));
                         cover.draw(wallHoriz.wallHorizCoverMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
+                    case types.Terrain.CASTLE_WALL_HORIZ:
+                        env.draw(castleWallHoriz.castleWallHorizBaseMasterPiece(object, renderOffsetX, renderOffsetY));
+                        cover.draw(castleWallHoriz.castleWallHorizCoverMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                    case types.Terrain.CASTLE_WALL_VERT:
+                        cover.draw(castleWallVert.castleWallVertMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
                 }
                 break;
             case types.ObjectTypes.INTERACTABLE:
@@ -134,6 +145,12 @@ export function renderObjects(
                 switch (object.subtype) {
                     case types.Decoration.DEAD_DUMMY:
                         env.draw(deadDummy.deadDummyMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                    case types.Decoration.WATCH_TOWER:
+                        cover.draw(watchTower.watchTowerMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                    case types.Decoration.CASTLE_FLOOR:
+                        background.draw(castleFloor.castleFloorMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
                 }
                 break;

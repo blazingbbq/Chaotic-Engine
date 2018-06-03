@@ -80,7 +80,7 @@ setInterval(() => {
 function initializeMap(obs) {
     prefabs.generateNew(obs, "init", 75, -25, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
     prefabs.generateNew(obs, "init", 180, 210, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
-    prefabs.generateNew(obs, "init", -150, 185, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", -150, 200, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
     prefabs.generateNew(obs, "init", 220, -205, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
     prefabs.generateNew(obs, "init", -195, -175, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
 
@@ -115,5 +115,46 @@ function initializeMap(obs) {
 
     prefabs.generateNew(obs, "init", 0, 0, types.ObjectTypes.TRIGGER, types.Trigger.INVULN_PLATFORM);
 
-    prefabs.generateNew(obs, "init", 0, 75, types.ObjectTypes.INTERACTABLE, types.Interactable.TELEPORTER, { destX: 0, destY: -200 });
+    prefabs.generateNew(obs, "init", 0, 75, types.ObjectTypes.INTERACTABLE, types.Interactable.TELEPORTER, { destX: 0, destY: 1900 });
+
+    // Castle
+    prefabs.generateNew(obs, "init", 0, 1985, types.ObjectTypes.DECORATION, types.Decoration.CASTLE_FLOOR);
+
+    prefabs.generateNew(obs, "init", 0, 1613, types.ObjectTypes.TERRAIN, types.Terrain.CASTLE_WALL_HORIZ);
+    prefabs.generateNew(obs, "init", 0, 2413, types.ObjectTypes.TERRAIN, types.Terrain.CASTLE_WALL_HORIZ);
+
+    prefabs.generateNew(obs, "init", 400, 1500, types.ObjectTypes.DECORATION, types.Decoration.WATCH_TOWER);
+    prefabs.generateNew(obs, "init", -400, 1500, types.ObjectTypes.DECORATION, types.Decoration.WATCH_TOWER);
+
+    prefabs.generateNew(obs, "init", 400, 1985, types.ObjectTypes.TERRAIN, types.Terrain.CASTLE_WALL_VERT);
+    prefabs.generateNew(obs, "init", -400, 1985, types.ObjectTypes.TERRAIN, types.Terrain.CASTLE_WALL_VERT);
+    
+    prefabs.generateNew(obs, "init", 400, 2300, types.ObjectTypes.DECORATION, types.Decoration.WATCH_TOWER);
+    prefabs.generateNew(obs, "init", -400, 2300, types.ObjectTypes.DECORATION, types.Decoration.WATCH_TOWER);
+
+    prefabs.generateNew(obs, "init", 200, 1785, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
+    prefabs.generateNew(obs, "init", -200, 1785, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
+    prefabs.generateNew(obs, "init", 200, 2185, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
+    prefabs.generateNew(obs, "init", -200, 2185, types.ObjectTypes.INTERACTABLE, types.Interactable.HEALTH_PICKUP);
+
+    prefabs.generateNew(obs, "init", 600, 1400, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", 634, 1550, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", 720, 1800, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", 550, 2100, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", -600, 2100, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", -634, 1800, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", -720, 1400, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", -550, 1500, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", -350, 1450, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", -50, 1400, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", 150, 1450, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", 230, 1300, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", -350, 2500, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", -50, 2700, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", 150, 2650, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", 230, 2550, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", -580, 2650, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", -500, 2550, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", 450, 2500, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", 630, 2700, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
 }

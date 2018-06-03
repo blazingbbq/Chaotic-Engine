@@ -17,6 +17,8 @@ var flameDashProjectile = require("./Projectile/FlameDashProjectile");
 var _terrain = require("./Terrain/_Terrain");
 var tree = require("./Terrain/Tree");
 var wallHoriz = require("./Terrain/WallHoriz");
+var castleWallHoriz = require("./Terrain/CastleWallHoriz");
+var castleWallVert = require("./Terrain/CastleWallVert");
 
 var _interactable = require("./Interactable/_Interactable");
 var healthPickup = require("./Interactable/HealthPickup");
@@ -33,6 +35,8 @@ var car = require("./Vehicle/Car");
 
 var _decoration = require("./Decoration/_Decoration");
 var deadDummy = require("./Decoration/DeadDummy");
+var watchTower = require("./Decoration/WatchTower");
+var castleFloor = require("./Decoration/CastleFloor");
 
 var blaster = require("./Equipment/Blaster");
 var scanner = require("./Equipment/Scanner");
@@ -110,6 +114,12 @@ module.exports = {
                     case types.Terrain.WALL_HORIZ:
                         newObj = wallHoriz.generateNew(obs, src, posX, posY, newObj);
                         break;
+                    case types.Terrain.CASTLE_WALL_HORIZ:
+                        newObj = castleWallHoriz.generateNew(obs, src, posX, posY, newObj);
+                        break;
+                    case types.Terrain.CASTLE_WALL_VERT:
+                        newObj = castleWallVert.generateNew(obs, src, posX, posY, newObj);
+                        break;
                 }
                 break;
             case types.ObjectTypes.INTERACTABLE:
@@ -154,6 +164,12 @@ module.exports = {
                 switch (subtype) {
                     case types.Decoration.DEAD_DUMMY:
                         newObj = deadDummy.generateNew(obs, src, posX, posY, newObj);
+                        break;
+                    case types.Decoration.WATCH_TOWER:
+                        newObj = watchTower.generateNew(obs, src, posX, posY, newObj);
+                        break;
+                    case types.Decoration.CASTLE_FLOOR:
+                        newObj = castleFloor.generateNew(obs, src, posX, posY, newObj);
                         break;
                 }
                 break;
