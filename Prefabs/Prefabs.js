@@ -26,6 +26,7 @@ var playerTypeChanger = require("./Interactable/PlayerTypeChanger");
 
 var _trigger = require("./Trigger/_Trigger");
 var spikeTrap = require("./Trigger/SpikeTrap");
+var invulnPlatform = require("./Trigger/InvulnPlatform");
 
 var _vehicle = require("./Vehicle/_Vehicle");
 var car = require("./Vehicle/Car");
@@ -132,6 +133,9 @@ module.exports = {
                 switch (subtype) {
                     case types.Trigger.SPIKE_TRAP:
                         newObj = spikeTrap.generateNew(obs, src, posX, posY, newObj);
+                        break;
+                    case types.Trigger.INVULN_PLATFORM:
+                        newObj = invulnPlatform.generateNew(obs, src, posX, posY, newObj);
                         break;
                 }
                 break;

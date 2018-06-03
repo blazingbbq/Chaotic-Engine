@@ -70,7 +70,7 @@ function generateNew(obs, src, posX, posY, base) {
                             const fireDamage = obs[obs[srcId].source].fireTicks ? obs[obs[srcId].source].fireTicks * firemage.fireTickDamage: 0;
 
                             obs[collisionId].damage(obs, collisionId, damage, types.DamageTypes.NORMAL);
-                            if (fireDamage) obs[collisionId].damage( obs, collisionId, fireDamage, types.DamageTypes.FIRE);
+                            if (fireDamage && obs[collisionId]) obs[collisionId].damage( obs, collisionId, fireDamage, types.DamageTypes.FIRE);
                         }
                         delete obs[srcId];
                     }

@@ -39,6 +39,7 @@ function generateNew(obs, src, posX, posY) {
                         case types.ObjectTypes.VEHICLE:
                         case types.ObjectTypes.TERRAIN:
                         case types.ObjectTypes.PLAYER:
+                        case types.ObjectTypes.ENEMY:
                             collisions.pushBack(obs, srcId, collisionId, prefabs.renderSize);
                             break;
                     }

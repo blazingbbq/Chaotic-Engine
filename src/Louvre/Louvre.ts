@@ -26,6 +26,7 @@ import * as healthPickup from "../../Prefabs/Interactable/HealthPickup.template"
 import * as playerTypeChanger from "../../Prefabs/Interactable/PlayerTypeChanger.template";
 
 import * as spikeTrap from "../../Prefabs/Trigger/SpikeTrap.template";
+import * as invulnPlatform from "../../Prefabs/Trigger/InvulnPlatform.template";
 
 import * as car from "../../Prefabs/Vehicle/Car.template";
 
@@ -116,6 +117,8 @@ export function renderObjects(
                     case types.Trigger.SPIKE_TRAP:
                         env.draw(spikeTrap.spikeTrapMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
+                    case types.Trigger.INVULN_PLATFORM:
+                        env.draw(invulnPlatform.invulnPlatformMasterPiece(object, renderOffsetX, renderOffsetY));
                 }
                 break;
             case types.ObjectTypes.VEHICLE:

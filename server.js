@@ -112,4 +112,6 @@ function initializeMap(obs) {
 
     prefabs.generateNew(obs, "init", -25, -100, types.ObjectTypes.ENEMY, types.Enemy.TARGET_DUMMY);
     prefabs.generateNew(obs, "init", 25, -100, types.ObjectTypes.ENEMY, types.Enemy.TARGET_DUMMY);
+
+    prefabs.generateNew(obs, "init", 0, 0, types.ObjectTypes.TRIGGER, types.Trigger.INVULN_PLATFORM);
 }

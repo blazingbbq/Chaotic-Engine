@@ -2,7 +2,7 @@ var projectileWidth = 2;
 var projectileHeight = 0.5;
 var projectileHitBoxRadius = 1.5;
 var baseProjectileDamage = 10;
-var projectileSpeed = 0.8; 
+var projectileSpeed = 0.7; 
 var maxProjDist = 1600;
 
 function generateNew(obs, src, posX, posY) {

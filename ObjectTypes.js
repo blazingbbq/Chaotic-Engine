@@ -33,6 +33,7 @@ module.exports = {
     },
     Trigger: {
         SPIKE_TRAP: "spike-trap",
+        INVULN_PLATFORM: "invuln-platform",
     },
     Vehicle: {
         CAR: "car",

@@ -19,7 +19,8 @@ function generateNew(obs, src, posX, posY, base) {
         onTrigger: (obs, selfRef, triggerId) => {
             if (obs[triggerId] && (
                 obs[triggerId].type == types.ObjectTypes.PLAYER ||
-                obs[triggerId].type == types.ObjectTypes.VEHICLE
+                obs[triggerId].type == types.ObjectTypes.VEHICLE ||
+                obs[triggerId].type == types.ObjectTypes.ENEMY
             )) {
                 if (obs[triggerId].damage) {
                     obs[triggerId].damage(obs, triggerId, spikeTrapDamage, types.DamageTypes.NORMAL);
