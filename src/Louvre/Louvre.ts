@@ -24,6 +24,7 @@ import * as deadDummy from "../../Prefabs/Terrain/DeadDummy.template";
 
 import * as healthPickup from "../../Prefabs/Interactable/HealthPickup.template";
 import * as playerTypeChanger from "../../Prefabs/Interactable/PlayerTypeChanger.template";
+import * as teleporter from "../../Prefabs/Interactable/Teleporter.template";
 
 import * as spikeTrap from "../../Prefabs/Trigger/SpikeTrap.template";
 import * as invulnPlatform from "../../Prefabs/Trigger/InvulnPlatform.template";
@@ -109,6 +110,9 @@ export function renderObjects(
                     case types.Interactable.PLAYER_TYPE_CHANGER:
                         env.draw(playerTypeChanger.playerTypeChangerMasterPiece(object, renderOffsetX, renderOffsetY));
                         env.draw(playerTypeChanger.littleManMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                    case types.Interactable.TELEPORTER:
+                        env.draw(teleporter.teleporterMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
                 }
                 break;

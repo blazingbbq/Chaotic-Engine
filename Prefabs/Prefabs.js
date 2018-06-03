@@ -23,6 +23,7 @@ var _interactable = require("./Interactable/_Interactable");
 var healthPickup = require("./Interactable/HealthPickup");
 var carEnter = require("./Interactable/CarEnter");
 var playerTypeChanger = require("./Interactable/PlayerTypeChanger");
+var teleporter = require("./Interactable/Teleporter");
 
 var _trigger = require("./Trigger/_Trigger");
 var spikeTrap = require("./Trigger/SpikeTrap");
@@ -126,6 +127,8 @@ module.exports = {
                     case types.Interactable.PLAYER_TYPE_CHANGER:
                         newObj = playerTypeChanger.generateNew(obs, src, posX, posY, newObj, params);
                         break;
+                    case types.Interactable.TELEPORTER:
+                        newObj = teleporter.generateNew(obs, src, posX, posY, newObj, { destX: params.destX, destY: params.destY });
                 }
                 break;
             case types.ObjectTypes.TRIGGER:

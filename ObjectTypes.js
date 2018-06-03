@@ -30,6 +30,7 @@ module.exports = {
         HEALTH_PICKUP: "health-pickup",
         CAR_ENTER: "car-enter",
         PLAYER_TYPE_CHANGER: "player-type-changer",
+        TELEPORTER: "teleporter",
     },
     Trigger: {
         SPIKE_TRAP: "spike-trap",
