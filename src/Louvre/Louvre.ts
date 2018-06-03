@@ -20,6 +20,7 @@ import * as gravestone from "../../Prefabs/Gravestone/_Gravestone.template";
 import * as _terrain from "../../Prefabs/Terrain/_Terrain.template";
 import * as tree from "../../Prefabs/Terrain/Tree.template";
 import * as wallHoriz from "../../Prefabs/Terrain/WallHoriz.template";
+import * as deadDummy from "../../Prefabs/Terrain/DeadDummy.template";
 
 import * as healthPickup from "../../Prefabs/Interactable/HealthPickup.template";
 import * as playerTypeChanger from "../../Prefabs/Interactable/PlayerTypeChanger.template";
@@ -93,6 +94,9 @@ export function renderObjects(
                     case types.Terrain.WALL_HORIZ:
                         env.draw(wallHoriz.wallHorizBaseMasterPiece(object, renderOffsetX, renderOffsetY));
                         cover.draw(wallHoriz.wallHorizCoverMasterPiece(object, renderOffsetX, renderOffsetY));
+                        break;
+                    case types.Terrain.DEAD_DUMMY:
+                        env.draw(deadDummy.deadDummyMasterPiece(object, renderOffsetX, renderOffsetY));
                         break;
                 }
                 break;

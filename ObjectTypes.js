@@ -24,6 +24,7 @@ module.exports = {
     Terrain: {
         TREE: "tree",
         WALL_HORIZ: "wall-horiz",
+        DEAD_DUMMY: "dead-dummy",
     },
     Interactable: {
         HEALTH_PICKUP: "health-pickup",

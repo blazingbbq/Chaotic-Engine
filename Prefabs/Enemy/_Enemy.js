@@ -1,7 +1,7 @@
 var enemySpeed = 0.2;
 var enemyHealth = 300;
 var enemyWidth = 4;
-var enemyHeight = 4;
+var enemyHeight = 6;
 
 function generateNew(obs, src, posX, posY) {
     var types = require("../../ObjectTypes");
@@ -26,8 +26,7 @@ function generateNew(obs, src, posX, posY) {
         maxHealth: enemyHealth,
         statusEffects: { },
         deathrattle: (obs, selfRef) => {
-            // TODO: Make better deathrattle...
-            // prefabs.generateNew(obs, selfRef, obs[selfRef].x, obs[selfRef].y, types.ObjectTypes.GRAVESTONE);
+            prefabs.generateNew(obs, selfRef, obs[selfRef].x, obs[selfRef].y + 1 * obs[selfRef].height / 3 * prefabs.renderSize, types.ObjectTypes.TERRAIN, types.Terrain.DEAD_DUMMY);
             delete obs[selfRef];
         },
         update: (obs, selfId, delta) => {

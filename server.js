@@ -78,7 +78,7 @@ setInterval(() => {
 
 // Initializes starting map resources
 function initializeMap(obs) {
-    prefabs.generateNew(obs, "init", 50, -25, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
+    prefabs.generateNew(obs, "init", 75, -25, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
     prefabs.generateNew(obs, "init", 180, 210, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
     prefabs.generateNew(obs, "init", -150, 185, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
     prefabs.generateNew(obs, "init", 220, -205, types.ObjectTypes.TERRAIN, types.Terrain.TREE);
@@ -110,5 +110,6 @@ function initializeMap(obs) {
     prefabs.generateNew(obs, "init", -350, 0, types.ObjectTypes.VEHICLE, types.Vehicle.CAR);
     prefabs.generateNew(obs, "init", -350, 74, types.ObjectTypes.VEHICLE, types.Vehicle.CAR);
 
-    prefabs.generateNew(obs, "init", 0, -100, types.ObjectTypes.ENEMY, types.Enemy.TARGET_DUMMY);
+    prefabs.generateNew(obs, "init", -25, -100, types.ObjectTypes.ENEMY, types.Enemy.TARGET_DUMMY);
+    prefabs.generateNew(obs, "init", 25, -100, types.ObjectTypes.ENEMY, types.Enemy.TARGET_DUMMY);
 }

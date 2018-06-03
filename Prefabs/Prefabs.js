@@ -17,6 +17,7 @@ var flameDashProjectile = require("./Projectile/FlameDashProjectile");
 var _terrain = require("./Terrain/_Terrain");
 var tree = require("./Terrain/Tree");
 var wallHoriz = require("./Terrain/WallHoriz");
+var deadDummy = require("./Terrain/DeadDummy");
 
 var _interactable = require("./Interactable/_Interactable");
 var healthPickup = require("./Interactable/HealthPickup");
@@ -104,6 +105,9 @@ module.exports = {
                         break;
                     case types.Terrain.WALL_HORIZ:
                         newObj = wallHoriz.generateNew(obs, src, posX, posY, newObj);
+                        break;
+                    case types.Terrain.DEAD_DUMMY:
+                        newObj = deadDummy.generateNew(obs, src, posX, posY, newObj);
                         break;
                 }
                 break;
