@@ -50,15 +50,17 @@ export function littleManMasterPiece(object: any, renderOffsetX: number, renderO
     objCopy.height = 3;
 
     var playerTypeChangerMasterPiece = _player.playerMasterPiece(objCopy, renderOffsetX, renderOffsetY);
+    playerTypeChangerMasterPiece.customRenderSize = 2;
     switch (object.newPlayerType) {
         case types.Player.FIRE_MAGE:
             playerTypeChangerMasterPiece = firemage.firemagePlayerMasterPiece(objCopy, renderOffsetX, renderOffsetY);
+            playerTypeChangerMasterPiece.customRenderSize = 2;
             break;
         case types.Player.GOD:
             playerTypeChangerMasterPiece = god.godPlayerMasterPiece(objCopy, renderOffsetX, renderOffsetY);
+            playerTypeChangerMasterPiece.customRenderSize = 1;
             break;
     }
-    playerTypeChangerMasterPiece.customRenderSize = 2;
 
     return playerTypeChangerMasterPiece;
 }

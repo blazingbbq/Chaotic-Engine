@@ -115,7 +115,7 @@ function initializeMap(obs) {
 
     prefabs.generateNew(obs, "init", 0, 0, types.ObjectTypes.TRIGGER, types.Trigger.INVULN_PLATFORM);
 
-    prefabs.generateNew(obs, "init", 0, 75, types.ObjectTypes.INTERACTABLE, types.Interactable.TELEPORTER, { destX: 0, destY: 1900 });
+    prefabs.generateNew(obs, "init", 0, 75, types.ObjectTypes.INTERACTABLE, types.Interactable.TELEPORTER, { destX: 0, destY: 1985 });
 
     // Castle
     prefabs.generateNew(obs, "init", 0, 1985, types.ObjectTypes.DECORATION, types.Decoration.CASTLE_FLOOR);
