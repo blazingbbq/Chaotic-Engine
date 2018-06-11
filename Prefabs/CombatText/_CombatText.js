@@ -1,7 +1,7 @@
-var combatTextAnimationSpeed = 0.06;
+var combatTextAnimationSpeed = 0.05;
 var combatTextFontSize = 9;
 var combatTextColor = "#000000FF";
-var combatTextDuration = 250;
+var combatTextDuration = 300;
 
 function generateNew(obs, src, posX, posY, params) {
     var types = require("../../ObjectTypes");
