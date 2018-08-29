@@ -5,7 +5,7 @@ export interface masterPiece {
     width: number,
     height: number,
     facing: number,
-    strokes: stroke[],
+    strokes: (stroke|svgStroke)[],
     customRenderSize?: number,
 }
 
@@ -18,9 +18,16 @@ export interface stroke {
     type?: StrokeTypes,
 }
 
+export interface svgStroke {
+    type: StrokeTypes,
+    path: string,
+    params: object,
+}
+
 export enum StrokeTypes {
     RECT = "stroke-rect",
     CIRC = "stroke-circ",
+    SVG = "stroke-svg",
 }
 
 export interface mousePosition {
@@ -37,6 +44,8 @@ export class Popova {
     private width: number;
     private height: number;
     private cubeSize: number = 12;
+    private shadowColor: string = "#77777799";
+    private shadowHeight: number;
 
     constructor() { }
 
@@ -45,7 +54,7 @@ export class Popova {
      * @param canvasId Id of html canvas element
      * @param cubeSize Render size for each cube when drawing with cubes
      */
-    init(canvasId: string) {
+    init(canvasId: string, shadowHeight: number) {
         this.canvas = <any> document.getElementById(canvasId);
         // @ts-ignore   --   Ignores "Cannot find name 'rough'"
         this.rcanvas = <any> rough.canvas(this.canvas);
@@ -54,6 +63,7 @@ export class Popova {
         this.canvas.width = this.width;
         this.canvas.height = this.height;
         this.ctx = this.canvas.getContext("2d");
+        this.shadowHeight = shadowHeight;
     }
 
     /**
@@ -84,6 +94,22 @@ export class Popova {
      * @param masterPiece Definition for what to draw
      */
     draw(masterPiece: masterPiece) {
+        if (this.shadowHeight > 0) {        // Render shadows
+            this.ctx.save();
+
+            this.prepCanvas(
+                masterPiece.posX + this.shadowHeight,
+                masterPiece.posY + this.shadowHeight,
+                masterPiece.width,
+                masterPiece.height,
+                masterPiece.facing);
+            masterPiece.strokes.forEach((stroke: any) => {
+                this.renderShadow(stroke, this.shadowColor, masterPiece.customRenderSize);
+            });
+
+            this.ctx.restore();
+        }
+
         this.ctx.save();
 
         this.prepCanvas(
@@ -92,11 +118,9 @@ export class Popova {
             masterPiece.width,
             masterPiece.height,
             masterPiece.facing);
-        masterPiece.strokes.forEach((stroke: stroke) => {
+        masterPiece.strokes.forEach((stroke: any) => {
             this.renderStroke(stroke, masterPiece.palette, masterPiece.customRenderSize);
         });
-
-        this.rcanvas.rectangle(10, 10, 200, 200);
 
         this.ctx.restore();
     }
@@ -120,15 +144,14 @@ export class Popova {
     }
 
     /**
-     * Renders 
+     * Renders masterpiece's strokes
      * @param stroke Stroke to render
      * @param palette Contains the master piece's color swatches
      * @param customRenderSize Render the master piece with custom cube sizing
      */
-    renderStroke(stroke: stroke, palette: string[], customRenderSize?: number){
-        this.ctx.fillStyle = palette[stroke.swatch];
-
+    renderStroke(stroke: any, palette: string[], customRenderSize?: number){
         if (stroke.type && stroke.type === StrokeTypes.CIRC) {
+            this.ctx.fillStyle = palette[stroke.swatch];
             this.ctx.arc(
                 stroke.cellX * (customRenderSize ? customRenderSize : this.cubeSize),
                 stroke.cellY * (customRenderSize ? customRenderSize : this.cubeSize),
@@ -137,9 +160,40 @@ export class Popova {
                 Math.PI * 2
             );
             this.ctx.fill();
-
-
+        } else if (stroke.type && stroke.type === StrokeTypes.SVG) {
+            this.rcanvas.path(stroke.path, stroke.params);
         } else {
+            this.ctx.fillStyle = palette[stroke.swatch];
+            this.ctx.fillRect(
+                stroke.cellX * (customRenderSize ? customRenderSize : this.cubeSize),
+                stroke.cellY * (customRenderSize ? customRenderSize : this.cubeSize),
+                stroke.width * (customRenderSize ? customRenderSize : this.cubeSize),
+                stroke.height * (customRenderSize ? customRenderSize : this.cubeSize)
+            );
+        }
+    }
+
+    /**
+     * Renders masterpiece shadow
+     * @param stroke Stroke to render
+     * @param shadowColor Shadow fill color
+     * @param customRenderSize Render the master piece with custom cube sizing
+     */
+    renderShadow(stroke: any, shadowColor: string, customRenderSize?: number){
+        if (stroke.type && stroke.type === StrokeTypes.CIRC) {
+            this.ctx.fillStyle = shadowColor;
+            this.ctx.arc(
+                stroke.cellX * (customRenderSize ? customRenderSize : this.cubeSize),
+                stroke.cellY * (customRenderSize ? customRenderSize : this.cubeSize),
+                Math.min(stroke.width, stroke.height) * (customRenderSize ? customRenderSize : this.cubeSize),
+                0,
+                Math.PI * 2
+            );
+            this.ctx.fill();
+        } else if (stroke.type && stroke.type === StrokeTypes.SVG) {
+            this.rcanvas.path(stroke.path, { fill: shadowColor, fillStyle: "solid", strokeWidth: 0.01 } );
+        } else {
+            this.ctx.fillStyle = shadowColor;
             this.ctx.fillRect(
                 stroke.cellX * (customRenderSize ? customRenderSize : this.cubeSize),
                 stroke.cellY * (customRenderSize ? customRenderSize : this.cubeSize),

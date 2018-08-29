@@ -164,11 +164,11 @@ var foreground  = new Popova();
 var cover       = new Popova();
 var ui          = new Popova();
 
-background.init("background");
-env.init("env");
-foreground.init("foreground");
-cover.init("cover");
-ui.init("ui");
+background.init("background", 2);
+env.init("env", 2);
+foreground.init("foreground", 2);
+cover.init("cover", 2);
+ui.init("ui", 0);       // Ui doesn't drop a shadow
 
 // Tell the server a new player has joined and handshake
 socket.emit("new-player");
