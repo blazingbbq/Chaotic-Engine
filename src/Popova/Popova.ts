@@ -32,6 +32,7 @@ export interface mousePosition {
 export class Popova {
 
     private canvas: any;
+    private rcanvas: any;
     private ctx: any;
     private width: number;
     private height: number;
@@ -46,6 +47,8 @@ export class Popova {
      */
     init(canvasId: string) {
         this.canvas = <any> document.getElementById(canvasId);
+        // @ts-ignore   --   Ignores "Cannot find name 'rough'"
+        this.rcanvas = <any> rough.canvas(this.canvas);
         this.width = this.canvas.offsetWidth - 4;
         this.height = this.canvas.offsetHeight - 4;
         this.canvas.width = this.width;
@@ -93,6 +96,8 @@ export class Popova {
             this.renderStroke(stroke, masterPiece.palette, masterPiece.customRenderSize);
         });
 
+        this.rcanvas.rectangle(10, 10, 200, 200);
+
         this.ctx.restore();
     }
 
@@ -132,6 +137,8 @@ export class Popova {
                 Math.PI * 2
             );
             this.ctx.fill();
+
+
         } else {
             this.ctx.fillRect(
                 stroke.cellX * (customRenderSize ? customRenderSize : this.cubeSize),
