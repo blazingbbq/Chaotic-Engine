@@ -7,6 +7,7 @@ export interface masterPiece {
     facing: number,
     strokes: (stroke|svgStroke)[],
     customRenderSize?: number,
+    shadowHeight?: number,
 }
 
 export interface stroke {
@@ -94,12 +95,12 @@ export class Popova {
      * @param masterPiece Definition for what to draw
      */
     draw(masterPiece: masterPiece) {
-        if (this.shadowHeight > 0) {        // Render shadows
+        if (this.shadowHeight > 0) {        // Render shadows  && (masterPiece.shadowHeight) ? masterPiece.shadowHeight > 0 : true
             this.ctx.save();
 
             this.prepCanvas(
-                masterPiece.posX + this.shadowHeight,
-                masterPiece.posY + this.shadowHeight,
+                masterPiece.posX + ((masterPiece.shadowHeight) ? masterPiece.shadowHeight : this.shadowHeight),
+                masterPiece.posY + ((masterPiece.shadowHeight) ? masterPiece.shadowHeight : this.shadowHeight),
                 masterPiece.width,
                 masterPiece.height,
                 masterPiece.facing);

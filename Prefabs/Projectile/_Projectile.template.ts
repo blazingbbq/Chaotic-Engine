@@ -33,10 +33,11 @@ export function projectileMasterPiece(object: any, renderOffsetX: number, render
         width: object.width,
         height: object.height,
         facing: object.facing,
+        shadowHeight: 6,
         strokes: [{
             type: StrokeTypes.SVG,
             path: 'M 14 6 Q 16 8 14 10 Q 7 15 0 13 Q 5 8 0 4 Q 8 1 14 6 Z', 
-            params: { fill: '#999999', fillStyle: 'solid', strokeWidth: 0.2 }
+            params: { fill: '#992222', fillStyle: 'solid', strokeWidth: 0.2 }
         }]
     }
 }
