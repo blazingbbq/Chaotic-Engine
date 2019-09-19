@@ -3,7 +3,7 @@ Node based server which uses socket.io to connect multiple users to a single gam
 Client utilizes HTML5 canvas to render game objects.
 
 # Try It Out
-[Try it on Heroku](https://scousineau-chaoticmp.herokuapp.com/ "Go to Heroku")
+[Try it out!](chaoticmp.simoncousineau.com) (or try it on [Heroku](https://chaoticmp.herokuapp.com/ "Go to Heroku")).
 
 * Use the WASD keys to move around,
 * Use the F key to interact with nearby health packs, cars, and character change frames,
